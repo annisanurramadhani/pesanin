@@ -20,15 +20,16 @@ class OrderController extends Controller
         return view('merchant.orders.index', compact('orders'));
     }
 
-    // 2. Update Status Pesanan (Menunggu -> Diproses -> Selesai)
+    // 2. Update Status Pesanan (Pending -> Processing -> Completed / Canceled)
     public function updateStatus(Request $request, Order $order)
     {
         if ($order->merchant_id !== $request->user()->merchant_id) {
             abort(403);
         }
 
+        // Perbaikan: Enum disesuaikan dengan database (pending, processing, completed, canceled)
         $request->validate([
-            'status' => 'required|in:menunggu,diproses,selesai,dibatalkan',
+            'status' => 'required|in:pending,processing,completed,canceled',
         ]);
 
         $order->update(['status' => $request->status]);
@@ -36,15 +37,27 @@ class OrderController extends Controller
         return back()->with('success', 'Status pesanan berhasil diperbarui!');
     }
 
+    // 3. Polling Real-time Cek Pesanan Baru
     public function checkNew(Request $request)
     {
         $merchantId = $request->user()->merchant_id;
-        
-        // Hitung total pesanan yang berstatus 'pending' (baru masuk) atau 'processing' (sedang dimasak)
+
         $activeOrders = Order::where('merchant_id', $merchantId)
             ->whereIn('status', ['pending', 'processing'])
             ->count();
 
         return response()->json(['count' => $activeOrders]);
+    }
+
+    // 4. Cetak Struk / Nota Pembayaran
+    public function receipt(Request $request, Order $order)
+    {
+        if ($order->merchant_id !== $request->user()->merchant_id) {
+            abort(403);
+        }
+
+        $order->load(['items.menu', 'qrCode', 'merchant']);
+
+        return view('merchant.orders.receipt', compact('order'));
     }
 }

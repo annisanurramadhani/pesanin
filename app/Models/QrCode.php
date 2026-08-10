@@ -17,7 +17,6 @@ class QrCode extends Model
         'is_active',
     ];
 
-    // Relasi ke Model Merchant
     public function merchant()
     {
         return $this->belongsTo(Merchant::class);

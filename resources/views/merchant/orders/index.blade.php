@@ -189,5 +189,36 @@
                 .catch(error => console.error('Error checking new orders:', error));
         }, 10000); // Mengecek database setiap 10 detik (10.000 ms)
     });
-</script>
+
+<!-- Sound Notifikasi -->
+    <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+    <script>
+        let lastOrderCount = null;
+
+        function checkNewOrders() {
+            fetch("{{ route('merchant.orders.check') }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (lastOrderCount !== null && data.count > lastOrderCount) {
+                        // Putar Suara Notifikasi
+                        const audio = document.getElementById('notifSound');
+                        if (audio) {
+                            audio.play().catch(e => console.log('Audio autoplay blocked'));
+                        }
+                        
+                        // Auto Reload Halaman
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                    lastOrderCount = data.count;
+                })
+                .catch(err => console.error(err));
+        }
+
+        // Cek pesanan baru setiap 5 detik
+        setInterval(checkNewOrders, 5000);
+        checkNewOrders();
+    </script>
 </x-app-layout>

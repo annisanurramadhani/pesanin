@@ -2,25 +2,35 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Atribut yang diizinkan untuk mass-assignment (Create/Update).
+     */
+    protected $fillable = [
+        'merchant_id',
+        'name',
+        'email',
+        'password',
+        'role',
+    ];
+
+    /**
+     * Atribut yang disembunyikan saat serialisasi JSON/Array.
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Casting tipe data kolom.
      */
     protected function casts(): array
     {
@@ -28,5 +38,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relasi ke model Merchant.
+     */
+    public function merchant()
+    {
+        return $this->belongsTo(Merchant::class);
     }
 }

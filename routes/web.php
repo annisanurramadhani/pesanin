@@ -5,6 +5,7 @@ use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StaffController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -20,7 +21,7 @@ Route::prefix('m')->group(function () {
 });
 Route::get('/order/success/{order_number}', [CustomerController::class, 'success'])->name('customer.success');
 
-// 3. Redirect Dashboard Default
+// 3. Redirect Dashboard Default Berdasarkan Role
 Route::get('/dashboard', function () {
     $user = Auth::user();
 
@@ -44,43 +45,43 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')
 });
 
 
-// 5. Rute Khusus MERCHANT (Owner, Kasir, Dapur)
+// 5. Rute MERCHANT (Owner, Kasir, Dapur)
 Route::middleware(['auth'])->prefix('merchant')->name('merchant.')->group(function () {
 
-    // 1. Dashboard (Hanya Owner & Kasir)
-    // Khusus OWNER (QR Code & Menu)
-    Route::middleware(['role:owner,super_admin'])->group(function () {
-        Route::get('/qr', [MerchantController::class, 'qrIndex'])->name('qr.index');
-        Route::post('/qr', [MerchantController::class, 'qrStore'])->name('qr.store');
-        Route::get('/qr/{qrCode}/print', [MerchantController::class, 'qrPrint'])->name('qr.print'); // <-- TAMBAHKAN BARIS INI
-
-        Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
-        Route::post('/category', [MenuController::class, 'storeCategory'])->name('category.store');
-        Route::post('/menu', [MenuController::class, 'store'])->name('menu.store');
-        Route::delete('/menu/{menu}', [MenuController::class, 'destroy'])->name('menu.destroy');
+    // Dashboard Merchant (Owner & Kasir)
+    Route::middleware(['role:owner,kasir'])->group(function () {
+        Route::get('/dashboard', [MerchantController::class, 'dashboard'])->name('dashboard');
     });
 
-    // 2. Kelola Pesanan (Owner, Kasir, & Dapur BISA AKSES)
-    Route::middleware(['role:owner,kasir,dapur,super_admin'])->group(function () {
+    // Kelola Pesanan (Owner, Kasir, Dapur)
+    Route::middleware(['role:owner,kasir,dapur'])->group(function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/check', [OrderController::class, 'checkNew'])->name('orders.check'); // <-- Tambahkan baris ini
+        Route::get('/orders/check', [OrderController::class, 'checkNew'])->name('orders.check');
+        Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
     });
 
-    // 3. Kelola QR Code & Menu (KHUSUS OWNER)
-    Route::middleware(['role:owner,super_admin'])->group(function () {
+    // Khusus OWNER (QR Code & Menu)
+    Route::middleware(['role:owner'])->group(function () {
         Route::get('/qr', [MerchantController::class, 'qrIndex'])->name('qr.index');
         Route::post('/qr', [MerchantController::class, 'qrStore'])->name('qr.store');
-
+        Route::get('/qr/{qrCode}/print', [MerchantController::class, 'qrPrint'])->name('qr.print');
+        Route::delete('/qr/{qrCode}', [MerchantController::class, 'qrDestroy'])->name('qr.destroy'); 
+        
         Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
         Route::post('/category', [MenuController::class, 'storeCategory'])->name('category.store');
         Route::post('/menu', [MenuController::class, 'store'])->name('menu.store');
         Route::delete('/menu/{menu}', [MenuController::class, 'destroy'])->name('menu.destroy');
+
+        // Kelola Staf Kafe (KHUSUS OWNER SAJA)
+        Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
+        Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
+        Route::delete('/staff/{user}', [StaffController::class, 'destroy'])->name('staff.destroy');
     });
 
 });
 
-// Profile User
+// 6. Profile User
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

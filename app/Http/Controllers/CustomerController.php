@@ -3,88 +3,101 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Menu;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\QrCode;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
-    // Tampilkan Menu Pelanggan berdasarkan QR Code Hash
+    // 1. Tampilkan Menus saat Scan QR
     public function showMenu($code_hash)
     {
-        // Ambil QR Code beserta relasi merchant
-        $qrCode = QrCode::with('merchant')->where('code_hash', $code_hash)->where('is_active', true)->firstOrFail();
+        $qrCode = QrCode::where('code_hash', $code_hash)->firstOrFail();
+        $merchant = $qrCode->merchant;
 
-        // Ambil Kategori dan Menu milik Merchant tersebut
-        $categories = Category::with('menus')
-            ->where('merchant_id', $qrCode->merchant_id)
+        // Ambil kategori beserta menu aktifnya
+        $categories = Category::where('merchant_id', $merchant->id)->get();
+        $menus = Menu::where('merchant_id', $merchant->id)
+            ->where('is_available', true)
             ->get();
 
-        return view('customer.menu', compact('qrCode', 'categories'));
+        return view('customer.menu', compact('qrCode', 'merchant', 'categories', 'menus'));
     }
 
-    // Proses Checkout Order Pelanggan
-    public function checkout(Request $request, $code_hash)
+    // 2. Proses Checkout Pesanan Pelanggan
+   public function checkout(Request $request, $code_hash)
     {
         $qrCode = QrCode::where('code_hash', $code_hash)->firstOrFail();
 
         $request->validate([
-            'customer_name' => 'required|string|max:100',
-            'items' => 'required|array',
+            'customer_name' => 'required|string|max:255',
+            'items' => 'required|array|min:1',
+            'items.*.menu_id' => 'required|exists:menus,id',
+            'items.*.quantity' => 'required|integer|min:1',
         ]);
 
-        $totalAmount = 0;
-        $orderItems = [];
+        DB::beginTransaction();
+        try {
+            // Generate Nomor Order Unik
+            $orderNumber = 'ORD-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -3));
 
-        foreach ($request->items as $menuId => $quantity) {
-            if ($quantity > 0) {
-                $menu = \App\Models\Menu::find($menuId);
-                if ($menu) {
-                    $subtotal = $menu->price * $quantity;
-                    $totalAmount += $subtotal;
+            $totalPrice = 0;
+            $orderItemsData = [];
 
-                    $orderItems[] = [
-                        'menu_id' => $menu->id,
-                        'quantity' => $quantity,
-                        'price' => $menu->price,
-                    ];
-                }
+            foreach ($request->items as $item) {
+                $menu = Menu::where('id', $item['menu_id'])
+                    ->where('merchant_id', $qrCode->merchant_id)
+                    ->firstOrFail();
+
+                $subtotal = $menu->price * $item['quantity'];
+                $totalPrice += $subtotal;
+
+                $orderItemsData[] = [
+                    'menu_id' => $menu->id,
+                    'quantity' => $item['quantity'],
+                    'price' => $menu->price,
+                    'subtotal' => $subtotal,
+                    'notes' => $item['notes'] ?? null,
+                ];
             }
-        }
 
-        if (empty($orderItems)) {
-            return back()->with('error', 'Silakan pilih minimal 1 menu.');
-        }
-
-        // Buat Order Baru
-        $order = Order::create([
-            'merchant_id' => $qrCode->merchant_id,
-            'qr_code_id' => $qrCode->id,
-            'order_number' => 'ORD-' . strtoupper(Str::random(6)),
-            'customer_name' => $request->customer_name,
-            'total_amount' => $totalAmount,
-            'status' => 'menunggu',
-        ]);
-
-        // Simpan Detail Items
-        foreach ($orderItems as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'menu_id' => $item['menu_id'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
+            // Simpan Data Order
+            $order = Order::create([
+                'merchant_id' => $qrCode->merchant_id,
+                'qr_code_id' => $qrCode->id,
+                'order_number' => $orderNumber,
+                'customer_name' => $request->customer_name,
+                'total_price' => $totalPrice,
+                'status' => 'pending',
+                'payment_status' => 'unpaid',
             ]);
-        }
 
-        return redirect()->route('customer.success', $order->order_number);
+            // Simpan Detail Items
+            foreach ($orderItemsData as $itemData) {
+                $itemData['order_id'] = $order->id;
+                OrderItem::create($itemData);
+            }
+
+            DB::commit();
+
+            return redirect()->route('customer.success', $order->order_number);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memproses pesanan: ' . $e->getMessage());
+        }
     }
 
-    // Halaman Selesai Order
+    // 3. Halaman Sukses Setelah Pesan
     public function success($order_number)
     {
-        $order = Order::with(['qrCode', 'items.menu'])->where('order_number', $order_number)->firstOrFail();
+        $order = Order::where('order_number', $order_number)
+            ->with(['merchant', 'qrCode', 'items.menu'])
+            ->firstOrFail();
+
         return view('customer.success', compact('order'));
     }
 }

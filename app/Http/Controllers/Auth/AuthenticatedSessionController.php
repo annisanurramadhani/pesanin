@@ -28,14 +28,18 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $user = Auth::user();
+        $user = $request->user();
 
-        // Jika role Dapur, langsung lempar ke Halaman Kelola Pesanan
-        if ($user->role === 'dapur') {
-            return redirect()->route('merchant.orders.index');
+        // Redirect berdasarkan role
+        if ($user->role === 'super_admin') {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
         }
 
-        // Role Owner & Kasir masuk ke Dashboard Utama
+        if ($user->role === 'dapur') {
+            return redirect()->intended(route('merchant.orders.index', absolute: false));
+        }
+
+        // Role Owner & Kasir
         return redirect()->intended(route('merchant.dashboard', absolute: false));
     }
 

@@ -15,7 +15,7 @@
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-6">
 
-    <!-- Tombol Cetak / Kembali (Sembunyi saat di-print) -->
+    <!-- Tombol Cetak / Kembali -->
     <div class="no-print mb-6 flex gap-3">
         <a href="{{ route('merchant.qr.index') }}" class="px-4 py-2 bg-slate-700 text-white rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-slate-800">
             <i class="fa-solid fa-arrow-left"></i> Kembali
@@ -25,7 +25,7 @@
         </button>
     </div>
 
-    <!-- Desain Kartu Meja Elegan -->
+    <!-- Desain Kartu Meja -->
     <div class="w-80 bg-white rounded-3xl p-8 border-2 border-slate-900 shadow-2xl text-center relative overflow-hidden">
         <!-- Header Kafe -->
         <div class="mb-4">
@@ -43,9 +43,11 @@
             {{ $qrCode->name }}
         </div>
 
-        <!-- QR Code -->
+        <!-- QR Code (Diubah Menggunakan API Gambar) -->
         <div class="bg-amber-50 p-4 rounded-2xl border-2 border-dashed border-amber-300 inline-block my-2">
-            {!! SimpleSoftwareIO\QrCode\Facades\QrCode::size(180)->generate(route('customer.menu', $qrCode->code_hash)) !!}
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode(route('customer.menu', $qrCode->code_hash)) }}" 
+                 alt="QR Code {{ $qrCode->name }}" 
+                 class="w-44 h-44 rounded-xl mx-auto">
         </div>
 
         <!-- Petunjuk Singkat -->
@@ -55,7 +57,7 @@
             <p><i class="fa-solid fa-utensils text-amber-500 mr-1"></i> Pilih menu dan lakukan pembayaran</p>
         </div>
 
-        <!-- Footer Powered By -->
+        <!-- Footer -->
         <div class="mt-6 text-[9px] font-bold text-slate-400 tracking-widest uppercase">
             Powered by PesanIn
         </div>

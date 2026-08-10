@@ -43,9 +43,9 @@
 
                     <div>
                         <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">Jenis Area *</label>
-                        <select name="type" class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition" required>
+                        <select name="type" class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition cursor-pointer" required>
                             <option value="table">Meja Makan (Table)</option>
-                            <option value="takeout">Take Away / Drive Thru</option>
+                            <option value="takeaway">Take Away / Drive Thru</option>
                             <option value="vip">Area VIP</option>
                         </select>
                     </div>
@@ -91,29 +91,55 @@
                                             <span class="font-extrabold text-slate-900 text-base">{{ $qr->name }}</span>
                                         </div>
                                     </td>
+                                    
+                                    <!-- Jenis Area Dinamis -->
                                     <td class="p-4">
-                                        <span class="capitalize px-3 py-1 bg-slate-100 text-slate-700 font-extrabold rounded-lg text-xs">
-                                            {{ $qr->type }}
-                                        </span>
+                                        @if(in_array(strtolower($qr->type), ['takeaway', 'takeout']))
+                                            <span class="px-3 py-1 bg-orange-50 text-orange-700 border border-orange-200/80 font-extrabold rounded-lg text-xs inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-bag-shopping text-[10px]"></i> Take Away
+                                            </span>
+                                        @elseif(strtolower($qr->type) == 'vip')
+                                            <span class="px-3 py-1 bg-purple-50 text-purple-700 border border-purple-200/80 font-extrabold rounded-lg text-xs inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-crown text-[10px]"></i> Area VIP
+                                            </span>
+                                        @else
+                                            <span class="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200/80 font-extrabold rounded-lg text-xs inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-utensils text-[10px]"></i> Meja Makan
+                                            </span>
+                                        @endif
                                     </td>
+
                                     <td class="p-4">
                                         <a href="{{ route('customer.menu', $qr->code_hash) }}" target="_blank" class="inline-flex items-center gap-2 text-xs font-bold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200/60 px-3.5 py-2 rounded-xl transition">
                                             <span>Buka Link Pesanan</span>
                                             <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                                         </a>
                                     </td>
+
                                     <td class="p-4">
                                         <span class="px-3 py-1.5 text-xs bg-emerald-50 text-emerald-700 font-extrabold rounded-xl border border-emerald-200/80 inline-flex items-center gap-1.5">
                                             <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Aktif
                                         </span>
                                     </td>
+
+                                    <!-- Tombol Aksi: Cetak & Hapus -->
                                     <td class="p-4 pr-6 text-center">
-                                        <a href="{{ route('merchant.qr.print', $qr->id) }}" 
-                                           target="_blank"
-                                           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-700 hover:bg-amber-500 hover:text-slate-950 rounded-xl text-xs font-extrabold transition border border-amber-500/20">
-                                            <i class="fa-solid fa-print"></i>
-                                            <span>Cetak Kartu</span>
-                                        </a>
+                                        <div class="flex items-center justify-center gap-2">
+                                            <a href="{{ route('merchant.qr.print', $qr->id) }}" 
+                                               target="_blank"
+                                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-700 hover:bg-amber-500 hover:text-slate-950 rounded-xl text-xs font-extrabold transition border border-amber-500/20" title="Cetak Kartu Meja">
+                                                <i class="fa-solid fa-print"></i>
+                                                <span>Cetak</span>
+                                            </a>
+
+                                            <form action="{{ route('merchant.qr.destroy', $qr->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus QR Code {{ $qr->name }}?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl text-xs font-extrabold transition border border-rose-200" title="Hapus QR Code">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty

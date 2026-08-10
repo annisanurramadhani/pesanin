@@ -47,26 +47,38 @@ class MerchantController extends Controller
     // 3. Simpan QR Code Baru
     public function qrStore(Request $request)
     {
-        $merchantId = $request->user()->merchant_id;
-
-        if (!$merchantId) {
-            return back()->with('error', 'Akun Super Admin tidak dapat membuat QR Code. Silakan login sebagai Owner Merchant.');
-        }
-
         $request->validate([
-            'name' => 'required|string|max:50',
+            'name' => 'required|string|max:255',
             'type' => 'required|string',
         ]);
 
-        QrCode::create([
-            'merchant_id' => $merchantId,
-            'name' => $request->name,
-            'type' => $request->type,
-            'code_hash' => Str::random(10),
-            'is_active' => true,
+        $user = $request->user();
+
+        if (!$user->merchant_id) {
+            return back()->with('error', 'Akun kamu belum terhubung ke merchant mana pun.');
+        }
+
+        \App\Models\QrCode::create([
+            'merchant_id' => $user->merchant_id,
+            'name'        => $request->name,
+            'type'        => $request->type, // Menyimpan nilai: table, takeaway, atau vip
+            'code_hash'   => \Illuminate\Support\Str::random(10),
+            'is_active'   => true,
         ]);
 
-        return back()->with('success', 'QR Code berhasil dibuat!');
+        return back()->with('success', 'QR Code Meja berhasil dibuat!');
+    }
+
+    // Method Hapus QR Code
+    public function qrDestroy(Request $request, \App\Models\QrCode $qrCode)
+    {
+        if ($qrCode->merchant_id !== $request->user()->merchant_id) {
+            abort(403);
+        }
+
+        $qrCode->delete();
+
+        return back()->with('success', 'QR Code Meja berhasil dihapus!');
     }
 
     public function qrPrint(Request $request, QrCode $qrCode)

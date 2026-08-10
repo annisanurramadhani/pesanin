@@ -85,6 +85,13 @@
                             <i class="fa-solid fa-utensils w-5"></i>
                             <span>Kelola Menu</span>
                         </a>
+
+                        <!-- MENU KELOLA STAF BARU -->
+                        <a href="{{ route('merchant.staff.index') }}" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200 {{ request()->routeIs('merchant.staff.*') ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-users-gear w-5"></i>
+                            <span>Kelola Staf Kafe</span>
+                        </a>
                     @endif
 
                 </nav>
