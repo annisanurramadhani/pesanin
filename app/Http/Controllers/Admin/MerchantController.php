@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Merchant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use App\Rules\SecureText;
 use Illuminate\Support\Str;
 
 class MerchantController extends Controller
@@ -25,36 +26,62 @@ class MerchantController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:merchants,name'],
-            'phone' => ['required', 'digits_between:10,20'],
-            'address' => ['required', 'string', 'max:1000'],
-            'subscription_expires_at' => ['required', 'date', 'after_or_equal:today'],
-        ], [
-            'name.required' => 'Nama merchant wajib diisi.',
-            'name.string' => 'Nama merchant harus berupa teks.',
-            'name.max' => 'Nama merchant maksimal 255 karakter.',
-            'name.unique' => 'Nama merchant sudah terdaftar.',
+        'name' => [
+            'required',
+            'string',
+            'max:255',
+            'unique:merchants,name',
+            new SecureText,
+        ],
+        'phone' => [
+            'required',
+            'digits_between:10,20',
+            'regex:/^[0-9]+$/',
+        ],
+        'address' => [
+            'required',
+            'string',
+            'max:1000',
+            new SecureText,
+        ],
+        'subscription_expires_at' => [
+            'required',
+            'date',
+            'after_or_equal:today',
+        ],
+        'is_active' => [
+            'nullable',
+            'boolean',
+        ],
+    ], [
+        'name.required' => 'Nama merchant wajib diisi.',
+        'name.string' => 'Nama merchant harus berupa teks.',
+        'name.max' => 'Nama merchant maksimal 255 karakter.',
+        'name.unique' => 'Nama merchant sudah terdaftar.',
 
-            'phone.required' => 'Nomor telepon wajib diisi.',
-            'phone.digits_between' => 'Nomor telepon harus memiliki 10 sampai 20 digit.',
+        'phone.required' => 'Nomor telepon wajib diisi.',
+        'phone.digits_between' => 'Nomor telepon harus memiliki 10 sampai 20 digit.',
+        'phone.regex' => 'Nomor telepon hanya boleh berisi angka.',
 
-            'address.required' => 'Alamat merchant wajib diisi.',
-            'address.string' => 'Alamat merchant harus berupa teks.',
-            'address.max' => 'Alamat merchant maksimal 1000 karakter.',
+        'address.required' => 'Alamat merchant wajib diisi.',
+        'address.string' => 'Alamat merchant harus berupa teks.',
+        'address.max' => 'Alamat merchant maksimal 1000 karakter.',
 
-            'subscription_expires_at.required' => 'Masa langganan wajib diisi.',
-            'subscription_expires_at.date' => 'Masa langganan harus berupa tanggal yang valid.',
-            'subscription_expires_at.after_or_equal' => 'Masa langganan tidak boleh sebelum hari ini.',
-        ]);
+        'subscription_expires_at.required' => 'Masa langganan wajib diisi.',
+        'subscription_expires_at.date' => 'Masa langganan harus berupa tanggal yang valid.',
+        'subscription_expires_at.after_or_equal' => 'Masa langganan tidak boleh sebelum hari ini.',
+
+        'is_active.boolean' => 'Status merchant tidak valid.',
+    ]);
 
         Merchant::create([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'phone' => $validated['phone'],
-            'address' => $validated['address'],
-            'is_active' => $request->boolean('is_active'),
-            'subscription_expires_at' => $validated['subscription_expires_at'],
-        ]);
+        'name' => trim($validated['name']),
+        'slug' => Str::slug($validated['name']),
+        'phone' => $validated['phone'],
+        'address' => trim($validated['address']),
+        'is_active' => $request->boolean('is_active'),
+        'subscription_expires_at' => $validated['subscription_expires_at'],
+    ]);
 
         return redirect()
             ->route('admin.merchants.index')
@@ -89,45 +116,63 @@ class MerchantController extends Controller
         $merchant = Merchant::findOrFail($merchantId);
 
         $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:merchants,name,' . $merchant->id,
-            ],
-            'phone' => ['required', 'digits_between:10,20'],
-            'address' => ['required', 'string', 'max:1000'],
-            'subscription_expires_at' => ['required', 'date', 'after_or_equal:today'],
-            'is_active' => ['required', 'boolean'],
-        ], [
-            'name.required' => 'Nama merchant wajib diisi.',
-            'name.string' => 'Nama merchant harus berupa teks.',
-            'name.max' => 'Nama merchant maksimal 255 karakter.',
-            'name.unique' => 'Nama merchant sudah digunakan merchant lain.',
+        'name' => [
+            'required',
+            'string',
+            'max:255',
+            'unique:merchants,name,' . $merchant->id,
+            new SecureText,
+        ],
+        'phone' => [
+            'required',
+            'digits_between:10,20',
+            'regex:/^[0-9]+$/',
+        ],
+        'address' => [
+            'required',
+            'string',
+            'max:1000',
+            new SecureText,
+        ],
+        'subscription_expires_at' => [
+            'required',
+            'date',
+            'after_or_equal:today',
+        ],
+        'is_active' => [
+            'required',
+            'boolean',
+        ],
+    ], [
+        'name.required' => 'Nama merchant wajib diisi.',
+        'name.string' => 'Nama merchant harus berupa teks.',
+        'name.max' => 'Nama merchant maksimal 255 karakter.',
+        'name.unique' => 'Nama merchant sudah digunakan merchant lain.',
 
-            'phone.required' => 'Nomor telepon wajib diisi.',
-            'phone.digits_between' => 'Nomor telepon harus memiliki 10 sampai 20 digit.',
+        'phone.required' => 'Nomor telepon wajib diisi.',
+        'phone.digits_between' => 'Nomor telepon harus memiliki 10 sampai 20 digit.',
+        'phone.regex' => 'Nomor telepon hanya boleh berisi angka.',
 
-            'address.required' => 'Alamat merchant wajib diisi.',
-            'address.string' => 'Alamat merchant harus berupa teks.',
-            'address.max' => 'Alamat merchant maksimal 1000 karakter.',
+        'address.required' => 'Alamat merchant wajib diisi.',
+        'address.string' => 'Alamat merchant harus berupa teks.',
+        'address.max' => 'Alamat merchant maksimal 1000 karakter.',
 
-            'subscription_expires_at.required' => 'Masa langganan wajib diisi.',
-            'subscription_expires_at.date' => 'Masa langganan harus berupa tanggal yang valid.',
-            'subscription_expires_at.after_or_equal' => 'Masa langganan tidak boleh sebelum hari ini.',
+        'subscription_expires_at.required' => 'Masa langganan wajib diisi.',
+        'subscription_expires_at.date' => 'Masa langganan harus berupa tanggal yang valid.',
+        'subscription_expires_at.after_or_equal' => 'Masa langganan tidak boleh sebelum hari ini.',
 
-            'is_active.required' => 'Status merchant wajib dipilih.',
-            'is_active.boolean' => 'Status merchant tidak valid.',
-        ]);
+        'is_active.required' => 'Status merchant wajib dipilih.',
+        'is_active.boolean' => 'Status merchant tidak valid.',
+    ]);
 
-        $merchant->update([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
-            'phone' => $validated['phone'],
-            'address' => $validated['address'],
-            'subscription_expires_at' => $validated['subscription_expires_at'],
-            'is_active' => (bool) $validated['is_active'],
-        ]);
+        $$merchant->update([
+        'name' => trim($validated['name']),
+        'slug' => Str::slug($validated['name']),
+        'phone' => $validated['phone'],
+        'address' => trim($validated['address']),
+        'subscription_expires_at' => $validated['subscription_expires_at'],
+        'is_active' => $validated['is_active'],
+    ]);
 
         return redirect()
             ->route('admin.merchants.index')
