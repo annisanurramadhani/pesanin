@@ -6,6 +6,9 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffController;
+
+use App\Http\Controllers\Admin\MerchantController as AdminMerchantController;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +45,23 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
+    Route::get('/merchants', [AdminMerchantController::class, 'index'])
+            ->name('merchants.index');
+
+    Route::get('/merchants/create', [AdminMerchantController::class, 'create'])
+            ->name('merchants.create');
+
+    Route::post('/merchants', [AdminMerchantController::class, 'store'])
+            ->name('merchants.store');
+
+    Route::get('/merchants/{encryptedId}/edit', [AdminMerchantController::class, 'edit'])
+            ->name('merchants.edit');
+
+    Route::put('/merchants/{encryptedId}', [AdminMerchantController::class, 'update'])
+            ->name('merchants.update');
+
+    Route::delete('/merchants/{encryptedId}', [AdminMerchantController::class, 'destroy'])
+            ->name('merchants.destroy');
 });
 
 
@@ -66,8 +86,8 @@ Route::middleware(['auth'])->prefix('merchant')->name('merchant.')->group(functi
         Route::get('/qr', [MerchantController::class, 'qrIndex'])->name('qr.index');
         Route::post('/qr', [MerchantController::class, 'qrStore'])->name('qr.store');
         Route::get('/qr/{qrCode}/print', [MerchantController::class, 'qrPrint'])->name('qr.print');
-        Route::delete('/qr/{qrCode}', [MerchantController::class, 'qrDestroy'])->name('qr.destroy'); 
-        
+        Route::delete('/qr/{qrCode}', [MerchantController::class, 'qrDestroy'])->name('qr.destroy');
+
         Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
         Route::post('/category', [MenuController::class, 'storeCategory'])->name('category.store');
         Route::post('/menu', [MenuController::class, 'store'])->name('menu.store');

@@ -17,6 +17,10 @@ class Merchant extends Model
         'is_active',
         'subscription_expires_at',
     ];
+    protected $casts = [
+    'is_active' => 'boolean',
+    'subscription_expires_at' => 'date',
+];
 
     // Relasi ke Users (Owner & Staff)
     public function users()
