@@ -85,4 +85,8 @@
             <a href="{{ route('merchant.orders.index') }}" class="block px-3 py-2 rounded-lg text-base font-semibold {{ request()->routeIs('merchant.orders.*') ? 'bg-blue-50 text-blue-600' : 'text-slate-600' }}">Kelola Pesanan</a>
         </div>
     </div>
+
+    <x-nav-link :href="route('merchant.profile-kafe.edit')" :active="request()->routeIs('merchant.profile-kafe.edit')">
+        {{ __('Profil Kafe') }}
+    </x-nav-link>
 </nav>

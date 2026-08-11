@@ -15,22 +15,25 @@ class Order extends Model
         'order_number',
         'customer_name',
         'total_amount',
+        'payment_method',
         'status',
     ];
 
-    // Relasi ke Merchant
-    public function merchant()
+    public function getTotalPriceAttribute()
     {
-        return $this->belongsTo(Merchant::class);
+        return $this->attributes['total_amount'] ?? 0;
     }
 
-    // Relasi ke QR Code
     public function qrCode()
     {
         return $this->belongsTo(QrCode::class);
     }
 
-    // Relasi ke Order Items
+    public function merchant()
+    {
+        return $this->belongsTo(Merchant::class);
+    }
+
     public function items()
     {
         return $this->hasMany(OrderItem::class);

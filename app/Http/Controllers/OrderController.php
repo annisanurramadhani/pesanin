@@ -20,16 +20,16 @@ class OrderController extends Controller
         return view('merchant.orders.index', compact('orders'));
     }
 
-    // 2. Update Status Pesanan (Pending -> Processing -> Completed / Canceled)
+    // Update Status Pesanan (menunggu -> diproses -> selesai / dibatalkan)
     public function updateStatus(Request $request, Order $order)
     {
         if ($order->merchant_id !== $request->user()->merchant_id) {
             abort(403);
         }
 
-        // Perbaikan: Enum disesuaikan dengan database (pending, processing, completed, canceled)
+        // Sesuaikan validasi dengan isi ENUM database MySQL
         $request->validate([
-            'status' => 'required|in:pending,processing,completed,canceled',
+            'status' => 'required|in:menunggu,diproses,selesai,dibatalkan',
         ]);
 
         $order->update(['status' => $request->status]);

@@ -4,14 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Menu;
+use App\Models\Merchant;
 use App\Models\Order;
 use App\Models\QrCode;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use App\Models\User;
-use App\Models\Merchant;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Str;
 
 class MerchantController extends Controller
 {
@@ -58,19 +57,19 @@ class MerchantController extends Controller
             return back()->with('error', 'Akun kamu belum terhubung ke merchant mana pun.');
         }
 
-        \App\Models\QrCode::create([
+        QrCode::create([
             'merchant_id' => $user->merchant_id,
             'name'        => $request->name,
-            'type'        => $request->type, // Menyimpan nilai: table, takeaway, atau vip
-            'code_hash'   => \Illuminate\Support\Str::random(10),
+            'type'        => $request->type, // table, takeaway, atau vip
+            'code_hash'   => Str::random(10),
             'is_active'   => true,
         ]);
 
         return back()->with('success', 'QR Code Meja berhasil dibuat!');
     }
 
-    // Method Hapus QR Code
-    public function qrDestroy(Request $request, \App\Models\QrCode $qrCode)
+    // 4. Hapus QR Code
+    public function qrDestroy(Request $request, QrCode $qrCode)
     {
         if ($qrCode->merchant_id !== $request->user()->merchant_id) {
             abort(403);
@@ -81,9 +80,9 @@ class MerchantController extends Controller
         return back()->with('success', 'QR Code Meja berhasil dihapus!');
     }
 
+    // 5. Cetak QR Code Meja
     public function qrPrint(Request $request, QrCode $qrCode)
     {
-        // Pastikan QR code milik merchant yang sedang login
         if ($qrCode->merchant_id !== $request->user()->merchant_id) {
             abort(403);
         }
@@ -91,7 +90,7 @@ class MerchantController extends Controller
         return view('merchant.qr.print', compact('qrCode'));
     }
 
-    // 4. Update Status Pesanan
+    // 6. Update Status Pesanan
     public function updateOrderStatus(Request $request, Order $order)
     {
         if ($order->merchant_id !== $request->user()->merchant_id) {
@@ -107,28 +106,55 @@ class MerchantController extends Controller
         return back()->with('success', 'Status pesanan berhasil diperbarui!');
     }
 
+    // 7. Simpan Merchant Baru (Opsional - Pendaftaran Tenant)
     public function storeMerchant(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|string|email|max:255|unique:users',
+            'password'      => 'required|string|min:8',
             'merchant_name' => 'required|string|max:255',
         ]);
 
-        // 1. Buat Data Merchant/Kafe
         $merchant = Merchant::create([
             'name' => $request->merchant_name,
         ]);
 
-        // 2. Buat Akun User untuk Merchant tersebut
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+        User::create([
+            'name'        => $request->name,
+            'email'       => $request->email,
+            'password'    => Hash::make($request->password),
             'merchant_id' => $merchant->id,
+            'role'        => 'owner',
         ]);
 
         return back()->with('success', 'Akun Merchant baru berhasil didaftarkan!');
+    }
+
+    // 8. Tampilan Edit Profil Kafe
+    public function profileEdit(Request $request)
+    {
+        $merchant = $request->user()->merchant;
+        return view('merchant.profile', compact('merchant'));
+    }
+
+    // 9. Simpan Perubahan Profil Kafe
+    public function profileUpdate(Request $request)
+    {
+        $merchant = $request->user()->merchant;
+
+        $request->validate([
+            'name'    => 'required|string|max:255',
+            'phone'   => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+        ]);
+
+        $merchant->update([
+            'name'    => $request->name,
+            'phone'   => $request->phone,
+            'address' => $request->address,
+        ]);
+
+        return back()->with('success', 'Profil kafe berhasil diperbarui!');
     }
 }

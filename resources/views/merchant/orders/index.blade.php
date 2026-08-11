@@ -10,7 +10,7 @@
             <div class="flex items-center gap-2">
                 <span class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-400 border border-slate-800 shadow-sm flex items-center gap-2">
                     <i class="fa-solid fa-receipt"></i>
-                    Total: {{ count($orders) }} Order
+                    Total: {{ method_exists($orders, 'total') ? $orders->total() : count($orders) }} Order
                 </span>
             </div>
         </div>
@@ -62,7 +62,7 @@
                                 <td class="p-4">
                                     <p class="font-extrabold text-slate-800">{{ $order->customer_name }}</p>
                                     <p class="text-[11px] text-slate-400 font-medium mt-0.5">
-                                        <i class="fa-regular fa-clock"></i> {{ $order->created_at->format('d M Y, H:i') }}
+                                        <i class="fa-regular fa-clock"></i> {{ $order->created_at->addHours(7)->format('d M Y, H:i') }} WIB
                                     </p>
                                 </td>
 
@@ -75,26 +75,28 @@
                                                 <span class="font-semibold text-slate-700">{{ $item->menu->name ?? 'Menu' }}</span>
                                                 <span class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[10px]">(x{{ $item->quantity }})</span>
                                             </div>
+                                            @if(!empty($item->notes))
+                                                <p class="text-[10px] text-amber-600 italic pl-3.5">- Note: {{ $item->notes }}</p>
+                                            @endif
                                         @endforeach
                                     </div>
                                 </td>
 
-                                <!-- Total Harga -->
+                                <!-- Total Harga (Perbaikan dari total_amount -> total_price) -->
                                 <td class="p-4">
-                                    <span class="font-black text-slate-900 text-base">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
+                                    <span class="font-black text-slate-900 text-base">Rp {{ number_format($order->total_amount ?? $order->total_price ?? 0, 0, ',', '.') }}</span>
                                 </td>
-
-                                <!-- Status Badge -->
+                                <!-- Status Badge (Mendukung bahasa Inggris & Indonesia) -->
                                 <td class="p-4">
-                                    @if($order->status == 'menunggu')
+                                    @if(in_array($order->status, ['pending', 'menunggu']))
                                         <span class="px-3 py-1.5 text-xs bg-amber-50 text-amber-700 font-extrabold rounded-xl border border-amber-200/80 inline-flex items-center gap-1.5">
                                             <i class="fa-solid fa-clock"></i> Menunggu
                                         </span>
-                                    @elseif($order->status == 'diproses')
+                                    @elseif(in_array($order->status, ['processing', 'diproses']))
                                         <span class="px-3 py-1.5 text-xs bg-blue-50 text-blue-700 font-extrabold rounded-xl border border-blue-200/80 inline-flex items-center gap-1.5">
                                             <i class="fa-solid fa-fire"></i> Diproses
                                         </span>
-                                    @elseif($order->status == 'selesai')
+                                    @elseif(in_array($order->status, ['completed', 'selesai']))
                                         <span class="px-3 py-1.5 text-xs bg-emerald-50 text-emerald-700 font-extrabold rounded-xl border border-emerald-200/80 inline-flex items-center gap-1.5">
                                             <i class="fa-solid fa-check"></i> Selesai
                                         </span>
@@ -107,19 +109,26 @@
 
                                 <!-- Form Aksi Update Status -->
                                 <td class="p-4 pr-6">
-                                    <form action="{{ route('merchant.orders.status', $order->id) }}" method="POST" class="flex items-center gap-2">
-                                        @csrf
-                                        @method('PATCH')
-                                        <select name="status" class="bg-slate-50 border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 rounded-xl text-xs font-bold py-2 px-3 text-slate-800 transition cursor-pointer">
-                                            <option value="menunggu" {{ $order->status == 'menunggu' ? 'selected' : '' }}>⏳ Menunggu</option>
-                                            <option value="diproses" {{ $order->status == 'diproses' ? 'selected' : '' }}>🔥 Diproses</option>
-                                            <option value="selesai" {{ $order->status == 'selesai' ? 'selected' : '' }}>✅ Selesai</option>
-                                            <option value="dibatalkan" {{ $order->status == 'dibatalkan' ? 'selected' : '' }}>❌ Batalkan</option>
-                                        </select>
-                                        <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-amber-400 p-2 rounded-xl text-xs font-extrabold transition shadow-sm active:scale-[0.95]" title="Simpan Perubahan">
-                                            <i class="fa-solid fa-floppy-disk"></i>
-                                        </button>
-                                    </form>
+                                    <div class="flex items-center gap-2">
+                                        <!-- Tombol Cetak Struk -->
+                                        <a href="{{ route('merchant.orders.receipt', $order->id) }}" target="_blank" class="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl text-xs font-extrabold transition" title="Cetak Struk">
+                                            <i class="fa-solid fa-print"></i>
+                                        </a>
+
+                                        <form action="{{ route('merchant.orders.status', $order->id) }}" method="POST" class="flex items-center gap-2">
+                                            @csrf
+                                            @method('PATCH')
+                                            <select name="status" class="bg-slate-50 border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 rounded-xl text-xs font-bold py-2 px-3 text-slate-800 transition cursor-pointer">
+                                                <option value="menunggu" {{ $order->status == 'menunggu' ? 'selected' : '' }}>⏳ Menunggu</option>
+                                                <option value="diproses" {{ $order->status == 'diproses' ? 'selected' : '' }}>🔥 Diproses</option>
+                                                <option value="selesai" {{ $order->status == 'selesai' ? 'selected' : '' }}>✅ Selesai</option>
+                                                <option value="dibatalkan" {{ $order->status == 'dibatalkan' ? 'selected' : '' }}>❌ Batalkan</option>
+                                            </select>
+                                            <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-amber-400 p-2 rounded-xl text-xs font-extrabold transition shadow-sm active:scale-[0.95]" title="Simpan Perubahan">
+                                                <i class="fa-solid fa-floppy-disk"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -146,79 +155,38 @@
 
     </div>
 
-    <!-- Elemen Audio Tersembunyi (Memakai sound bell gratis dari mixkit) -->
-<audio id="notificationSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Simpan jumlah pesanan awal saat halaman pertama dimuat
-        // (Pastikan variabel $activeOrdersCount dikirim dari OrderController::index, 
-        // atau kita pakai angka sementara 0 yang akan ter-update otomatis dalam 10 detik)
-        let currentOrderCount = -1; 
-
-        setInterval(() => {
-            fetch("{{ route('merchant.orders.check') }}")
-                .then(response => response.json())
-                .then(data => {
-                    // Inisialisasi awal
-                    if (currentOrderCount === -1) {
-                        currentOrderCount = data.count;
-                        return;
-                    }
-
-                    // Jika jumlah pesanan aktif bertambah (Ada pesanan baru)
-                    if (data.count > currentOrderCount) {
-                        // 1. Bunyikan Suara
-                        document.getElementById('notificationSound').play().catch(error => {
-                            console.log("Browser memblokir autoplay suara sampai user berinteraksi dengan halaman.");
-                        });
-                        
-                        // 2. Update jumlah
-                        currentOrderCount = data.count;
-
-                        // 3. Refresh halaman setelah 1.5 detik agar suara sempat berbunyi
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } 
-                    // Jika pesanan selesai (berkurang), cukup update variabel tanpa refresh paksa
-                    else if (data.count < currentOrderCount) {
-                        currentOrderCount = data.count;
-                    }
-                })
-                .catch(error => console.error('Error checking new orders:', error));
-        }, 10000); // Mengecek database setiap 10 detik (10.000 ms)
-    });
-
-<!-- Sound Notifikasi -->
+    <!-- Elemen Audio Notifikasi (Mixkit Bell) -->
     <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
+    <!-- Script Polling Real-time Pesanan Baru -->
     <script>
-        let lastOrderCount = null;
+        document.addEventListener("DOMContentLoaded", function() {
+            let lastOrderCount = null;
 
-        function checkNewOrders() {
-            fetch("{{ route('merchant.orders.check') }}")
-                .then(response => response.json())
-                .then(data => {
-                    if (lastOrderCount !== null && data.count > lastOrderCount) {
-                        // Putar Suara Notifikasi
-                        const audio = document.getElementById('notifSound');
-                        if (audio) {
-                            audio.play().catch(e => console.log('Audio autoplay blocked'));
+            function checkNewOrders() {
+                fetch("{{ route('merchant.orders.check') }}")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (lastOrderCount !== null && data.count > lastOrderCount) {
+                            // 1. Putar Suara Notifikasi
+                            const audio = document.getElementById('notifSound');
+                            if (audio) {
+                                audio.play().catch(e => console.log('Audio autoplay diblokir browser sampai ada interaksi user.'));
+                            }
+                            
+                            // 2. Auto Reload Halaman setelah 1 detik
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
                         }
-                        
-                        // Auto Reload Halaman
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
-                    }
-                    lastOrderCount = data.count;
-                })
-                .catch(err => console.error(err));
-        }
+                        lastOrderCount = data.count;
+                    })
+                    .catch(err => console.error('Error checking new orders:', err));
+            }
 
-        // Cek pesanan baru setiap 5 detik
-        setInterval(checkNewOrders, 5000);
-        checkNewOrders();
+            // Cek pesanan baru setiap 5 detik
+            setInterval(checkNewOrders, 5000);
+            checkNewOrders();
+        });
     </script>
 </x-app-layout>
