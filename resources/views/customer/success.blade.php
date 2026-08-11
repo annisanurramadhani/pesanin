@@ -40,23 +40,36 @@
                 @foreach($order->items as $item)
                     <div class="flex justify-between items-center text-xs">
                         <span class="text-slate-300 font-semibold">{{ $item->quantity }}x {{ $item->menu->name ?? 'Menu' }}</span>
-                        <span class="text-slate-400">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                        <span class="text-slate-400">Rp {{ number_format($item->subtotal ?? ($item->price * $item->quantity), 0, ',', '.') }}</span>
                     </div>
                 @endforeach
             </div>
 
             <div class="border-t border-slate-800 pt-3 flex justify-between items-center">
                 <span class="text-xs font-bold text-slate-300">Total Tagihan:</span>
-                <span class="text-base font-black text-amber-400">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
+                <span class="text-base font-black text-amber-400">Rp {{ number_format($order->total_amount ?? $order->total_price ?? 0, 0, ',', '.') }}</span>
             </div>
         </div>
 
-        <!-- Informasi Pembayaran Kasir -->
-        <div class="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-xs text-amber-300 text-left flex items-start gap-3">
-            <i class="fa-solid fa-circle-info text-base mt-0.5"></i>
-            <div>
-                <p class="font-bold">Lakukan Pembayaran di Kasir</p>
-                <p class="text-[11px] text-amber-200/80 mt-0.5">Tunjukkan halaman ini atau sebutkan **No. Order #{{ $order->order_number }}** ke kasir saat membayar (Tunai / QRIS).</p>
+        <!-- Tampilan Pembayaran QRIS -->
+        <div class="bg-slate-900/90 p-5 rounded-2xl border border-amber-500/30 text-center space-y-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider">
+                <i class="fa-solid fa-qrcode"></i> Scan & Bayar via QRIS
+            </div>
+            
+            <!-- Kode QRIS Generator -->
+            <div class="p-3 bg-white rounded-2xl inline-block shadow-lg">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=PAY-{{ $order->order_number }}-RP-{{ $order->total_amount }}" 
+                     alt="QRIS Pembayaran" class="w-44 h-44 mx-auto rounded-lg">
+            </div>
+
+            <div class="space-y-1">
+                <p class="text-xs text-slate-300 font-bold">
+                    Scan menggunakan <span class="text-amber-400">GoPay, OVO, Dana, ShopeePay,</span> atau <span class="text-amber-400">M-Banking</span>.
+                </p>
+                <p class="text-[10px] text-slate-400">
+                    Tunjukkan bukti transfer ke staf kafe jika diperlukan.
+                </p>
             </div>
         </div>
 

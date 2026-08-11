@@ -5,7 +5,7 @@
                 <h2 class="font-extrabold text-2xl text-slate-900 tracking-tight flex items-center gap-2">
                     Kelola Menu & Kategori
                 </h2>
-                <p class="text-xs font-medium text-slate-500 mt-1">Atur katalog produk, kategori makanan/minuman, dan daftar harga tokomu.</p>
+                <p class="text-xs font-medium text-slate-500 mt-1">Atur katalog produk, kategori makanan/minuman, dan ketersediaan stok tokomu.</p>
             </div>
         </div>
     </x-slot>
@@ -61,7 +61,6 @@
                         </div>
                     </div>
 
-                    <!-- PENTING: enctype="multipart/form-data" ditambahkan agar file gambar bisa ter-upload -->
                     <form action="{{ route('merchant.menu.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                         @csrf
                         <div>
@@ -79,9 +78,15 @@
                             <input type="text" name="name" class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition placeholder:font-normal placeholder:text-slate-400" placeholder="Contoh: Ice Americano PST" required>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">Harga (Rp) *</label>
-                            <input type="number" name="price" class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition placeholder:font-normal placeholder:text-slate-400" placeholder="22000" required>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">Harga (Rp) *</label>
+                                <input type="number" name="price" class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition placeholder:font-normal placeholder:text-slate-400" placeholder="22000" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">Stok (Porsi) *</label>
+                                <input type="number" name="stock" class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition placeholder:font-normal placeholder:text-slate-400" placeholder="50" min="0" value="50" required>
+                            </div>
                         </div>
 
                         <div>
@@ -95,7 +100,7 @@
                         </div>
 
                         <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl text-sm transition-all duration-200 shadow-lg shadow-amber-500/25 active:scale-[0.98]">
-                            + Tambahkan Ke Katalok
+                            + Tambahkan Ke Katalog
                         </button>
                     </form>
                 </div>
@@ -123,13 +128,25 @@
                                     <span class="px-3 py-1 bg-slate-900 text-amber-400 font-extrabold rounded-lg text-[10px] uppercase tracking-wider">
                                         {{ $menu->category->name ?? 'Uncategorized' }}
                                     </span>
-                                    <form action="{{ route('merchant.menu.destroy', $menu->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus menu ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition" title="Hapus Menu">
-                                            <i class="fa-solid fa-trash-can text-xs"></i>
-                                        </button>
-                                    </form>
+                                    
+                                    <!-- Aksi: Edit & Hapus -->
+                                    <div class="flex items-center gap-1">
+                                        <!-- Tombol Edit -->
+                                        <a href="{{ route('merchant.menu.edit', $menu->id) }}" 
+                                           class="w-7 h-7 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 flex items-center justify-center transition" 
+                                           title="Edit Menu">
+                                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                        </a>
+
+                                        <!-- Tombol Hapus -->
+                                        <form action="{{ route('merchant.menu.destroy', $menu->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus menu ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition" title="Hapus Menu">
+                                                <i class="fa-solid fa-trash-can text-xs"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
 
                                 <!-- Thumbnail Foto Menu & Info Produk -->
@@ -149,9 +166,31 @@
                                 </div>
                             </div>
 
+                            <!-- Footer Kartu: Harga, Stok & Sakelar Status -->
                             <div class="pt-3 border-t border-slate-200/60 flex items-center justify-between">
-                                <span class="text-xs font-bold text-slate-400">Harga Jual:</span>
-                                <span class="font-black text-slate-900 text-base">Rp {{ number_format($menu->price, 0, ',', '.') }}</span>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Harga Jual</span>
+                                    <span class="font-black text-slate-900 text-base">Rp {{ number_format($menu->price, 0, ',', '.') }}</span>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <!-- Badge Stok -->
+                                    <span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-xl text-[10px] font-black border border-slate-200">
+                                        Stok: {{ $menu->stock ?? 0 }}
+                                    </span>
+
+                                    <!-- Tombol Toggle Status Stok -->
+                                    <form action="{{ route('merchant.menu.toggle', $menu->id) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" 
+                                                class="px-2.5 py-1 rounded-xl text-[10px] font-black flex items-center gap-1.5 transition {{ ($menu->is_available ?? true) && ($menu->stock > 0) ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-rose-100 text-rose-800 hover:bg-rose-200' }}"
+                                                title="Klik untuk ubah status stok">
+                                            <span class="w-2 h-2 rounded-full {{ ($menu->is_available ?? true) && ($menu->stock > 0) ? 'bg-emerald-500' : 'bg-rose-500' }}"></span>
+                                            <span>{{ ($menu->is_available ?? true) && ($menu->stock > 0) ? 'Ready' : 'Habis' }}</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     @empty
