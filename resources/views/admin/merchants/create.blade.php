@@ -1,25 +1,35 @@
-<x-app-layout>
+@extends('layouts.admin')
 
-    <div class="max-w-5xl mx-auto space-y-6">
+@section('header')
 
-        <div class="flex items-center gap-4">
+    <div class="flex items-center gap-4">
 
-            <a href="{{ route('admin.merchants.index') }}"
-                class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-800">
-                <i class="fa-solid fa-arrow-left"></i>
-            </a>
+        <a
+            href="{{ route('admin.merchants.index') }}"
+            class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+        >
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
 
-            <div>
-                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
-                    Tambah Merchant
-                </h1>
+        <div>
 
-                <p class="mt-1 text-sm text-slate-500">
-                    Tambahkan merchant baru ke dalam platform PesanIn.
-                </p>
-            </div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+                Tambah Merchant
+            </h1>
+
+            <p class="mt-1 text-sm text-slate-500">
+                Tambahkan merchant baru ke dalam platform PesanIn.
+            </p>
 
         </div>
+
+    </div>
+
+@endsection
+
+@section('content')
+
+    <div class="max-w-5xl mx-auto">
 
         <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
@@ -32,6 +42,7 @@
                     </div>
 
                     <div>
+
                         <h2 class="font-extrabold text-slate-900">
                             Informasi Merchant
                         </h2>
@@ -39,6 +50,7 @@
                         <p class="text-xs text-slate-400">
                             Isi data merchant dengan lengkap.
                         </p>
+
                     </div>
 
                 </div>
@@ -59,7 +71,10 @@
 
                     <div class="md:col-span-2">
 
-                        <label for="name" class="mb-2 block text-sm font-bold text-slate-700">
+                        <label
+                            for="name"
+                            class="mb-2 block text-sm font-bold text-slate-700"
+                        >
                             Nama Merchant
                         </label>
 
@@ -77,7 +92,10 @@
 
                     <div>
 
-                        <label for="phone" class="mb-2 block text-sm font-bold text-slate-700">
+                        <label
+                            for="phone"
+                            class="mb-2 block text-sm font-bold text-slate-700"
+                        >
                             Nomor Telepon
                         </label>
 
@@ -97,7 +115,10 @@
 
                     <div>
 
-                        <label for="subscription_expires_at" class="mb-2 block text-sm font-bold text-slate-700">
+                        <label
+                            for="subscription_expires_at"
+                            class="mb-2 block text-sm font-bold text-slate-700"
+                        >
                             Masa Langganan
                         </label>
 
@@ -114,7 +135,10 @@
 
                     <div class="md:col-span-2">
 
-                        <label for="address" class="mb-2 block text-sm font-bold text-slate-700">
+                        <label
+                            for="address"
+                            class="mb-2 block text-sm font-bold text-slate-700"
+                        >
                             Alamat Merchant
                         </label>
 
@@ -198,8 +222,10 @@
 
     </div>
 
-    @push('scripts')
-        <script src="{{ asset('js/admin/merchant.js') }}"></script>
-    @endpush
+@endsection
 
-</x-app-layout>
+@push('scripts')
+
+    <script src="{{ asset('js/admin/merchant.js') }}"></script>
+
+@endpush
