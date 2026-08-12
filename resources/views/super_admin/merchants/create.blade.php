@@ -242,6 +242,6 @@
 
 @push('scripts')
 
-<script src="{{ asset('js/admin/merchant.js') }}"></script>
+<script src="{{ asset('js/super_admin/merchant.js') }}"></script>
 
 @endpush

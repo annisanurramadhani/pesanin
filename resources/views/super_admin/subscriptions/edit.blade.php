@@ -218,4 +218,7 @@
         </div>
 
     </div>
+    @push('scripts')
+        <script src="{{ asset('js/subscriptions.js') }}"></script>
+    @endpush
 @endsection
