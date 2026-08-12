@@ -22,8 +22,6 @@ class Subscription extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'price' => 'decimal:2',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
     ];
 
     public function merchant()
