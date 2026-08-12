@@ -6,26 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('merchants', function (Blueprint $table) {
             $table->id();
+
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->date('subscription_expires_at')->nullable();
+            $table->string('logo')->nullable();
+
+            $table->enum('status', [
+                'active',
+                'inactive',
+            ])->default('active');
+
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('merchants');

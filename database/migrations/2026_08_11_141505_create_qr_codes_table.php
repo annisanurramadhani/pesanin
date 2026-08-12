@@ -10,13 +10,27 @@ return new class extends Migration
     {
         Schema::create('qr_codes', function (Blueprint $table) {
             $table->id();
-            // Hanya merujuk ke merchants (merchants sudah dibuat di awal)
-            $table->foreignId('merchant_id')->constrained()->cascadeOnDelete();
+
+            $table->foreignId('merchant_id')
+                ->constrained('merchants')
+                ->cascadeOnDelete();
+
             $table->string('name');
-            $table->string('type')->default('table');
-            $table->string('code_hash')->unique();
-            $table->boolean('is_active')->default(true);
+
+            $table->enum('type', [
+                'menu',
+                'table',
+            ])->default('table');
+
+            $table->string('code')->unique();
+
+            $table->enum('status', [
+                'active',
+                'inactive',
+            ])->default('active');
+
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
