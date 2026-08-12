@@ -14,41 +14,50 @@ class Merchant extends Model
         'slug',
         'phone',
         'address',
-        'is_active',
-        'subscription_expires_at',
+        'logo',
+        'status',
     ];
-    protected $casts = [
-    'is_active' => 'boolean',
-    'subscription_expires_at' => 'date',
-];
 
-    // Relasi ke Users (Owner & Staff)
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
+    ];
+
     public function users()
     {
         return $this->hasMany(User::class);
     }
 
-    // Relasi ke Categories
     public function categories()
     {
         return $this->hasMany(Category::class);
     }
 
-    // Relasi ke Menus
     public function menus()
     {
         return $this->hasMany(Menu::class);
     }
 
-    // Relasi ke QrCodes
     public function qrCodes()
     {
         return $this->hasMany(QrCode::class);
     }
 
-    // Relasi ke Orders
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function activeSubscription()
+    {
+        return $this->hasOne(Subscription::class)
+            ->where('status', 'active')
+            ->latestOfMany();
     }
 }
