@@ -73,7 +73,7 @@ Route::middleware(['auth', 'role:super_admin'])
         Route::put('/merchants/{encryptedId}', [SuperAdminMerchantController::class, 'update'])
             ->name('merchants.update');
 
-        Route::delete('/merchants/{encryptedId}', [MerchantController::class, 'destroy'])
+        Route::delete('/merchants/{encryptedId}', [SuperAdminMerchantController::class, 'destroy'])
             ->name('merchants.destroy');
 
 

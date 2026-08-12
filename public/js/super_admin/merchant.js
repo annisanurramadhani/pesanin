@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const nameInput = document.getElementById('name');
     const phoneInput = document.getElementById('phone');
     const addressInput = document.getElementById('address');
-    const subscriptionInput = document.getElementById('subscription_expires_at');
 
     const dangerousPattern = /<\s*(script|\/script|iframe|\/iframe|object|\/object|embed|\/embed|svg|\/svg|style|\/style|link|meta|form|\/form|input|textarea|select|button|php|%php)|<\?php|<\?=|\{\{|\}\}|\{!!|!!\}|javascript\s*:|vbscript\s*:|data\s*:\s*text\/html|on[a-z]+\s*=|expression\s*\(|url\s*\(\s*javascript\s*:|@php\b|@endphp\b|@if\b|@endif\b|@foreach\b|@endforeach\b/i;
 
@@ -45,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const name = nameInput.value.trim();
         const phone = phoneInput.value.trim();
         const address = addressInput.value.trim();
-        const subscription = subscriptionInput.value.trim();
 
         if (containsDangerousInput(name)) {
             showError(
@@ -70,15 +68,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Input Tidak Valid',
                 'Alamat merchant mengandung kode atau karakter yang tidak diizinkan.',
                 addressInput
-            );
-            return;
-        }
-
-        if (containsDangerousInput(subscription)) {
-            showError(
-                'Input Tidak Valid',
-                'Masa langganan mengandung kode atau karakter yang tidak diizinkan.',
-                subscriptionInput
             );
             return;
         }
@@ -142,31 +131,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Alamat Merchant',
                 'Alamat merchant maksimal 1000 karakter.',
                 addressInput
-            );
-            return;
-        }
-
-        if (!subscription) {
-            showError(
-                'Masa Langganan',
-                'Masa langganan wajib dipilih.',
-                subscriptionInput
-            );
-            return;
-        }
-
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-
-        const todayString = `${year}-${month}-${day}`;
-
-        if (subscription < todayString) {
-            showError(
-                'Masa Langganan',
-                'Masa langganan tidak boleh sebelum hari ini.',
-                subscriptionInput
             );
             return;
         }
