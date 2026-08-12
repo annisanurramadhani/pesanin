@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Merchant;
@@ -21,7 +21,7 @@ class SubscriptionController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('admin.subscriptions.index', compact('subscriptions'));
+        return view('super_admin.subscriptions.index', compact('subscriptions'));
     }
 
     public function create()
@@ -36,7 +36,7 @@ class SubscriptionController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return view('admin.subscriptions.create', compact(
+        return view('super_admin.subscriptions.create', compact(
             'merchants',
             'packageDurations'
         ));
@@ -125,7 +125,7 @@ class SubscriptionController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.subscriptions.index')
+            ->route('super_admin.subscriptions.index')
             ->with('success', 'Langganan berhasil ditambahkan.');
     }
 
@@ -142,7 +142,7 @@ class SubscriptionController extends Controller
             'packageDuration.package',
         ])->findOrFail($subscriptionId);
 
-        return view('admin.subscriptions.show', compact('subscription'));
+        return view('super_admin.subscriptions.show', compact('subscription'));
     }
 
     public function edit(string $encryptedId)
@@ -166,7 +166,7 @@ class SubscriptionController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return view('admin.subscriptions.edit', compact(
+        return view('super_admin.subscriptions.edit', compact(
             'subscription',
             'merchants',
             'packageDurations'
@@ -264,7 +264,7 @@ class SubscriptionController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.subscriptions.index')
+            ->route('super_admin.subscriptions.index')
             ->with('success', 'Langganan berhasil diperbarui.');
     }
 
@@ -281,7 +281,7 @@ class SubscriptionController extends Controller
         $subscription->delete();
 
         return redirect()
-            ->route('admin.subscriptions.index')
+            ->route('super_admin.subscriptions.index')
             ->with('success', 'Langganan berhasil dihapus.');
     }
 }

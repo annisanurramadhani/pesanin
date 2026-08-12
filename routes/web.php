@@ -9,7 +9,8 @@ use App\Http\Controllers\StaffController;
 
 use App\Http\Controllers\Superadmin\PackageController;
 use App\Http\Controllers\Superadmin\PackageDurationController;
-use App\Http\Controllers\SuperAdmin\MerchantController as AdminMerchantController;
+use App\Http\Controllers\SuperAdmin\MerchantController as SuperAdminMerchantController;
+use App\Http\Controllers\SuperAdmin\SubscriptionController as SuperAdminSubscriptionController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -31,7 +32,7 @@ Route::get('/dashboard', function () {
     $user = Auth::user();
 
     if ($user->role === 'super_admin') {
-        return redirect()->route('admin.dashboard');
+        return redirect()->route('super_admin.dashboard');
     }
 
     if ($user->role === 'dapur') {
@@ -49,7 +50,7 @@ Route::middleware(['auth', 'role:super_admin'])
 
         // Dashboard
         Route::get('/dashboard', function () {
-            return view('admin.dashboard');
+            return view('super_admin.dashboard');
         })->name('dashboard');
 
 
@@ -57,22 +58,22 @@ Route::middleware(['auth', 'role:super_admin'])
         // MERCHANTS
         // =====================================================
 
-        Route::get('/merchants', [AdminMerchantController::class, 'index'])
+        Route::get('/merchants', [SuperAdminMerchantController::class, 'index'])
             ->name('merchants.index');
 
-        Route::get('/merchants/create', [AdminMerchantController::class, 'create'])
+        Route::get('/merchants/create', [SuperAdminMerchantController::class, 'create'])
             ->name('merchants.create');
 
-        Route::post('/merchants', [AdminMerchantController::class, 'store'])
+        Route::post('/merchants', [SuperAdminMerchantController::class, 'store'])
             ->name('merchants.store');
 
-        Route::get('/merchants/{encryptedId}/edit', [AdminMerchantController::class, 'edit'])
+        Route::get('/merchants/{encryptedId}/edit', [SuperAdminMerchantController::class, 'edit'])
             ->name('merchants.edit');
 
-        Route::put('/merchants/{encryptedId}', [AdminMerchantController::class, 'update'])
+        Route::put('/merchants/{encryptedId}', [SuperAdminMerchantController::class, 'update'])
             ->name('merchants.update');
 
-        Route::delete('/merchants/{encryptedId}', [AdminMerchantController::class, 'destroy'])
+        Route::delete('/merchants/{encryptedId}', [MerchantController::class, 'destroy'])
             ->name('merchants.destroy');
 
 
@@ -120,7 +121,32 @@ Route::middleware(['auth', 'role:super_admin'])
 
         Route::delete('/packages/{package}/durations/{duration}', [PackageDurationController::class, 'destroy'])
             ->name('packages.durations.destroy');
+
+        // =====================================================
+        // SUBSCRIPTIONS
+        // =====================================================
+        Route::get('/subscriptions', [SuperAdminSubscriptionController::class, 'index'])
+            ->name('subscriptions.index');
+
+        Route::get('/subscriptions/create', [SuperAdminSubscriptionController::class, 'create'])
+            ->name('subscriptions.create');
+
+        Route::post('/subscriptions', [SuperAdminSubscriptionController::class, 'store'])
+            ->name('subscriptions.store');
+
+        Route::get('/subscriptions/{encryptedId}', [SuperAdminSubscriptionController::class, 'show'])
+            ->name('subscriptions.show');
+
+        Route::get('/subscriptions/{encryptedId}/edit', [SuperAdminSubscriptionController::class, 'edit'])
+            ->name('subscriptions.edit');
+
+        Route::put('/subscriptions/{encryptedId}', [SuperAdminSubscriptionController::class, 'update'])
+            ->name('subscriptions.update');
+
+        Route::delete('/subscriptions/{encryptedId}', [SuperAdminSubscriptionController::class, 'destroy'])
+            ->name('subscriptions.destroy');
     });
+
 
 // 5. Rute MERCHANT (Owner, Kasir, Dapur)
 Route::middleware(['auth'])->prefix('merchant')->name('merchant.')->group(function () {

@@ -26,35 +26,35 @@
 
         <nav class="px-4 py-6 space-y-2">
 
-            <a href="{{ route('admin.dashboard') }}"
+            <a href="{{ route('super_admin.dashboard') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
-                {{ request()->routeIs('admin.dashboard')
+                {{ request()->routeIs('super_admin.dashboard')
                     ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
                 <i class="fa-solid fa-chart-pie w-5"></i>
                 <span>Dashboard</span>
             </a>
 
-            <a href="{{ route('admin.merchants.index') }}"
+            <a href="{{ route('super_admin.merchants.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
-                {{ request()->routeIs('admin.merchants.*')
+                {{ request()->routeIs('super_admin.merchants.*')
                     ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
                 <i class="fa-solid fa-store w-5"></i>
                 <span>Kelola Merchant</span>
             </a>
-            <a href="{{ route('admin.packages.index') }}"
+            <a href="{{ route('super_admin.packages.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
-        {{ request()->routeIs('admin.packages.*')
+        {{ request()->routeIs('super_admin.packages.*')
             ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
             : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
                 <i class="fa-solid fa-box-open w-5"></i>
                 <span>Kelola Paket</span>
             </a>
 
-            <a href="{{ route('admin.subscriptions.index') }}"
+            <a href="{{ route('super_admin.subscriptions.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
-        {{ request()->routeIs('admin.subscriptions.*')
+        {{ request()->routeIs('super_admin.subscriptions.*')
             ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
             : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
                 <i class="fa-solid fa-credit-card w-5"></i>

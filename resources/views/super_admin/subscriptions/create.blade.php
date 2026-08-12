@@ -3,7 +3,7 @@
 @section('header')
     <div class="flex items-center gap-4">
 
-        <a href="{{ route('admin.subscriptions.index') }}"
+        <a href="{{ route('super_admin.subscriptions.index') }}"
             class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-800">
             <i class="fa-solid fa-arrow-left"></i>
         </a>
@@ -40,7 +40,7 @@
 
             </div>
 
-            <form action="{{ route('admin.subscriptions.store') }}" method="POST" class="p-6">
+            <form action="{{ route('super_admin.subscriptions.store') }}" method="POST" class="p-6">
 
                 @csrf
 
@@ -197,7 +197,7 @@
 
                 <div class="mt-8 flex items-center justify-end gap-3 border-t border-slate-100 pt-6">
 
-                    <a href="{{ route('admin.subscriptions.index') }}"
+                    <a href="{{ route('super_admin.subscriptions.index') }}"
                         class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50">
                         Batal
                     </a>

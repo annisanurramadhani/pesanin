@@ -5,7 +5,7 @@
 <div class="flex items-center gap-4">
 
     <a
-        href="{{ route('admin.subscriptions.index') }}"
+        href="{{ route('super_admin.subscriptions.index') }}"
         class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
     >
         <i class="fa-solid fa-arrow-left"></i>
@@ -163,14 +163,14 @@
         <div class="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-5">
 
             <a
-                href="{{ route('admin.subscriptions.index') }}"
+                href="{{ route('super_admin.subscriptions.index') }}"
                 class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50"
             >
                 Kembali
             </a>
 
             <a
-                href="{{ route('admin.subscriptions.edit', [
+                href="{{ route('super_admin.subscriptions.edit', [
                     'encryptedId' => \Illuminate\Support\Facades\Crypt::encryptString((string) $subscription->id),
                 ]) }}"
                 class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-slate-950 transition hover:bg-amber-400"
