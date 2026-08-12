@@ -219,6 +219,6 @@
 
     </div>
     @push('scripts')
-        <script src="{{ asset('js/subscriptions.js') }}"></script>
+        <script src="{{ asset('js/super_admin/subscriptions.js') }}"></script>
     @endpush
 @endsection
