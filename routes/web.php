@@ -7,7 +7,9 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffController;
 
-use App\Http\Controllers\Admin\MerchantController as AdminMerchantController;
+use App\Http\Controllers\Superadmin\PackageController;
+use App\Http\Controllers\Superadmin\PackageDurationController;
+use App\Http\Controllers\SuperAdmin\MerchantController as AdminMerchantController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -39,29 +41,86 @@ Route::get('/dashboard', function () {
     return redirect()->route('merchant.dashboard');
 })->middleware(['auth'])->name('dashboard');
 
-// 4. Rute Khusus SUPER ADMIN
-Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
-    Route::get('/merchants', [AdminMerchantController::class, 'index'])
+// 4. Special Routes for SUPER ADMIN
+Route::middleware(['auth', 'role:super_admin'])
+    ->prefix('super_admin')
+    ->name('super_admin.')
+    ->group(function () {
+
+        // Dashboard
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('dashboard');
+
+
+        // =====================================================
+        // MERCHANTS
+        // =====================================================
+
+        Route::get('/merchants', [AdminMerchantController::class, 'index'])
             ->name('merchants.index');
 
-    Route::get('/merchants/create', [AdminMerchantController::class, 'create'])
+        Route::get('/merchants/create', [AdminMerchantController::class, 'create'])
             ->name('merchants.create');
 
-    Route::post('/merchants', [AdminMerchantController::class, 'store'])
+        Route::post('/merchants', [AdminMerchantController::class, 'store'])
             ->name('merchants.store');
 
-    Route::get('/merchants/{encryptedId}/edit', [AdminMerchantController::class, 'edit'])
+        Route::get('/merchants/{encryptedId}/edit', [AdminMerchantController::class, 'edit'])
             ->name('merchants.edit');
 
-    Route::put('/merchants/{encryptedId}', [AdminMerchantController::class, 'update'])
+        Route::put('/merchants/{encryptedId}', [AdminMerchantController::class, 'update'])
             ->name('merchants.update');
 
-    Route::delete('/merchants/{encryptedId}', [AdminMerchantController::class, 'destroy'])
+        Route::delete('/merchants/{encryptedId}', [AdminMerchantController::class, 'destroy'])
             ->name('merchants.destroy');
-});
+
+
+        // =====================================================
+        // PACKAGES
+        // =====================================================
+
+        Route::get('/packages', [PackageController::class, 'index'])
+            ->name('packages.index');
+
+        Route::get('/packages/create', [PackageController::class, 'create'])
+            ->name('packages.create');
+
+        Route::post('/packages', [PackageController::class, 'store'])
+            ->name('packages.store');
+
+        Route::get('/packages/{encryptedId}/edit', [PackageController::class, 'edit'])
+            ->name('packages.edit');
+
+        Route::put('/packages/{encryptedId}', [PackageController::class, 'update'])
+            ->name('packages.update');
+
+        Route::delete('/packages/{encryptedId}', [PackageController::class, 'destroy'])
+            ->name('packages.destroy');
+
+
+        // =====================================================
+        // PACKAGE DURATIONS
+        // =====================================================
+
+        Route::get('/packages/{package}/durations', [PackageDurationController::class, 'index'])
+            ->name('packages.durations.index');
+
+        Route::get('/packages/{package}/durations/create', [PackageDurationController::class, 'create'])
+            ->name('packages.durations.create');
+
+        Route::post('/packages/{package}/durations', [PackageDurationController::class, 'store'])
+            ->name('packages.durations.store');
+
+        Route::get('/packages/{package}/durations/{duration}/edit', [PackageDurationController::class, 'edit'])
+            ->name('packages.durations.edit');
+
+        Route::put('/packages/{package}/durations/{duration}', [PackageDurationController::class, 'update'])
+            ->name('packages.durations.update');
+
+        Route::delete('/packages/{package}/durations/{duration}', [PackageDurationController::class, 'destroy'])
+            ->name('packages.durations.destroy');
+    });
 
 // 5. Rute MERCHANT (Owner, Kasir, Dapur)
 Route::middleware(['auth'])->prefix('merchant')->name('merchant.')->group(function () {
@@ -105,7 +164,6 @@ Route::middleware(['auth'])->prefix('merchant')->name('merchant.')->group(functi
         Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
         Route::delete('/staff/{user}', [StaffController::class, 'destroy'])->name('staff.destroy');
     });
-
 });
 
 // 6. Profile User Bawaan Auth
@@ -115,4 +173,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

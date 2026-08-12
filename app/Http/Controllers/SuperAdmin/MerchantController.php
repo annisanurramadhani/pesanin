@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Merchant;
@@ -20,12 +20,12 @@ class MerchantController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('admin.merchants.index', compact('merchants'));
+        return view('super_admin.merchants.index', compact('merchants'));
     }
 
     public function create()
     {
-        return view('admin.merchants.create');
+        return view('super_admin.merchants.create');
     }
 
     public function store(Request $request)
@@ -80,7 +80,7 @@ class MerchantController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.merchants.index')
+            ->route('super_admin.merchants.index')
             ->with('success', 'Merchant berhasil ditambahkan.');
     }
 
@@ -96,7 +96,7 @@ class MerchantController extends Controller
 
         $merchant = Merchant::findOrFail($merchantId);
 
-        return view('admin.merchants.edit', compact('merchant'));
+        return view('super_admin.merchants.edit', compact('merchant'));
     }
 
     public function update(Request $request, string $encryptedId)
@@ -161,7 +161,7 @@ class MerchantController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.merchants.index')
+            ->route('super_admin.merchants.index')
             ->with('success', 'Merchant berhasil diperbarui.');
     }
 
@@ -180,7 +180,7 @@ class MerchantController extends Controller
         $merchant->delete();
 
         return redirect()
-            ->route('admin.merchants.index')
+            ->route('super_admin.merchants.index')
             ->with('success', 'Merchant berhasil dihapus.');
     }
 }

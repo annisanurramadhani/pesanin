@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PackageDuration extends Model
 {
@@ -28,13 +30,35 @@ class PackageDuration extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function package()
+    /**
+     * Get the package that owns this duration.
+     */
+    public function package(): BelongsTo
     {
         return $this->belongsTo(Package::class);
     }
 
-    public function subscriptions()
+    /**
+     * Get the subscriptions that use this package duration.
+     */
+    public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Get the effective price.
+     */
+    public function getEffectivePriceAttribute(): float
+    {
+        return $this->discount_price ?? $this->price;
+    }
+
+    /**
+     * Check whether the duration is active.
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
     }
 }
