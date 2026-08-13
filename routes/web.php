@@ -104,22 +104,22 @@ Route::middleware(['auth', 'role:super_admin'])
         // PACKAGE DURATIONS
         // =====================================================
 
-        Route::get('/packages/{package}/durations', [PackageDurationController::class, 'index'])
+        Route::get('/packages/{encryptedId}/durations', [PackageDurationController::class, 'index'])
             ->name('packages.durations.index');
 
-        Route::get('/packages/{package}/durations/create', [PackageDurationController::class, 'create'])
+        Route::get('/packages/{encryptedId}/durations/create', [PackageDurationController::class, 'create'])
             ->name('packages.durations.create');
 
-        Route::post('/packages/{package}/durations', [PackageDurationController::class, 'store'])
+        Route::post('/packages/{encryptedId}/durations', [PackageDurationController::class, 'store'])
             ->name('packages.durations.store');
 
-        Route::get('/packages/{package}/durations/{duration}/edit', [PackageDurationController::class, 'edit'])
+        Route::get('/packages/{encryptedId}/durations/{duration}/edit', [PackageDurationController::class, 'edit'])
             ->name('packages.durations.edit');
 
-        Route::put('/packages/{package}/durations/{duration}', [PackageDurationController::class, 'update'])
+        Route::put('/packages/{encryptedId}/durations/{duration}', [PackageDurationController::class, 'update'])
             ->name('packages.durations.update');
 
-        Route::delete('/packages/{package}/durations/{duration}', [PackageDurationController::class, 'destroy'])
+        Route::delete('/packages/{encryptedId}/durations/{duration}', [PackageDurationController::class, 'destroy'])
             ->name('packages.durations.destroy');
 
         // =====================================================
