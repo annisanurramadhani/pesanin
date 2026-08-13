@@ -11,6 +11,7 @@ use App\Http\Controllers\Superadmin\PackageController;
 use App\Http\Controllers\Superadmin\PackageDurationController;
 use App\Http\Controllers\SuperAdmin\MerchantController as SuperAdminMerchantController;
 use App\Http\Controllers\SuperAdmin\SubscriptionController as SuperAdminSubscriptionController;
+use App\Http\Controllers\SuperAdmin\AccountController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -145,6 +146,28 @@ Route::middleware(['auth', 'role:super_admin'])
 
         Route::delete('/subscriptions/{encryptedId}', [SuperAdminSubscriptionController::class, 'destroy'])
             ->name('subscriptions.destroy');
+            
+        // =====================================================
+        // ACCOUNTS
+        // =====================================================
+
+        Route::get('/accounts', [AccountController::class, 'index'])
+            ->name('accounts.index');
+
+        Route::get('/accounts/create', [AccountController::class, 'create'])
+            ->name('accounts.create');
+
+        Route::post('/accounts', [AccountController::class, 'store'])
+            ->name('accounts.store');
+
+        Route::get('/accounts/{encryptedId}/edit', [AccountController::class, 'edit'])
+            ->name('accounts.edit');
+
+        Route::put('/accounts/{encryptedId}', [AccountController::class, 'update'])
+            ->name('accounts.update');
+
+        Route::delete('/accounts/{encryptedId}', [AccountController::class, 'destroy'])
+            ->name('accounts.destroy');
     });
 
 
