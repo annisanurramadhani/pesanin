@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PackageDuration extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'package_id',
@@ -17,7 +18,6 @@ class PackageDuration extends Model
         'duration_days',
         'price',
         'discount_price',
-        'sort_order',
         'status',
     ];
 
@@ -25,7 +25,6 @@ class PackageDuration extends Model
         'duration_days' => 'integer',
         'price' => 'decimal:2',
         'discount_price' => 'decimal:2',
-        'sort_order' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

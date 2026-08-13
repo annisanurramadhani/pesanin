@@ -17,7 +17,6 @@ class Package extends Model
         'description',
         'badge',
         'status',
-        'sort_order',
     ];
 
     /**
