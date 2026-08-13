@@ -28,6 +28,8 @@
         ->name('public.subscription.index');
     Route::get('/subscription/{slug}', [PublicSubscriptionController::class, 'show'])
         ->name('public.subscription.show');
+    Route::get('/subscription/{slug}/summary/{duration}', [PublicSubscriptionController::class, 'summary'])
+        ->name('public.subscription.summary');
 
     // 2. Rute Pelanggan (Scan QR & Order) - SUDAH DIPERBAIKI (Tidak dobel /m/m lagi)
     Route::prefix('m')->group(function () {
