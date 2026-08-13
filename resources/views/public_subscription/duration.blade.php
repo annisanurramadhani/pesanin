@@ -180,7 +180,7 @@
                                     {{-- Button --}}
                                     <div class="mt-auto pt-8">
 
-                                        <a href="#"
+                                        <a href="{{ route('public.subscription.summary', [$package->slug, $duration->id]) }}"
                                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3.5 text-sm font-extrabold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400">
 
                                             <span>

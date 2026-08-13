@@ -44,4 +44,29 @@ class PublicSubscriptionController extends Controller
         );
     }
 
+    public function summary(string $slug, int $duration)
+    {
+        $package = Package::where('slug', $slug)
+            ->where('status', 'active')
+            ->firstOrFail();
+
+        $duration = PackageDuration::where('id', $duration)
+            ->where('package_id', $package->id)
+            ->where('status', 'active')
+            ->firstOrFail();
+
+        $price = $duration->discount_price ?? $duration->price;
+        $hasDiscount = !is_null($duration->discount_price);
+
+        return view(
+            'public_subscription.summary',
+            compact(
+                'package',
+                'duration',
+                'price',
+                'hasDiscount'
+            )
+        );
+    }
+
 }
