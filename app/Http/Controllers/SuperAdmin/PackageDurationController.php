@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Superadmin;
 use App\Http\Controllers\Controller;
 use App\Models\Package;
 use App\Models\PackageDuration;
+use App\Rules\SecureText;
 use Illuminate\Http\Request;
 
 class PackageDurationController extends Controller
@@ -12,8 +13,14 @@ class PackageDurationController extends Controller
     /**
      * Display durations for a package.
      */
-    public function index(Package $package)
+    public function index($package)
     {
+        $packageId = decryptId($package);
+
+        abort_unless($packageId, 404);
+
+        $package = Package::findOrFail($packageId);
+
         $durations = $package->durations()
             ->orderBy('sort_order')
             ->paginate(10);
@@ -24,29 +31,42 @@ class PackageDurationController extends Controller
         );
     }
 
+
     /**
      * Show the form for creating a duration.
      */
-    public function create(Package $package)
+    public function create($package)
     {
+        $packageId = decryptId($package);
+
+        abort_unless($packageId, 404);
+
+        $package = Package::findOrFail($packageId);
+
         return view(
             'super_admin.packages.durations.create',
             compact('package')
         );
     }
 
+
     /**
      * Store a new duration.
      */
-    public function store(
-        Request $request,
-        Package $package
-    ) {
+    public function store(Request $request, $package)
+    {
+        $packageId = decryptId($package);
+
+        abort_unless($packageId, 404);
+
+        $package = Package::findOrFail($packageId);
+
         $validated = $request->validate([
             'name' => [
                 'required',
                 'string',
                 'max:100',
+                new SecureText,
             ],
 
             'duration_days' => [
@@ -85,21 +105,31 @@ class PackageDurationController extends Controller
         return redirect()
             ->route(
                 'super_admin.packages.durations.index',
-                $package
+                encryptId($package->id)
             )
             ->with(
                 'success',
-                'Package duration created successfully.'
+                'Durasi Paket Berhasil ditambahkan.'
             );
     }
+
 
     /**
      * Show the form for editing a duration.
      */
-    public function edit(
-        Package $package,
-        PackageDuration $duration
-    ) {
+    public function edit($package, $duration)
+    {
+        $packageId = decryptId($package);
+        $durationId = decryptId($duration);
+
+        abort_unless(
+            $packageId && $durationId,
+            404
+        );
+
+        $package = Package::findOrFail($packageId);
+        $duration = PackageDuration::findOrFail($durationId);
+
         abort_unless(
             $duration->package_id === $package->id,
             404
@@ -111,14 +141,26 @@ class PackageDurationController extends Controller
         );
     }
 
+
     /**
      * Update a duration.
      */
     public function update(
         Request $request,
-        Package $package,
-        PackageDuration $duration
+        $package,
+        $duration
     ) {
+        $packageId = decryptId($package);
+        $durationId = decryptId($duration);
+
+        abort_unless(
+            $packageId && $durationId,
+            404
+        );
+
+        $package = Package::findOrFail($packageId);
+        $duration = PackageDuration::findOrFail($durationId);
+
         abort_unless(
             $duration->package_id === $package->id,
             404
@@ -129,6 +171,7 @@ class PackageDurationController extends Controller
                 'required',
                 'string',
                 'max:100',
+                new SecureText,
             ],
 
             'duration_days' => [
@@ -167,21 +210,31 @@ class PackageDurationController extends Controller
         return redirect()
             ->route(
                 'super_admin.packages.durations.index',
-                $package
+                encryptId($package->id)
             )
             ->with(
                 'success',
-                'Package duration updated successfully.'
+                'Durasi Paket Berhasil diperbarui.'
             );
     }
+
 
     /**
      * Delete a duration.
      */
-    public function destroy(
-        Package $package,
-        PackageDuration $duration
-    ) {
+    public function destroy($package, $duration)
+    {
+        $packageId = decryptId($package);
+        $durationId = decryptId($duration);
+
+        abort_unless(
+            $packageId && $durationId,
+            404
+        );
+
+        $package = Package::findOrFail($packageId);
+        $duration = PackageDuration::findOrFail($durationId);
+
         abort_unless(
             $duration->package_id === $package->id,
             404
@@ -192,11 +245,11 @@ class PackageDurationController extends Controller
         return redirect()
             ->route(
                 'super_admin.packages.durations.index',
-                $package
+                encryptId($package->id)
             )
             ->with(
                 'success',
-                'Package duration deleted successfully.'
+                'Durasi Paket Berhasil dihapus.'
             );
     }
 }

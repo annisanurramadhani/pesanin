@@ -1,201 +1,133 @@
 @extends('layouts.admin')
 
+
+@section('header')
+
+<div class="flex items-center gap-4">
+
+    {{-- Back --}}
+    <a
+        href="{{ route('super_admin.packages.index') }}"
+        class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+        title="Kembali ke Paket"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+    </a>
+
+
+    {{-- Header Title --}}
+    <div>
+
+        <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+            Kelola Durasi Paket
+        </h1>
+
+        <p class="mt-1 text-sm text-slate-500">
+            Kelola durasi dan harga untuk paket
+            <span class="font-semibold text-slate-700">
+                {{ strip_tags($package->name) }}
+            </span>.
+        </p>
+
+    </div>
+
+</div>
+
+@endsection
+
+
 @section('content')
-    <div class="p-6">
 
-        {{-- Header --}}
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+<div class="mx-auto max-w-5xl">
 
-            <div>
 
-                <div class="flex items-center gap-3">
+    {{-- Validation Errors --}}
+    @if ($errors->any())
 
-                    <a href="{{ route('super_admin.packages.index') }}"
-                        class="inline-flex items-center justify-center
-                               w-9 h-9
-                               bg-white border border-gray-300
-                               hover:bg-gray-100
-                               text-gray-600
-                               rounded-lg
-                               transition duration-200"
-                        title="Kembali ke Paket">
+        <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 p-4">
 
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            class="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2">
+            <div class="flex items-start gap-3">
 
-                            <path stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M15 19l-7-7 7-7" />
+                <i class="fa-solid fa-circle-exclamation mt-0.5 text-rose-500"></i>
 
-                        </svg>
+                <div>
 
-                    </a>
+                    <p class="text-sm font-bold text-rose-700">
+                        Silakan perbaiki kesalahan berikut:
+                    </p>
 
-                    <div>
+                    <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-rose-600">
 
-                        <h1 class="text-2xl font-bold text-gray-800">
-                            Kelola Durasi Paket
-                        </h1>
+                        @foreach ($errors->all() as $error)
 
-                        <p class="mt-1 text-sm text-gray-500">
-                            Kelola durasi dan harga untuk paket
-                            <span class="font-semibold text-gray-700">
-                                {{ $package->name }}
-                            </span>.
-                        </p>
+                            <li>
+                                {{ $error }}
+                            </li>
 
-                    </div>
+                        @endforeach
+
+                    </ul>
 
                 </div>
 
             </div>
 
-
-            {{-- Add Duration --}}
-            <a href="{{ route('super_admin.packages.durations.create', $package) }}"
-                class="inline-flex items-center justify-center gap-2
-                       px-4 py-2.5
-                       bg-indigo-600 hover:bg-indigo-700
-                       text-white text-sm font-medium
-                       rounded-lg
-                       transition duration-200">
-
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    class="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2">
-
-                    <path stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M12 4v16m8-8H4" />
-
-                </svg>
-
-                Tambah Durasi
-
-            </a>
-
         </div>
 
-
-        {{-- Success Message --}}
-        @if (session('success'))
-
-            <div class="mb-6 flex items-center gap-3 p-4
-                        bg-green-50 border border-green-200
-                        text-green-700 rounded-lg">
-
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    class="w-5 h-5 flex-shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2">
-
-                    <path stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M5 13l4 4L19 7" />
-
-                </svg>
-
-                <span class="text-sm font-medium">
-                    {{ session('success') }}
-                </span>
-
-            </div>
-
-        @endif
+    @endif
 
 
-        {{-- Validation Errors --}}
-        @if ($errors->any())
+    {{-- Package Information --}}
+    <div class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
-            <div class="mb-6 p-4
-                        bg-red-50 border border-red-200
-                        rounded-lg">
+        <div class="p-6">
 
-                <p class="text-sm font-semibold text-red-700 mb-2">
-                    Silakan perbaiki kesalahan berikut:
-                </p>
-
-                <ul class="list-disc list-inside
-                           text-sm text-red-600 space-y-1">
-
-                    @foreach ($errors->all() as $error)
-
-                        <li>
-                            {{ $error }}
-                        </li>
-
-                    @endforeach
-
-                </ul>
-
-            </div>
-
-        @endif
+            <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
 
 
-        {{-- Package Information --}}
-        <div class="mb-6 bg-white border border-gray-200
-                    rounded-xl shadow-sm">
+                {{-- Package --}}
+                <div class="flex items-start gap-4">
 
-            <div class="p-5">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+                        <i class="fa-solid fa-box text-lg"></i>
+                    </div>
 
-                <div class="flex flex-col sm:flex-row
-                            sm:items-center sm:justify-between gap-4">
 
                     <div>
 
-                        <p class="text-xs font-medium
-                                  uppercase tracking-wide
-                                  text-gray-400">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
                             Paket
                         </p>
 
-                        <div class="flex items-center gap-3 mt-1">
+                        <div class="mt-1 flex flex-wrap items-center gap-3">
 
-                            <h2 class="text-xl font-bold text-gray-800">
-                                {{ $package->name }}
+                            <h2 class="text-xl font-extrabold text-slate-900">
+                                {{ strip_tags($package->name) }}
                             </h2>
 
+
+                            {{-- Status --}}
                             @if ($package->status === 'active')
 
-                                <span class="inline-flex items-center gap-1.5
-                                             px-2.5 py-1
-                                             text-xs font-semibold
-                                             rounded-full
-                                             bg-green-100 text-green-700">
+                                <span
+                                    class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                                >
 
-                                    <span class="w-1.5 h-1.5
-                                                 rounded-full
-                                                 bg-green-500">
-                                    </span>
+                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
 
-                                    Active
+                                    Aktif
 
                                 </span>
 
                             @else
 
-                                <span class="inline-flex items-center gap-1.5
-                                             px-2.5 py-1
-                                             text-xs font-semibold
-                                             rounded-full
-                                             bg-gray-100 text-gray-600">
+                                <span
+                                    class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-500"
+                                >
 
-                                    <span class="w-1.5 h-1.5
-                                                 rounded-full
-                                                 bg-gray-400">
-                                    </span>
+                                    <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
 
-                                    Inactive
+                                    Nonaktif
 
                                 </span>
 
@@ -203,29 +135,40 @@
 
                         </div>
 
+
                         @if ($package->description)
 
-                            <p class="mt-2 text-sm text-gray-500">
-                                {{ $package->description }}
+                            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                                {{ strip_tags($package->description) }}
                             </p>
 
                         @endif
 
                     </div>
 
+                </div>
 
-                    <div class="flex-shrink-0">
 
-                        <span class="inline-flex items-center
-                                     px-3 py-1.5
-                                     bg-gray-100
-                                     text-gray-700
-                                     text-sm font-medium
-                                     rounded-lg">
+                {{-- Duration Count --}}
+                <div class="shrink-0">
 
-                            {{ $durations->total() }} Durasi
+                    <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
 
-                        </span>
+                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+
+                        <div>
+
+                            <p class="text-xs font-medium text-slate-400">
+                                Total Durasi
+                            </p>
+
+                            <p class="text-sm font-extrabold text-slate-800">
+                                {{ $durations->total() }} Durasi
+                            </p>
+
+                        </div>
 
                     </div>
 
@@ -235,447 +178,376 @@
 
         </div>
 
+    </div>
 
-        {{-- Duration Table --}}
-        <div class="bg-white border border-gray-200
-                    rounded-xl shadow-sm overflow-hidden">
 
-            @if ($durations->count())
+    {{-- Duration Card --}}
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
-                <div class="overflow-x-auto">
 
-                    <table class="w-full text-sm text-left">
+        {{-- Card Header --}}
+        <div class="border-b border-slate-200 px-6 py-5">
 
-                        <thead class="bg-gray-50 border-b border-gray-200">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                            <tr>
+                <div class="flex items-center gap-3">
 
-                                <th scope="col"
-                                    class="px-6 py-4
-                                           font-semibold text-gray-600
-                                           whitespace-nowrap">
-                                    No
-                                </th>
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
 
-                                <th scope="col"
-                                    class="px-6 py-4
-                                           font-semibold text-gray-600
-                                           whitespace-nowrap">
-                                    Nama Durasi
-                                </th>
+                    <div>
 
-                                <th scope="col"
-                                    class="px-6 py-4
-                                           font-semibold text-gray-600
-                                           text-center whitespace-nowrap">
-                                    Durasi
-                                </th>
+                        <h2 class="font-extrabold text-slate-900">
+                            Daftar Durasi
+                        </h2>
 
-                                <th scope="col"
-                                    class="px-6 py-4
-                                           font-semibold text-gray-600
-                                           whitespace-nowrap">
-                                    Harga
-                                </th>
+                        <p class="text-xs text-slate-400">
+                            Kelola pilihan durasi dan harga berlangganan paket.
+                        </p>
 
-                                <th scope="col"
-                                    class="px-6 py-4
-                                           font-semibold text-gray-600
-                                           whitespace-nowrap">
-                                    Harga Diskon
-                                </th>
-
-                                <th scope="col"
-                                    class="px-6 py-4
-                                           font-semibold text-gray-600
-                                           text-center whitespace-nowrap">
-                                    Status
-                                </th>
-
-                                <th scope="col"
-                                    class="px-6 py-4
-                                           font-semibold text-gray-600
-                                           text-center whitespace-nowrap">
-                                    Urutan
-                                </th>
-
-                                <th scope="col"
-                                    class="px-6 py-4
-                                           font-semibold text-gray-600
-                                           text-center whitespace-nowrap">
-                                    Aksi
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody class="divide-y divide-gray-100">
-
-                            @foreach ($durations as $index => $duration)
-
-                                <tr class="hover:bg-gray-50
-                                           transition duration-150">
-
-                                    {{-- Number --}}
-                                    <td class="px-6 py-4
-                                               text-gray-500
-                                               whitespace-nowrap">
-
-                                        {{ $durations->firstItem() + $index }}
-
-                                    </td>
-
-
-                                    {{-- Duration Name --}}
-                                    <td class="px-6 py-4">
-
-                                        <div class="flex items-center gap-3">
-
-                                            <div class="w-10 h-10
-                                                        rounded-lg
-                                                        bg-indigo-100
-                                                        flex items-center
-                                                        justify-center
-                                                        flex-shrink-0">
-
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="w-5 h-5 text-indigo-600"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                    stroke-width="2">
-
-                                                    <path stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-
-                                                </svg>
-
-                                            </div>
-
-                                            <div>
-
-                                                <p class="font-semibold
-                                                          text-gray-800">
-
-                                                    {{ $duration->name }}
-
-                                                </p>
-
-                                            </div>
-
-                                        </div>
-
-                                    </td>
-
-
-                                    {{-- Duration Days --}}
-                                    <td class="px-6 py-4 text-center">
-
-                                        <span class="inline-flex items-center
-                                                     px-3 py-1
-                                                     bg-gray-100
-                                                     text-gray-700
-                                                     font-medium
-                                                     rounded-full">
-
-                                            {{ $duration->duration_days }}
-                                            hari
-
-                                        </span>
-
-                                    </td>
-
-
-                                    {{-- Price --}}
-                                    <td class="px-6 py-4">
-
-                                        <span class="font-semibold
-                                                     text-gray-800
-                                                     whitespace-nowrap">
-
-                                            Rp {{ number_format(
-                                                $duration->price,
-                                                0,
-                                                ',',
-                                                '.'
-                                            ) }}
-
-                                        </span>
-
-                                    </td>
-
-
-                                    {{-- Discount Price --}}
-                                    <td class="px-6 py-4">
-
-                                        @if ($duration->discount_price !== null)
-
-                                            <div>
-
-                                                <span class="font-semibold
-                                                             text-green-600
-                                                             whitespace-nowrap">
-
-                                                    Rp {{ number_format(
-                                                        $duration->discount_price,
-                                                        0,
-                                                        ',',
-                                                        '.'
-                                                    ) }}
-
-                                                </span>
-
-                                                @if ($duration->price > 0)
-
-                                                    @php
-                                                        $discountPercentage =
-                                                            (($duration->price - $duration->discount_price)
-                                                            / $duration->price) * 100;
-                                                    @endphp
-
-                                                    <span class="block mt-0.5
-                                                                 text-xs
-                                                                 text-green-600">
-
-                                                        Hemat
-                                                        {{ round($discountPercentage) }}%
-
-                                                    </span>
-
-                                                @endif
-
-                                            </div>
-
-                                        @else
-
-                                            <span class="text-gray-400">
-                                                -
-                                            </span>
-
-                                        @endif
-
-                                    </td>
-
-
-                                    {{-- Status --}}
-                                    <td class="px-6 py-4 text-center">
-
-                                        @if ($duration->status === 'active')
-
-                                            <span class="inline-flex items-center
-                                                         gap-1.5
-                                                         px-2.5 py-1
-                                                         text-xs font-semibold
-                                                         rounded-full
-                                                         bg-green-100
-                                                         text-green-700">
-
-                                                <span class="w-1.5 h-1.5
-                                                             rounded-full
-                                                             bg-green-500">
-                                                </span>
-
-                                                Active
-
-                                            </span>
-
-                                        @else
-
-                                            <span class="inline-flex items-center
-                                                         gap-1.5
-                                                         px-2.5 py-1
-                                                         text-xs font-semibold
-                                                         rounded-full
-                                                         bg-gray-100
-                                                         text-gray-600">
-
-                                                <span class="w-1.5 h-1.5
-                                                             rounded-full
-                                                             bg-gray-400">
-                                                </span>
-
-                                                Inactive
-
-                                            </span>
-
-                                        @endif
-
-                                    </td>
-
-
-                                    {{-- Sort Order --}}
-                                    <td class="px-6 py-4 text-center">
-
-                                        <span class="font-medium
-                                                     text-gray-700">
-
-                                            {{ $duration->sort_order }}
-
-                                        </span>
-
-                                    </td>
-
-
-                                    {{-- Actions --}}
-                                    <td class="px-6 py-4">
-
-                                        <div class="flex items-center
-                                                    justify-center gap-2">
-
-                                            {{-- Edit --}}
-                                            <a href="{{ route(
-                                                'super_admin.packages.durations.edit',
-                                                [
-                                                    'package' => $package,
-                                                    'duration' => $duration
-                                                ]
-                                            ) }}"
-                                                class="inline-flex items-center
-                                                       justify-center
-                                                       w-9 h-9
-                                                       bg-indigo-50
-                                                       hover:bg-indigo-100
-                                                       text-indigo-600
-                                                       rounded-lg
-                                                       transition duration-200"
-                                                title="Edit Durasi">
-
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="w-5 h-5"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                    stroke-width="2">
-
-                                                    <path stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5" />
-
-                                                    <path stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-
-                                                </svg>
-
-                                            </a>
-
-
-                                            {{-- Delete --}}
-                                            <form action="{{ route(
-                                                'super_admin.packages.durations.destroy',
-                                                [
-                                                    'package' => $package,
-                                                    'duration' => $duration
-                                                ]
-                                            ) }}"
-                                                method="POST"
-                                                onsubmit="return confirm('Apakah Anda yakin ingin menghapus durasi ini?');">
-
-                                                @csrf
-                                                @method('DELETE')
-
-                                                <button type="submit"
-                                                    class="inline-flex items-center
-                                                           justify-center
-                                                           w-9 h-9
-                                                           bg-red-50
-                                                           hover:bg-red-100
-                                                           text-red-600
-                                                           rounded-lg
-                                                           transition duration-200"
-                                                    title="Hapus Durasi">
-
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                        class="w-5 h-5"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                        stroke-width="2">
-
-                                                        <path stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 01-1-1h-4a1 1 0 00-1 1v3m-4 0h14" />
-
-                                                    </svg>
-
-                                                </button>
-
-                                            </form>
-
-                                        </div>
-
-                                    </td>
-
-                                </tr>
-
-                            @endforeach
-
-                        </tbody>
-
-                    </table>
+                    </div>
 
                 </div>
 
 
-                {{-- Pagination --}}
-                @if ($durations->hasPages())
+                {{-- Add Duration --}}
+                <a
+                    href="{{ route('super_admin.packages.durations.create', [
+                        'encryptedId' => encryptId($package->id)
+                    ]) }}"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400"
+                >
+                    <i class="fa-solid fa-plus"></i>
 
-                    <div class="px-6 py-4 border-t border-gray-200">
+                    Tambah Durasi
+                </a>
 
-                        {{ $durations->links() }}
+            </div>
 
-                    </div>
-
-                @endif
-
-            @else
-
-                {{-- Empty State --}}
-                <div class="p-10 text-center">
-
-                    <div class="flex justify-center mb-4">
-
-                        <div class="w-14 h-14
-                                    flex items-center justify-center
-                                    bg-gray-100 rounded-full">
-
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                class="w-7 h-7 text-gray-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="2">
-
-                                <path stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-
-                            </svg>
-
-                        </div>
-
-                    </div>
+        </div>
 
 
-                    <h3 class="text-lg font-semibold text-gray-800">
-                        Belum ada durasi paket
-                    </h3>
+        {{-- Table --}}
+        @if ($durations->count())
 
-                    <p class="mt-1 text-sm text-gray-500">
-                        Tambahkan durasi dan harga untuk paket
-                        <span class="font-medium">
-                            {{ $package->name }}
-                        </span>.
-                    </p>
+            <div class="overflow-x-auto">
+
+                <table class="w-full text-left text-sm">
+
+                    <thead class="border-b border-slate-200 bg-slate-50">
+
+                        <tr>
+
+                            <th class="whitespace-nowrap px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                No
+                            </th>
+
+                            <th class="whitespace-nowrap px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                Nama Durasi
+                            </th>
+
+                            <th class="whitespace-nowrap px-6 py-4 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
+                                Durasi
+                            </th>
+
+                            <th class="whitespace-nowrap px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                Harga
+                            </th>
+
+                            <th class="whitespace-nowrap px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                Harga Diskon
+                            </th>
+
+                            <th class="whitespace-nowrap px-6 py-4 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
+                                Status
+                            </th>
+
+                            <th class="whitespace-nowrap px-6 py-4 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
+                                Urutan
+                            </th>
+
+                            <th class="whitespace-nowrap px-6 py-4 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
+                                Aksi
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody class="divide-y divide-slate-100">
+
+                        @foreach ($durations as $index => $duration)
+
+                            <tr class="transition hover:bg-slate-50">
+
+
+                                {{-- Number --}}
+                                <td class="whitespace-nowrap px-6 py-4 text-slate-500">
+
+                                    {{ $durations->firstItem() + $index }}
+
+                                </td>
+
+
+                                {{-- Duration Name --}}
+                                <td class="px-6 py-4">
+
+                                    <div class="flex items-center gap-3">
+
+                                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                            <i class="fa-solid fa-clock"></i>
+                                        </div>
+
+                                        <div>
+
+                                            <p class="font-bold text-slate-800">
+                                                {{ strip_tags($duration->name) }}
+                                            </p>
+
+                                            <p class="mt-0.5 text-xs text-slate-400">
+                                                Durasi berlangganan
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                {{-- Duration --}}
+                                <td class="px-6 py-4 text-center">
+
+                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
+
+                                        {{ $duration->duration_days }} hari
+
+                                    </span>
+
+                                </td>
+
+
+                                {{-- Price --}}
+                                <td class="whitespace-nowrap px-6 py-4">
+
+                                    <span class="font-bold text-slate-800">
+
+                                        Rp {{ number_format($duration->price, 0, ',', '.') }}
+
+                                    </span>
+
+                                </td>
+
+
+                                {{-- Discount --}}
+                                <td class="px-6 py-4">
+
+                                    @if ($duration->discount_price !== null)
+
+                                        <div>
+
+                                            <span class="whitespace-nowrap font-bold text-emerald-600">
+
+                                                Rp {{ number_format($duration->discount_price, 0, ',', '.') }}
+
+                                            </span>
+
+
+                                            @if ($duration->price > 0)
+
+                                                @php
+
+                                                    $discountPercentage =
+                                                        (($duration->price - $duration->discount_price)
+                                                        / $duration->price) * 100;
+
+                                                @endphp
+
+                                                <span class="mt-0.5 block text-xs font-medium text-emerald-500">
+
+                                                    Hemat {{ round($discountPercentage) }}%
+
+                                                </span>
+
+                                            @endif
+
+                                        </div>
+
+                                    @else
+
+                                        <span class="text-slate-400">
+                                            —
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+
+                                {{-- Status --}}
+                                <td class="px-6 py-4 text-center">
+
+                                    @if ($duration->status === 'active')
+
+                                        <span
+                                            class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                                        >
+
+                                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+
+                                            Aktif
+
+                                        </span>
+
+                                    @else
+
+                                        <span
+                                            class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-500"
+                                        >
+
+                                            <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+
+                                            Nonaktif
+
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+
+                                {{-- Sort --}}
+                                <td class="px-6 py-4 text-center">
+
+                                    <span class="font-bold text-slate-700">
+                                        {{ $duration->sort_order }}
+                                    </span>
+
+                                </td>
+
+
+                                {{-- Actions --}}
+                                <td class="px-6 py-4">
+
+                                    <div class="flex items-center justify-center gap-2">
+
+
+                                        {{-- Edit --}}
+                                        <a
+                                            href="{{ route('super_admin.packages.durations.edit', [
+                                                'encryptedId' => encryptId($package->id),
+                                                'duration' => encryptId($duration->id),
+                                            ]) }}"
+                                            class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition hover:bg-indigo-100"
+                                            title="Edit Durasi"
+                                        >
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+
+
+                                        {{-- Delete --}}
+                                        <form
+                                            action="{{ route('super_admin.packages.durations.destroy', [
+                                                'encryptedId' => encryptId($package->id),
+                                                'duration' => encryptId($duration->id),
+                                            ]) }}"
+                                            method="POST"
+                                            class="delete-duration-form"
+                                        >
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600 transition hover:bg-rose-100"
+                                                title="Hapus Durasi"
+                                            >
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            {{-- Pagination --}}
+            @if ($durations->hasPages())
+
+                <div class="border-t border-slate-200 px-6 py-4">
+
+                    {{ $durations->links() }}
 
                 </div>
 
             @endif
 
-        </div>
+
+        @else
+
+            {{-- Empty State --}}
+            <div class="px-6 py-16 text-center">
+
+                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+
+                    <i class="fa-solid fa-clock text-2xl"></i>
+
+                </div>
+
+
+                <h3 class="mt-5 text-lg font-extrabold text-slate-800">
+                    Belum ada durasi paket
+                </h3>
+
+
+                <p class="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-500">
+
+                    Tambahkan durasi dan harga untuk paket
+                    <span class="font-bold text-slate-700">
+                        {{ strip_tags($package->name) }}
+                    </span>.
+
+                </p>
+
+
+                <a
+                    href="{{ route('super_admin.packages.durations.create', [
+                        'encryptedId' => encryptId($package->id)
+                    ]) }}"
+                    class="mt-5 inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400"
+                >
+                    <i class="fa-solid fa-plus"></i>
+
+                    Tambah Durasi
+                </a>
+
+            </div>
+
+        @endif
 
     </div>
+
+</div>
+
 @endsection
+
+
+@push('scripts')
+
+<script src="{{ asset('js/super_admin/duration.js') }}"></script>
+
+@endpush
