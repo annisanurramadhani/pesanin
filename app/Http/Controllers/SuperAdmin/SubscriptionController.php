@@ -30,10 +30,11 @@ class SubscriptionController extends Controller
             ->orderBy('name')
             ->get();
 
+        // Tidak menggunakan sort_order karena kolom tersebut
+        // tidak tersedia di tabel package_durations.
         $packageDurations = PackageDuration::with('package')
             ->where('status', 'active')
             ->orderBy('package_id')
-            ->orderBy('sort_order')
             ->get();
 
         return view('super_admin.subscriptions.create', compact(
@@ -78,42 +79,33 @@ class SubscriptionController extends Controller
             'status.in' => 'Status langganan tidak valid.',
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Ambil data durasi paket dari database
-        |--------------------------------------------------------------------------
-        */
-
         $packageDuration = PackageDuration::findOrFail(
             $validated['package_duration_id']
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Hitung tanggal berakhir otomatis
-        |--------------------------------------------------------------------------
-        */
+        // Pastikan durasi paket valid
+        if (
+            !is_numeric($packageDuration->duration_days) ||
+            $packageDuration->duration_days < 1
+        ) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'package_duration_id' =>
+                        'Durasi paket tidak valid.'
+                ]);
+        }
 
+        // Tanggal mulai dipilih manual
         $startDate = Carbon::parse($validated['start_date']);
 
-        $endDate = $startDate
-            ->copy()
-            ->addDays($packageDuration->duration_days - 1);
+        // Tanggal selesai otomatis berdasarkan durasi paket
+        $endDate = $startDate->copy()
+            ->addDays((int) $packageDuration->duration_days - 1);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Tentukan harga dari database
-        |--------------------------------------------------------------------------
-        */
-
+        // Harga selalu mengambil dari database
         $price = $packageDuration->discount_price
             ?? $packageDuration->price;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Buat subscription
-        |--------------------------------------------------------------------------
-        */
 
         Subscription::create([
             'merchant_id' => $validated['merchant_id'],
@@ -142,7 +134,10 @@ class SubscriptionController extends Controller
             'packageDuration.package',
         ])->findOrFail($subscriptionId);
 
-        return view('super_admin.subscriptions.show', compact('subscription'));
+        return view(
+            'super_admin.subscriptions.show',
+            compact('subscription')
+        );
     }
 
     public function edit(string $encryptedId)
@@ -160,10 +155,10 @@ class SubscriptionController extends Controller
 
         $merchants = Merchant::orderBy('name')->get();
 
+        // Hapus orderBy('sort_order')
         $packageDurations = PackageDuration::with('package')
             ->where('status', 'active')
             ->orderBy('package_id')
-            ->orderBy('sort_order')
             ->get();
 
         return view('super_admin.subscriptions.edit', compact(
@@ -217,42 +212,32 @@ class SubscriptionController extends Controller
             'status.in' => 'Status langganan tidak valid.',
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Ambil durasi paket terbaru dari database
-        |--------------------------------------------------------------------------
-        */
-
         $packageDuration = PackageDuration::findOrFail(
             $validated['package_duration_id']
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Hitung tanggal berakhir otomatis
-        |--------------------------------------------------------------------------
-        */
+        if (
+            !is_numeric($packageDuration->duration_days) ||
+            $packageDuration->duration_days < 1
+        ) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'package_duration_id' =>
+                        'Durasi paket tidak valid.'
+                ]);
+        }
 
+        // Tanggal mulai tetap dipilih manual
         $startDate = Carbon::parse($validated['start_date']);
 
-        $endDate = $startDate
-            ->copy()
-            ->addDays($packageDuration->duration_days - 1);
+        // Tanggal selesai dihitung ulang otomatis
+        $endDate = $startDate->copy()
+            ->addDays((int) $packageDuration->duration_days - 1);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Ambil harga dari database
-        |--------------------------------------------------------------------------
-        */
-
+        // Harga mengikuti paket/durasi yang dipilih
         $price = $packageDuration->discount_price
             ?? $packageDuration->price;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Update subscription
-        |--------------------------------------------------------------------------
-        */
 
         $subscription->update([
             'merchant_id' => $validated['merchant_id'],
