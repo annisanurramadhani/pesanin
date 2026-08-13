@@ -15,15 +15,21 @@ class Order extends Model
         'qr_code_id',
         'order_number',
         'customer_name',
-        'total_amount',
+        'customer_phone',
+        'customer_email',
+        'subtotal',
+        'total',
         'payment_method',
+        'payment_provider',
         'status',
+        'receipt_sent_at',
     ];
 
-    public function getTotalPriceAttribute()
-    {
-        return $this->attributes['total_amount'] ?? 0;
-    }
+    protected $casts = [
+        'subtotal' => 'decimal:2',
+        'total' => 'decimal:2',
+        'receipt_sent_at' => 'datetime',
+    ];
 
     public function qrCode()
     {

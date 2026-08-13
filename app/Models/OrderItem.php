@@ -13,9 +13,22 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'menu_id',
+        'menu_name',
         'quantity',
         'price',
+        'subtotal',
     ];
+
+    protected $casts = [
+        'quantity' => 'integer',
+        'price' => 'decimal:2',
+        'subtotal' => 'decimal:2',
+    ];
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
 
     public function menu()
     {
