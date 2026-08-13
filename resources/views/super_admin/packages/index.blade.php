@@ -75,7 +75,7 @@
 
             <div class="overflow-x-auto">
 
-                <table class="w-full min-w-[1100px] text-left">
+                <table class="w-full min-w-[1000px] text-left">
 
                     <thead class="border-b border-slate-200 bg-slate-50">
 
@@ -99,10 +99,6 @@
 
                             <th class="px-6 py-4 text-center text-xs font-extrabold uppercase tracking-wider text-slate-500">
                                 Status
-                            </th>
-
-                            <th class="px-6 py-4 text-center text-xs font-extrabold uppercase tracking-wider text-slate-500">
-                                Urutan
                             </th>
 
                             <th class="px-6 py-4 text-center text-xs font-extrabold uppercase tracking-wider text-slate-500">
@@ -215,16 +211,6 @@
                                         </span>
 
                                     @endif
-
-                                </td>
-
-
-                                {{-- Sort Order --}}
-                                <td class="px-6 py-5 text-center">
-
-                                    <span class="font-bold text-slate-700">
-                                        {{ $package->sort_order }}
-                                    </span>
 
                                 </td>
 

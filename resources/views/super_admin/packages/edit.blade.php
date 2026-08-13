@@ -244,7 +244,7 @@
 
 
                 {{-- Status --}}
-                <div>
+                <div class="md:col-span-2">
 
                     <label
                         for="status"
@@ -278,42 +278,6 @@
                     </select>
 
                     @error('status')
-
-                        <p class="mt-1 text-xs font-semibold text-rose-500">
-                            {{ $message }}
-                        </p>
-
-                    @enderror
-
-                </div>
-
-
-                {{-- Sort Order --}}
-                <div>
-
-                    <label
-                        for="sort_order"
-                        class="mb-2 block text-sm font-bold text-slate-700"
-                    >
-                        Urutan
-                        <span class="text-rose-500">*</span>
-                    </label>
-
-                    <input
-                        type="number"
-                        name="sort_order"
-                        id="sort_order"
-                        value="{{ old('sort_order', $package->sort_order) }}"
-                        min="0"
-                        required
-                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 @error('sort_order') border-rose-500 @enderror"
-                    >
-
-                    <p class="mt-1.5 text-xs text-slate-400">
-                        Nomor yang lebih kecil akan ditampilkan lebih dahulu.
-                    </p>
-
-                    @error('sort_order')
 
                         <p class="mt-1 text-xs font-semibold text-rose-500">
                             {{ $message }}

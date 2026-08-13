@@ -22,7 +22,7 @@ class PackageDurationController extends Controller
         $package = Package::findOrFail($packageId);
 
         $durations = $package->durations()
-            ->orderBy('sort_order')
+            ->orderBy('duration_days')
             ->paginate(10);
 
         return view(
@@ -86,12 +86,6 @@ class PackageDurationController extends Controller
                 'numeric',
                 'min:0',
                 'lte:price',
-            ],
-
-            'sort_order' => [
-                'required',
-                'integer',
-                'min:0',
             ],
 
             'status' => [
@@ -191,12 +185,6 @@ class PackageDurationController extends Controller
                 'numeric',
                 'min:0',
                 'lte:price',
-            ],
-
-            'sort_order' => [
-                'required',
-                'integer',
-                'min:0',
             ],
 
             'status' => [

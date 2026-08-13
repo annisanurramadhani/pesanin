@@ -18,7 +18,6 @@ class PackageController extends Controller
     {
         $packages = Package::query()
             ->withCount('durations')
-            ->orderBy('sort_order')
             ->orderBy('name')
             ->paginate(10);
 
@@ -60,13 +59,6 @@ class PackageController extends Controller
                 'required',
                 Rule::in(['active', 'inactive']),
             ],
-
-            'sort_order' => [
-                'required',
-                'integer',
-                'min:0',
-                'max:999999',
-            ],
         ], [
             'name.required' => 'Nama paket wajib diisi.',
             'name.min' => 'Nama paket minimal 2 karakter.',
@@ -78,10 +70,6 @@ class PackageController extends Controller
 
             'status.required' => 'Status wajib dipilih.',
             'status.in' => 'Status tidak valid.',
-
-            'sort_order.required' => 'Urutan wajib diisi.',
-            'sort_order.integer' => 'Urutan harus berupa angka.',
-            'sort_order.min' => 'Urutan tidak boleh kurang dari 0.',
         ]);
 
         try {
@@ -96,7 +84,6 @@ class PackageController extends Controller
                         ? trim($validated['description'])
                         : null,
                     'status' => $validated['status'],
-                    'sort_order' => $validated['sort_order'],
                 ]);
             });
 
@@ -161,13 +148,6 @@ class PackageController extends Controller
                 'required',
                 Rule::in(['active', 'inactive']),
             ],
-
-            'sort_order' => [
-                'required',
-                'integer',
-                'min:0',
-                'max:999999',
-            ],
         ], [
             'name.required' => 'Nama paket wajib diisi.',
             'name.min' => 'Nama paket minimal 2 karakter.',
@@ -179,10 +159,6 @@ class PackageController extends Controller
 
             'status.required' => 'Status wajib dipilih.',
             'status.in' => 'Status tidak valid.',
-
-            'sort_order.required' => 'Urutan wajib diisi.',
-            'sort_order.integer' => 'Urutan harus berupa angka.',
-            'sort_order.min' => 'Urutan tidak boleh kurang dari 0.',
         ]);
 
         try {
@@ -201,7 +177,6 @@ class PackageController extends Controller
                         ? trim($validated['description'])
                         : null,
                     'status' => $validated['status'],
-                    'sort_order' => $validated['sort_order'],
                 ]);
             });
 

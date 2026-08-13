@@ -27,7 +27,6 @@ class PackageSeeder extends Seeder
                 'description' => 'Silver package for merchants who are just getting started.',
                 'badge' => null,
                 'status' => 'active',
-                'sort_order' => 1,
             ]
         );
 
@@ -39,7 +38,6 @@ class PackageSeeder extends Seeder
                 'duration_days' => 30,
                 'price' => 75000,
                 'discount_price' => null,
-                'sort_order' => 1,
                 'status' => 'active',
             ]
         );
@@ -52,7 +50,6 @@ class PackageSeeder extends Seeder
                 'duration_days' => 90,
                 'price' => 200000,
                 'discount_price' => 180000,
-                'sort_order' => 2,
                 'status' => 'active',
             ]
         );
@@ -65,7 +62,6 @@ class PackageSeeder extends Seeder
                 'duration_days' => 365,
                 'price' => 750000,
                 'discount_price' => 650000,
-                'sort_order' => 3,
                 'status' => 'active',
             ]
         );
@@ -86,7 +82,6 @@ class PackageSeeder extends Seeder
                 'description' => 'Gold package for growing merchants who need more features.',
                 'badge' => 'Popular',
                 'status' => 'active',
-                'sort_order' => 2,
             ]
         );
 
@@ -98,7 +93,6 @@ class PackageSeeder extends Seeder
                 'duration_days' => 30,
                 'price' => 150000,
                 'discount_price' => null,
-                'sort_order' => 1,
                 'status' => 'active',
             ]
         );
@@ -111,7 +105,6 @@ class PackageSeeder extends Seeder
                 'duration_days' => 90,
                 'price' => 400000,
                 'discount_price' => 350000,
-                'sort_order' => 2,
                 'status' => 'active',
             ]
         );
@@ -124,7 +117,6 @@ class PackageSeeder extends Seeder
                 'duration_days' => 365,
                 'price' => 1500000,
                 'discount_price' => 1200000,
-                'sort_order' => 3,
                 'status' => 'active',
             ]
         );
@@ -145,7 +137,6 @@ class PackageSeeder extends Seeder
                 'description' => 'Platinum package for established merchants who need the most advanced features.',
                 'badge' => 'Best Value',
                 'status' => 'active',
-                'sort_order' => 3,
             ]
         );
 
@@ -157,7 +148,6 @@ class PackageSeeder extends Seeder
                 'duration_days' => 30,
                 'price' => 250000,
                 'discount_price' => null,
-                'sort_order' => 1,
                 'status' => 'active',
             ]
         );
@@ -170,7 +160,6 @@ class PackageSeeder extends Seeder
                 'duration_days' => 90,
                 'price' => 700000,
                 'discount_price' => 625000,
-                'sort_order' => 2,
                 'status' => 'active',
             ]
         );
@@ -183,7 +172,6 @@ class PackageSeeder extends Seeder
                 'duration_days' => 365,
                 'price' => 2500000,
                 'discount_price' => 2100000,
-                'sort_order' => 3,
                 'status' => 'active',
             ]
         );

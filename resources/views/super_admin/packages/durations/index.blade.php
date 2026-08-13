@@ -264,10 +264,6 @@
                             </th>
 
                             <th class="whitespace-nowrap px-6 py-4 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
-                                Urutan
-                            </th>
-
-                            <th class="whitespace-nowrap px-6 py-4 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
                                 Aksi
                             </th>
 
@@ -414,16 +410,6 @@
                                         </span>
 
                                     @endif
-
-                                </td>
-
-
-                                {{-- Sort --}}
-                                <td class="px-6 py-4 text-center">
-
-                                    <span class="font-bold text-slate-700">
-                                        {{ $duration->sort_order }}
-                                    </span>
 
                                 </td>
 
