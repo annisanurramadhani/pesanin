@@ -1,5 +1,6 @@
-<x-app-layout>
-    <x-slot name="header">
+@extends('layouts.merchant')
+
+@section('header')
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h2 class="font-extrabold text-2xl text-slate-900 tracking-tight flex items-center gap-2">
@@ -14,13 +15,15 @@
                 </div>
             </div>
         </div>
-    </x-slot>
+    @endsection
+
+    @section('content')
 
     <div class="space-y-8">
 
         <!-- Stat Cards Grid (Lebih Besar & Berwarna Mewah) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
+
             <!-- Card 1: Total Menu -->
             <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between relative overflow-hidden group">
                 <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-amber-500/10 rounded-full group-hover:scale-125 transition duration-300"></div>
@@ -149,5 +152,6 @@
             </div>
         </div>
 
-    </div>
-</x-app-layout>
+        </div>
+
+@endsection

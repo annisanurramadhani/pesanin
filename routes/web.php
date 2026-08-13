@@ -7,6 +7,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffController;
 
+use App\Http\Controllers\PublicSubscription\PublicSubscriptionController;
+
 use App\Http\Controllers\Superadmin\PackageController;
 use App\Http\Controllers\Superadmin\PackageDurationController;
 use App\Http\Controllers\SuperAdmin\MerchantController as SuperAdminMerchantController;
@@ -20,6 +22,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Public Subscription
+Route::get('/subscription', [PublicSubscriptionController::class, 'index'])
+    ->name('public.subscription.index');
+Route::get('/subscription/{slug}', [PublicSubscriptionController::class, 'show'])
+    ->name('public.subscription.show');
 
 // 2. Rute Pelanggan (Scan QR & Order) - SUDAH DIPERBAIKI (Tidak dobel /m/m lagi)
 Route::prefix('m')->group(function () {
@@ -146,7 +154,7 @@ Route::middleware(['auth', 'role:super_admin'])
 
         Route::delete('/subscriptions/{encryptedId}', [SuperAdminSubscriptionController::class, 'destroy'])
             ->name('subscriptions.destroy');
-            
+
         // =====================================================
         // ACCOUNTS
         // =====================================================
