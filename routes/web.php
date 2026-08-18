@@ -33,8 +33,8 @@
 
     // 2. Rute Pelanggan (Scan QR & Order) - SUDAH DIPERBAIKI (Tidak dobel /m/m lagi)
     Route::prefix('m')->group(function () {
-        Route::get('{code_hash}', [CustomerController::class, 'showMenu'])->name('customer.menu');
-        Route::post('{code_hash}/checkout', [CustomerController::class, 'checkout'])->name('customer.checkout');
+        Route::get('{code}', [CustomerController::class, 'showMenu'])->name('customer.menu');
+        Route::post('{code}/checkout', [CustomerController::class, 'checkout'])->name('customer.checkout');
     });
     Route::get('/order/success/{order_number}', [CustomerController::class, 'success'])->name('customer.success');
 
