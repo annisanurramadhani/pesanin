@@ -7,6 +7,13 @@
     use App\Http\Controllers\ProfileController;
     use App\Http\Controllers\Merchant\StaffController;
 
+    use App\Http\Controllers\Payment\PaymentController;
+    use App\Http\Controllers\Payment\MidtransNotificationController;
+
+    use App\Http\Controllers\Auth\EmailVerificationController;
+
+    use App\Http\Controllers\Merchant\MerchantSetupController;
+
     use App\Http\Controllers\PublicSubscription\PublicSubscriptionController;
 
     use App\Http\Controllers\Superadmin\PackageController;
@@ -23,14 +30,103 @@
         return view('welcome');
     });
 
-    // Public Subscription
-    Route::get('/subscription', [PublicSubscriptionController::class, 'index'])
-        ->name('public.subscription.index');
-    Route::get('/subscription/{slug}', [PublicSubscriptionController::class, 'show'])
-        ->name('public.subscription.show');
-    Route::get('/subscription/{slug}/summary/{duration}', [PublicSubscriptionController::class, 'summary'])
-        ->name('public.subscription.summary');
+    Route::post('midtrans/notification', [MidtransNotificationController::class, 'handle'])
+        ->name('midtrans.notification');
 
+        // ==========================================================================
+        // PAYMENT
+        // ==========================================================================
+
+        Route::middleware('auth')->group(function () {
+
+                Route::get('/subscription/payment/{encryptedSubscription}', [PaymentController::class, 'show'])
+                    ->name('public.subscription.payment');
+                Route::post('/subscription/payment/{encryptedSubscription}', [PaymentController::class, 'process'])
+                    ->name('public.subscription.payment.process');
+            });
+
+        // ==========================================================================
+        // PUBLIC SUBSCRIPTION
+        // ==========================================================================
+
+        Route::prefix('subscription')
+            ->name('public.subscription.')
+            ->group(function () {
+
+                // Halaman daftar paket
+                Route::get('/', [
+                    PublicSubscriptionController::class,
+                    'index'
+                ])->name('index');
+
+
+                // Pilih akun
+                Route::get('/account/{encryptedDuration}', [
+                    PublicSubscriptionController::class,
+                    'account'
+                ])->name('account');
+
+
+                // Pilih paket
+                Route::get('/{slug}', [
+                    PublicSubscriptionController::class,
+                    'show'
+                ])->name('show');
+
+
+                // Pilih durasi → Summary
+                Route::get('/{slug}/{duration}', [
+                    PublicSubscriptionController::class,
+                    'summary'
+                ])->name('summary');
+            });
+
+
+        // ==========================================================================
+        // AUTHENTICATED SUBSCRIPTION FLOW
+        // ==========================================================================
+
+        Route::middleware('auth')->group(function () {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Data Toko
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get(
+                '/merchant/setup',
+                [MerchantSetupController::class, 'create']
+            )->name('merchant.setup');
+
+            Route::post(
+                '/merchant/setup',
+                [MerchantSetupController::class, 'store']
+            )->name('merchant.setup.store');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Email Verification OTP
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get(
+                '/verify-email',
+                [EmailVerificationController::class, 'show']
+            )->name('verification.code');
+
+            Route::post(
+                '/verify-email',
+                [EmailVerificationController::class, 'verify']
+            )->name('verification.code.verify');
+
+            Route::post(
+                '/verify-email/resend',
+                [EmailVerificationController::class, 'resend']
+            )->name('verification.code.resend');
+        });
+        
     // 2. Rute Pelanggan (Scan QR & Order) - SUDAH DIPERBAIKI (Tidak dobel /m/m lagi)
     Route::prefix('m')->group(function () {
         Route::get('{code}', [CustomerController::class, 'showMenu'])->name('customer.menu');
