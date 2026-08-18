@@ -169,7 +169,7 @@
                                 </span>
                             </div>
 
-                            {{-- Pengelompokan Per Kategori (Otomatis Tertutup Rapat Saat Baru Dibuka) --}}
+                            {{-- Pengelompokan Per Kategori --}}
                             @forelse($menus->groupBy(fn($item) => $item->category->name ?? 'Tanpa Kategori') as $categoryName => $groupedMenus)
 
                                 <details class="group space-y-4 [&_summary::-webkit-details-marker]:hidden border border-slate-200/80 rounded-2xl p-4 bg-slate-50/30 transition">
@@ -187,14 +187,13 @@
 
                                         <div class="flex items-center gap-2">
                                             <div class="h-[1px] w-16 sm:w-32 bg-slate-200"></div>
-                                            {{-- Panah menghadap ke bawah saat tertutup, dan berputar ke atas saat dibuka --}}
                                             <span class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-500 group-open:rotate-180 transition-transform duration-200 flex items-center justify-center text-xs shadow-sm">
                                                 <i class="fa-solid fa-chevron-down"></i>
                                             </span>
                                         </div>
                                     </summary>
 
-                                    {{-- Card Grid Isi Menu (Baru Muncul Saat Diklik) --}}
+                                    {{-- Card Grid Isi Menu --}}
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-200/60 mt-4">
                                         @foreach($groupedMenus as $menu)
                                             <div class="p-5 rounded-2xl border border-slate-200/70 bg-white hover:border-amber-500/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between group/card">
@@ -207,14 +206,13 @@
                                                                 <i class="fa-solid fa-pen-to-square text-xs"></i>
                                                             </a>
 
-                                                            <form id="delete-form-{{ encryptId($menu->id) }}"
-                                                                action="{{ route('merchant.menu.destroy', encryptId($menu->id)) }}"
-                                                                method="POST">
+                                                            {{-- Form Hapus --}}
+                                                            <form action="{{ route('merchant.menu.destroy', encryptId($menu->id)) }}" method="POST">
                                                                 @csrf
                                                                 @method('DELETE')
 
                                                                 <button type="button"
-                                                                    onclick="confirmDelete('{{ encryptId($menu->id) }}', '{{ $menu->name }}')"
+                                                                    onclick="confirmDelete(event, this, '{{ addslashes($menu->name) }}')"
                                                                     class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition"
                                                                     title="Hapus Menu">
                                                                     <i class="fa-solid fa-trash-can text-xs"></i>
@@ -311,5 +309,36 @@
         </div>
 
     </div>
+
+    {{-- Script SweetAlert2 untuk Konfirmasi Hapus --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(event, buttonElement, menuName) {
+            event.stopPropagation();
+            
+            // Mengambil elemen form langsung dari tombol yang diklik
+            const form = buttonElement.closest('form');
+
+            Swal.fire({
+                title: 'Hapus Menu?',
+                text: `Apakah kamu yakin ingin menghapus menu "${menuName}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl text-xs font-bold px-4 py-2.5',
+                    cancelButton: 'rounded-xl text-xs font-bold px-4 py-2.5'
+                }
+            }).then((result) => {
+                if (result.isConfirmed && form) {
+                    form.submit();
+                }
+            });
+        }
+    </script>
 
 @endsection
