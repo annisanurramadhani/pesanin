@@ -23,6 +23,13 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'role',
         'status',
+        'email_verified_at',
+        'verification_code',
+        'verification_code_expires_at',
+    ];
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'verification_code_expires_at' => 'datetime',
     ];
 
     /**

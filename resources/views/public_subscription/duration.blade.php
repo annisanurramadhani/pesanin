@@ -64,7 +64,6 @@
 
                 {{-- Durations --}}
                 @if ($durations->isEmpty())
-
                     <div class="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
 
                         <div
@@ -81,13 +80,10 @@
                         </p>
 
                     </div>
-
                 @else
-
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 
                         @foreach ($durations as $duration)
-
                             @php
                                 $price = $duration->discount_price ?? $duration->price;
                                 $hasDiscount = !is_null($duration->discount_price);
@@ -127,11 +123,9 @@
                                     <div class="mt-7">
 
                                         @if ($hasDiscount)
-
                                             <p class="text-sm font-semibold text-slate-400 line-through">
                                                 Rp {{ number_format($duration->price, 0, ',', '.') }}
                                             </p>
-
                                         @endif
 
                                         <div class="mt-1">
@@ -180,7 +174,7 @@
                                     {{-- Button --}}
                                     <div class="mt-auto pt-8">
 
-                                        <a href="{{ route('public.subscription.summary', [$package->slug, $duration->id]) }}"
+                                        <a href="{{ route('public.subscription.summary', [$package->slug, encryptId($duration->id)]) }}"
                                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3.5 text-sm font-extrabold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400">
 
                                             <span>
@@ -196,11 +190,9 @@
                                 </div>
 
                             </div>
-
                         @endforeach
 
                     </div>
-
                 @endif
 
             </div>

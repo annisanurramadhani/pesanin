@@ -12,11 +12,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // DAFTARKAN ALIAS ROLE DI SINI:
+
+        // DAFTARKAN ALIAS ROLE DI SINI
         $middleware->alias([
             'role' => CheckRole::class,
+        ]);
+
+        // EXCLUDE WEBHOOK MIDTRANS DARI CSRF
+        $middleware->validateCsrfTokens(except: [
+            'midtrans/notification',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->create();

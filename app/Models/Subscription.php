@@ -13,15 +13,18 @@ class Subscription extends Model
     protected $fillable = [
         'merchant_id',
         'package_duration_id',
+        'invoice_number',
         'start_date',
         'end_date',
         'price',
+        'paid_at',
         'status',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'paid_at' => 'datetime',
         'price' => 'decimal:2',
     ];
 

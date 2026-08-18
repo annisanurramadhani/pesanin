@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('body')
-
     <div class="min-h-screen bg-slate-50">
 
         <header class="border-b border-slate-200 bg-white">
@@ -17,7 +16,7 @@
                     </p>
                 </div>
 
-                <a href="{{ route('login') }}"
+                <a href="{{ route('public.subscription.account', encryptId($duration->id)) }}"
                     class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
                     Masuk
                 </a>
@@ -132,7 +131,6 @@
 
 
                                 @if ($package->description)
-
                                     <div class="border-t border-slate-100 pt-6">
 
                                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -144,7 +142,6 @@
                                         </p>
 
                                     </div>
-
                                 @endif
 
                             </div>
@@ -170,7 +167,6 @@
                             <div class="p-6">
 
                                 @if ($hasDiscount)
-
                                     <div class="flex items-center justify-between">
 
                                         <span class="text-sm text-slate-500">
@@ -182,7 +178,6 @@
                                         </span>
 
                                     </div>
-
                                 @endif
 
 
@@ -232,7 +227,7 @@
 
                                 <div class="mt-6">
 
-                                    <a href="{{ route('login') }}"
+                                    <a href="{{ route('public.subscription.account', encryptId($duration->id)) }}"
                                         class="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3.5 text-sm font-extrabold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400">
 
                                         <span>
@@ -258,5 +253,4 @@
         </section>
 
     </div>
-
 @endsection
