@@ -231,8 +231,10 @@
                                                                 alt="{{ $menu->name }}"
                                                                 class="w-14 h-14 rounded-xl object-cover border border-slate-200 shrink-0">
                                                         @else
-                                                            <div class="w-14 h-14 rounded-xl bg-slate-200/60 text-slate-400 flex items-center justify-center shrink-0 font-bold text-lg">
-                                                                <i class="fa-solid fa-mug-hot"></i>
+                                                            {{-- Ikon 2-in-1 Serbaguna (Minuman + Makanan) --}}
+                                                            <div class="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center shrink-0 shadow-sm gap-1">
+                                                                <i class="fa-solid fa-mug-hot text-xs"></i>
+                                                                <i class="fa-solid fa-utensils text-xs"></i>
                                                             </div>
                                                         @endif
 
@@ -316,7 +318,6 @@
         function confirmDelete(event, buttonElement, menuName) {
             event.stopPropagation();
             
-            // Mengambil elemen form langsung dari tombol yang diklik
             const form = buttonElement.closest('form');
 
             Swal.fire({

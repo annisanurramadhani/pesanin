@@ -10,6 +10,13 @@ use Illuminate\Support\Str;
 
 class MenuController extends Controller
 {
+    // Helper Internal Dekripsi (Mencegah Error Karakter Simbol di URL)
+    private function resolveId($encryptedId)
+    {
+        $decoded = urldecode($encryptedId);
+        return decryptId($decoded) ?? decryptId($encryptedId) ?? (is_numeric($encryptedId) ? $encryptedId : null);
+    }
+
     // 1. Tampilkan Daftar Menu & Kategori
     public function index(Request $request)
     {
@@ -69,10 +76,10 @@ class MenuController extends Controller
         return back()->with('success', 'Menu berhasil ditambahkan!');
     }
 
-    // 4. Halaman Edit Menu (Dengan Dekripsi ID)
+    // 4. Halaman Edit Menu
     public function edit(Request $request, $encryptedId)
     {
-        $id = decryptId($encryptedId);
+        $id = $this->resolveId($encryptedId);
         if (!$id) {
             abort(404, 'ID Menu tidak valid.');
         }
@@ -83,10 +90,10 @@ class MenuController extends Controller
         return view('merchant.menu.edit', compact('menu', 'categories'));
     }
 
-    // 5. Update Menu (Dengan Dekripsi ID)
+    // 5. Update Menu
     public function update(Request $request, $encryptedId)
     {
-        $id = decryptId($encryptedId);
+        $id = $this->resolveId($encryptedId);
         if (!$id) {
             abort(404, 'ID Menu tidak valid.');
         }
@@ -124,10 +131,10 @@ class MenuController extends Controller
         return redirect()->route('merchant.menu.index')->with('success', 'Menu berhasil diperbarui!');
     }
 
-    // 6. Hapus Menu (Dengan Dekripsi ID)
+    // 6. Hapus Menu
     public function destroy(Request $request, $encryptedId)
     {
-        $id = decryptId($encryptedId);
+        $id = $this->resolveId($encryptedId);
         if (!$id) {
             abort(404, 'ID Menu tidak valid.');
         }
@@ -143,10 +150,10 @@ class MenuController extends Controller
         return back()->with('success', 'Menu berhasil dihapus!');
     }
 
-    // 7. Toggle Status Ready / Habis (Dengan Dekripsi ID)
+    // 7. Toggle Status Ready / Habis
     public function toggle(Request $request, $encryptedId)
     {
-        $id = decryptId($encryptedId);
+        $id = $this->resolveId($encryptedId);
         if (!$id) {
             abort(404, 'ID Menu tidak valid.');
         }

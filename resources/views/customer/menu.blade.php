@@ -45,26 +45,26 @@
                     </div>
                 </div>
 
-                <!-- FORM PEMESAN & METODE PEMBAYARAN -->
-                <div class="p-3 bg-slate-50 border-b border-slate-100 space-y-2.5">
+                <!-- FORM PEMESAN (NAMA, WA, EMAIL - OPSIONAL) & METODE PEMBAYARAN -->
+                <div class="p-3 bg-slate-50 border-b border-slate-100 space-y-2">
 
-                    <!-- Input Nama (Opsional) -->
+                    <!-- Input Nama Pemesan (Opsional) -->
                     <div class="relative">
                         <span class="absolute inset-y-0 left-3 flex items-center text-amber-500 text-xs">
                             <i class="fa-solid fa-user"></i>
                         </span>
                         <input type="text" name="customer_name"
-                            class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                            class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none placeholder:text-slate-400"
                             placeholder="Masukkan nama pemesan... (Opsional)">
                     </div>
 
-                    <!-- Input WhatsApp (Opsional) -->
+                    <!-- Input No. WhatsApp (Opsional) -->
                     <div class="relative">
                         <span class="absolute inset-y-0 left-3 flex items-center text-amber-500 text-xs">
                             <i class="fa-brands fa-whatsapp"></i>
                         </span>
                         <input type="tel" name="customer_phone"
-                            class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                            class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none placeholder:text-slate-400"
                             placeholder="No. WhatsApp (misal: 08123456789) (Opsional)">
                     </div>
 
@@ -74,15 +74,15 @@
                             <i class="fa-solid fa-envelope"></i>
                         </span>
                         <input type="email" name="customer_email"
-                            class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                            class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none placeholder:text-slate-400"
                             placeholder="Email (Opsional)">
                     </div>
 
                     <!-- PILIHAN METODE PEMBAYARAN -->
                     <div class="pt-1">
-                        <label
-                            class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Pilih
-                            Pembayaran:</label>
+                        <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">
+                            Pilih Pembayaran:
+                        </label>
                         <div class="grid grid-cols-2 gap-2">
 
                             <!-- Opsi QRIS -->
@@ -101,10 +101,11 @@
                             </label>
 
                             <!-- Opsi Kasir -->
+                            <!-- Opsi Kasir -->
                             <label
                                 class="relative flex items-center p-2 rounded-xl border border-slate-200 bg-white cursor-pointer transition"
                                 id="label-kasir">
-                                <input type="radio" name="payment_method" value="kasir"
+                                <input type="radio" name="payment_method" value="cash"
                                     onclick="togglePayment('kasir')" class="sr-only">
                                 <div class="flex items-center gap-2">
                                     <i class="fa-solid fa-cash-register text-slate-400 text-sm" id="icon-kasir"></i>
@@ -145,10 +146,7 @@
                 @endif
 
                 @foreach ($categories as $category)
-                    @php
-                        $categoryMenus = $menus->where('category_id', $category->id);
-                    @endphp
-
+                    @php $categoryMenus = $menus->where('category_id', $category->id); @endphp
                     @if ($categoryMenus->count() > 0)
                         <div class="category-group space-y-3" id="category-group-{{ $category->id }}">
                             <h2
@@ -158,14 +156,11 @@
 
                             <div class="grid grid-cols-1 gap-3">
                                 @foreach ($categoryMenus as $menu)
-                                    @php
-                                        $isHabis = $menu->status !== 'available' || $menu->stock <= 0;
-                                    @endphp
-
+                                    @php $isHabis = ($menu->is_available ?? true) == false || ($menu->stock ?? 0) <= 0; @endphp
                                     <div
                                         class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3 transition {{ $isHabis ? 'opacity-50 grayscale select-none' : '' }}">
 
-                                        <!-- Gambar Menu -->
+                                        <!-- Gambar Menu / Icon Fallback -->
                                         <div
                                             class="w-16 h-16 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0 relative border border-slate-100">
                                             @if (!empty($menu->image_url) || !empty($menu->image))
@@ -177,7 +172,6 @@
                                                     <i class="fa-solid fa-utensils text-lg"></i>
                                                 </div>
                                             @endif
-
                                             @if ($isHabis)
                                                 <div
                                                     class="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
@@ -193,16 +187,13 @@
                                             </h3>
                                             <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5 leading-tight">
                                                 {{ $menu->description ?? 'Sensasi nikmat siap disajikan.' }}</p>
-
                                             <div class="flex items-center gap-2 mt-1">
-                                                <span class="font-black text-amber-600 text-xs">
-                                                    Rp {{ number_format($menu->price, 0, ',', '.') }}
-                                                </span>
+                                                <span class="font-black text-amber-600 text-xs">Rp
+                                                    {{ number_format($menu->price, 0, ',', '.') }}</span>
                                                 @if (!$isHabis && isset($menu->stock))
                                                     <span
-                                                        class="text-[9px] font-extrabold text-slate-400 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-md">
-                                                        Sisa: {{ $menu->stock }}
-                                                    </span>
+                                                        class="text-[9px] font-extrabold text-slate-400 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-md">Sisa:
+                                                        {{ $menu->stock }}</span>
                                                 @endif
                                             </div>
                                         </div>
@@ -227,7 +218,6 @@
                                             </div>
                                             <div id="inputs-{{ $menu->id }}"></div>
                                         @endif
-
                                     </div>
                                 @endforeach
                             </div>
@@ -236,7 +226,7 @@
                 @endforeach
             </div>
 
-            <!-- ================= BOTTOM NAVIGATION ================= -->
+            <!-- Bottom Navigation -->
             <div
                 class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-200 p-4 shadow-2xl flex items-center justify-between z-50">
                 <div>
@@ -309,16 +299,12 @@
                     price: price
                 };
             }
-
             let newQty = cart[menuId].qty + change;
-
             if (newQty > maxStock) {
                 alert("Maaf, stok hanya tersisa " + maxStock + " porsi.");
                 return;
             }
-
             cart[menuId].qty = newQty;
-
             if (cart[menuId].qty <= 0) {
                 delete cart[menuId];
                 document.getElementById('qty-' + menuId).innerText = 0;
@@ -330,26 +316,22 @@
                     <input type="hidden" name="items[${menuId}][quantity]" value="${cart[menuId].qty}">
                 `;
             }
-
             calculateTotal();
         }
 
         function calculateTotal() {
             let total = 0;
             let itemCount = 0;
-
             for (let id in cart) {
                 total += cart[id].qty * cart[id].price;
                 itemCount += cart[id].qty;
             }
-
             document.getElementById('totalDisplay').innerText = 'Rp ' + total.toLocaleString('id-ID');
-
             let btn = document.getElementById('submitBtn');
             if (itemCount > 0) {
                 btn.disabled = false;
                 btn.className =
-                    "bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-6 py-3 rounded-xl text-xs transition shadow-lg shadow-amber-500/20 active:scale-95";
+                    "bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-6 py-3 rounded-xl text-xs transition shadow-lg shadow-amber-500/20 active:scale-95 cursor-pointer";
             } else {
                 btn.disabled = true;
                 btn.className =

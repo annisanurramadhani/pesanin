@@ -9,6 +9,11 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4">
 
+    @php
+        $grandTotal = $order->total_amount ?? $order->total_price ?? 0;
+        $qrCodeHash = $order->qrCode->code ?? $order->qrCode->code_hash ?? '';
+    @endphp
+
     <div class="max-w-md w-full bg-slate-800 rounded-3xl p-6 border border-slate-700/80 shadow-2xl text-center space-y-6">
         
         <!-- Icon Berhasil -->
@@ -32,7 +37,7 @@
             </div>
             <div class="flex justify-between text-xs pb-2 border-b border-slate-800">
                 <span class="text-slate-400">Lokasi / Meja:</span>
-                <span class="font-bold text-white">{{ $order->qrCode->name ?? 'Meja' }}</span>
+                <span class="font-bold text-white">{{ $order->qrCode->name ?? 'Meja Pelanggan' }}</span>
             </div>
 
             <!-- List Makanan -->
@@ -47,7 +52,7 @@
 
             <div class="border-t border-slate-800 pt-3 flex justify-between items-center">
                 <span class="text-xs font-bold text-slate-300">Total Tagihan:</span>
-                <span class="text-base font-black text-amber-400">Rp {{ number_format($order->total_amount ?? $order->total_price ?? 0, 0, ',', '.') }}</span>
+                <span class="text-base font-black text-amber-400">Rp {{ number_format($grandTotal, 0, ',', '.') }}</span>
             </div>
         </div>
 
@@ -59,7 +64,7 @@
             
             <!-- Kode QRIS Generator -->
             <div class="p-3 bg-white rounded-2xl inline-block shadow-lg">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=PAY-{{ $order->order_number }}-RP-{{ $order->total_amount }}" 
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=PAY-{{ $order->order_number }}-RP-{{ $grandTotal }}" 
                      alt="QRIS Pembayaran" class="w-44 h-44 mx-auto rounded-lg">
             </div>
 
@@ -74,12 +79,14 @@
         </div>
 
         <!-- Tombol Pesan Lagi -->
-        <div>
-            <a href="{{ route('customer.menu', $order->qrCode->code_hash) }}" 
-               class="block w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl text-xs transition">
-                + Tambah Pesanan Lain
-            </a>
-        </div>
+        @if($qrCodeHash)
+            <div>
+                <a href="{{ url('/m/' . $qrCodeHash) }}" 
+                   class="block w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl text-xs transition">
+                    + Tambah Pesanan Lain
+                </a>
+            </div>
+        @endif
 
     </div>
 
