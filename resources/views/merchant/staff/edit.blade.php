@@ -74,7 +74,7 @@
                                     Nama Staf <span class="text-red-500">*</span>
                                 </label>
 
-                                <input type="text" id="name" name="name" value="{{ old('name', $staff->name) }}"
+                                <input type="text" id="name" name="name" value="{{ old('name', strip_tags($staff->name)) }}"
                                     class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition placeholder:font-normal placeholder:text-slate-400"
                                     placeholder="Contoh: Budi Kasir" required>
                             </div>
@@ -87,7 +87,7 @@
                                 </label>
 
                                 <input type="email" id="email" name="email"
-                                    value="{{ old('email', $staff->email) }}"
+                                    value="{{ old('email', strip_tags($staff->email)) }}"
                                     class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition placeholder:font-normal placeholder:text-slate-400"
                                     placeholder="budi@kopipst.com" required>
                             </div>

@@ -176,14 +176,14 @@
                                                         </div>
 
                                                         <span class="font-extrabold text-slate-900 text-sm">
-                                                            {{ $staff->name }}
+                                                            {{ strip_tags($staff->name) }}
                                                         </span>
                                                     </div>
                                                 </td>
 
                                                 {{-- Email --}}
                                                 <td class="p-4 text-xs font-bold text-slate-600">
-                                                    {{ $staff->email }}
+                                                    {{ strip_tags($staff->email) }}
                                                 </td>
 
                                                 {{-- Role --}}
