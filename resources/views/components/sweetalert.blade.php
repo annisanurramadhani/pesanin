@@ -50,8 +50,8 @@
         document.addEventListener('DOMContentLoaded', function () {
             Swal.fire({
                 icon: 'error',
-                title: 'Data Belum Lengkap',
-                text: 'Silakan lengkapi data terlebih dahulu.',
+                title: 'Validasi Gagal!',
+                text: @json($errors->first()),
                 confirmButtonText: 'OK',
                 confirmButtonColor: '#111827',
                 background: '#ffffff',

@@ -8,6 +8,7 @@ use App\Models\Merchant;
 use App\Models\Order;
 use App\Models\QrCode;
 use App\Models\User;
+use App\Rules\SecureText;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -47,8 +48,8 @@ class MerchantController extends Controller
     public function qrStore(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string',
+            'name' => ['required', 'string', 'max:255', new SecureText],
+            'type' => ['required', 'string'],
         ]);
 
         $user = $request->user();
@@ -60,18 +61,22 @@ class MerchantController extends Controller
         QrCode::create([
             'merchant_id' => $user->merchant_id,
             'name'        => $request->name,
-            'type'        => $request->type, // table, takeaway, atau vip
-            'code_hash'   => Str::random(10),
-            'is_active'   => true,
+            'type'        => $request->type,
+            'code'        => Str::random(10),
+            'status'      => 'active',
         ]);
 
         return back()->with('success', 'QR Code Meja berhasil dibuat!');
     }
 
     // 4. Hapus QR Code
-    public function qrDestroy(Request $request, QrCode $qrCode)
+    public function qrDestroy(Request $request, $encryptedId)
     {
-        if ($qrCode->merchant_id !== $request->user()->merchant_id) {
+        $qrCodeId = decrypt($encryptedId);
+
+        $qrCode = QrCode::findOrFail($qrCodeId);
+
+        if ((int) $qrCode->merchant_id !== (int) $request->user()->merchant_id) {
             abort(403);
         }
 
@@ -81,9 +86,13 @@ class MerchantController extends Controller
     }
 
     // 5. Cetak QR Code Meja
-    public function qrPrint(Request $request, QrCode $qrCode)
+    public function qrPrint(Request $request, $encryptedId)
     {
-        if ($qrCode->merchant_id !== $request->user()->merchant_id) {
+        $qrCodeId = decrypt($encryptedId);
+
+        $qrCode = QrCode::findOrFail($qrCodeId);
+
+        if ((int) $qrCode->merchant_id !== (int) $request->user()->merchant_id) {
             abort(403);
         }
 

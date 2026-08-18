@@ -183,20 +183,13 @@
                 {{-- Description --}}
                 <div class="md:col-span-2">
 
-                    <label
-                        for="description"
-                        class="mb-2 block text-sm font-bold text-slate-700"
-                    >
-                        Deskripsi
-                    </label>
 
-                    <textarea
-                        id="description"
-                        name="description"
-                        rows="4"
-                        placeholder="Jelaskan apa saja yang ditawarkan paket ini..."
-                        class="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 @error('description') border-rose-500 @enderror"
-                    >{{ old('description') }}</textarea>
+                    <x-rich-text-editor
+    name="description"
+    label="Deskripsi"
+    placeholder="Jelaskan apa saja yang ditawarkan paket ini..."
+    :value="old('description')"
+/>
 
                     @error('description')
 

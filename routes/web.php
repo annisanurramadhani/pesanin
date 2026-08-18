@@ -5,7 +5,7 @@
     use App\Http\Controllers\MenuController;
     use App\Http\Controllers\OrderController;
     use App\Http\Controllers\ProfileController;
-    use App\Http\Controllers\StaffController;
+    use App\Http\Controllers\Merchant\StaffController;
 
     use App\Http\Controllers\PublicSubscription\PublicSubscriptionController;
 
@@ -33,8 +33,8 @@
 
     // 2. Rute Pelanggan (Scan QR & Order) - SUDAH DIPERBAIKI (Tidak dobel /m/m lagi)
     Route::prefix('m')->group(function () {
-        Route::get('{code_hash}', [CustomerController::class, 'showMenu'])->name('customer.menu');
-        Route::post('{code_hash}/checkout', [CustomerController::class, 'checkout'])->name('customer.checkout');
+        Route::get('{code}', [CustomerController::class, 'showMenu'])->name('customer.menu');
+        Route::post('{code}/checkout', [CustomerController::class, 'checkout'])->name('customer.checkout');
     });
     Route::get('/order/success/{order_number}', [CustomerController::class, 'success'])->name('customer.success');
 
@@ -181,7 +181,7 @@
         });
 
 
-    // 5. Rute MERCHANT (Owner, Kasir, Dapur)
+    // 5. Rute MERCHANT (Owner, Kasir, Dapur) - WITH ENCRYPTED ID SUPPORT
     Route::middleware(['auth'])->prefix('merchant')->name('merchant.')->group(function () {
 
         // Dashboard Merchant (Owner & Kasir)
@@ -193,8 +193,8 @@
         Route::middleware(['role:owner,kasir,dapur'])->group(function () {
             Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
             Route::get('/orders/check', [OrderController::class, 'checkNew'])->name('orders.check');
-            Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
-            Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+            Route::get('/orders/{encryptedId}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
+            Route::patch('/orders/{encryptedId}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
         });
 
         // Khusus OWNER (QR Code, Menu, Profil Kafe, & Staf)
@@ -202,26 +202,37 @@
             // QR Code Meja
             Route::get('/qr', [MerchantController::class, 'qrIndex'])->name('qr.index');
             Route::post('/qr', [MerchantController::class, 'qrStore'])->name('qr.store');
-            Route::get('/qr/{qrCode}/print', [MerchantController::class, 'qrPrint'])->name('qr.print');
-            Route::delete('/qr/{qrCode}', [MerchantController::class, 'qrDestroy'])->name('qr.destroy');
+            Route::get('/qr/{encryptedId}/print', [MerchantController::class, 'qrPrint'])->name('qr.print');
+            Route::delete('/qr/{encryptedId}', [MerchantController::class, 'qrDestroy'])->name('qr.destroy');
 
-            // Menu & Kategori (Sudah ditambah rute Update & Toggle Status Ready/Habis)
+            // Menu & Kategori
             Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
             Route::post('/category', [MenuController::class, 'storeCategory'])->name('category.store');
             Route::post('/menu', [MenuController::class, 'store'])->name('menu.store');
-            Route::put('/menu/{menu}', [MenuController::class, 'update'])->name('menu.update');
-            Route::patch('/menu/{menu}/toggle', [MenuController::class, 'toggleStatus'])->name('menu.toggle');
-            Route::delete('/menu/{menu}', [MenuController::class, 'destroy'])->name('menu.destroy');
-            Route::get('/menu/{menu}/edit', [MenuController::class, 'edit'])->name('menu.edit');
+            Route::get('/menu/{encryptedId}/edit', [MenuController::class, 'edit'])->name('menu.edit');
+            Route::put('/menu/{encryptedId}', [MenuController::class, 'update'])->name('menu.update');
+            Route::patch('/menu/{encryptedId}/toggle', [MenuController::class, 'toggleStatus'])->name('menu.toggle');
+            Route::delete('/menu/{encryptedId}', [MenuController::class, 'destroy'])->name('menu.destroy');
 
             // Kelola Profil Kafe (Owner)
             Route::get('/profile-kafe', [MerchantController::class, 'profileEdit'])->name('profile-kafe.edit');
             Route::put('/profile-kafe', [MerchantController::class, 'profileUpdate'])->name('profile-kafe.update');
 
             // Kelola Staf Kafe
-            Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
-            Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
-            Route::delete('/staff/{user}', [StaffController::class, 'destroy'])->name('staff.destroy');
+            Route::get('/staff', [StaffController::class, 'index'])
+                ->name('staff.index');
+
+            Route::post('/staff', [StaffController::class, 'store'])
+                ->name('staff.store');
+
+            Route::get('/staff/{encryptedId}/edit', [StaffController::class, 'edit'])
+                ->name('staff.edit');
+
+            Route::put('/staff/{encryptedId}', [StaffController::class, 'update'])
+                ->name('staff.update');
+
+            Route::delete('/staff/{user}', [StaffController::class, 'destroy'])
+                ->name('staff.destroy');
         });
     });
 

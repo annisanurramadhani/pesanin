@@ -14,9 +14,9 @@ use Illuminate\Support\Str;
 class CustomerController extends Controller
 {
     // 1. Tampilkan Menu saat Scan QR
-    public function showMenu($code_hash)
+    public function showMenu($code)
     {
-        $qrCode = QrCode::where('code_hash', $code_hash)->firstOrFail();
+        $qrCode = QrCode::where('code', $code)->firstOrFail();
         $merchant = $qrCode->merchant;
 
         $categories = Category::where('merchant_id', $merchant->id)->get();
@@ -28,9 +28,9 @@ class CustomerController extends Controller
     }
 
     // 2. Proses Checkout Pesanan
-    public function checkout(Request $request, $code_hash)
+    public function checkout(Request $request, $code)
     {
-        $qrCode = QrCode::where('code_hash', $code_hash)->firstOrFail();
+        $qrCode = QrCode::where('code', $code)->firstOrFail();
 
         $request->validate([
             'customer_name' => 'required|string|max:255',

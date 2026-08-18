@@ -124,16 +124,12 @@
                                         class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition cursor-pointer"
                                         required>
 
-                                        <option value="table" {{ old('type') === 'table' ? 'selected' : '' }}>
-                                            Meja Makan (Table)
+                                        <option value="dine_in" {{ old('type') === 'dine_in' ? 'selected' : '' }}>
+                                            Dine In
                                         </option>
 
                                         <option value="takeaway" {{ old('type') === 'takeaway' ? 'selected' : '' }}>
-                                            Take Away / Drive Thru
-                                        </option>
-
-                                        <option value="vip" {{ old('type') === 'vip' ? 'selected' : '' }}>
-                                            Area VIP
+                                            Take Away
                                         </option>
 
                                     </select>
@@ -251,37 +247,20 @@
 
                                                 <td class="p-4">
 
-                                                    @if (in_array(strtolower($qr->type), ['takeaway', 'takeout']))
+                                                    @if (strtolower($qr->type) === 'takeaway')
 
                                                         <span
                                                             class="px-3 py-1 bg-orange-50 text-orange-700 border border-orange-200/80 font-extrabold rounded-lg text-xs inline-flex items-center gap-1">
-
                                                             <i class="fa-solid fa-bag-shopping text-[10px]"></i>
-
                                                             Take Away
-
-                                                        </span>
-
-                                                    @elseif (strtolower($qr->type) === 'vip')
-
-                                                        <span
-                                                            class="px-3 py-1 bg-purple-50 text-purple-700 border border-purple-200/80 font-extrabold rounded-lg text-xs inline-flex items-center gap-1">
-
-                                                            <i class="fa-solid fa-crown text-[10px]"></i>
-
-                                                            Area VIP
-
                                                         </span>
 
                                                     @else
 
                                                         <span
                                                             class="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200/80 font-extrabold rounded-lg text-xs inline-flex items-center gap-1">
-
                                                             <i class="fa-solid fa-utensils text-[10px]"></i>
-
-                                                            Meja Makan
-
+                                                            Dine In
                                                         </span>
 
                                                     @endif
@@ -292,7 +271,7 @@
                                                 <td class="p-4">
 
                                                     <a
-                                                        href="{{ route('customer.menu', $qr->code_hash) }}"
+                                                        href="{{ route('customer.menu', $qr->code) }}"
                                                         target="_blank"
                                                         class="inline-flex items-center gap-2 text-xs font-bold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200/60 px-3.5 py-2 rounded-xl transition">
 
@@ -326,7 +305,7 @@
                                                     <div class="flex items-center justify-center gap-2">
 
                                                         <a
-                                                            href="{{ route('merchant.qr.print', $qr->id) }}"
+                                                            href="{{ route('merchant.qr.print', encrypt($qr->id)) }}"
                                                             target="_blank"
                                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-700 hover:bg-amber-500 hover:text-slate-950 rounded-xl text-xs font-extrabold transition border border-amber-500/20"
                                                             title="Cetak Kartu Meja">
@@ -341,12 +320,11 @@
 
 
                                                         <form
-                                                            action="{{ route('merchant.qr.destroy', $qr->id) }}"
+                                                            action="{{ route('merchant.qr.destroy', encrypt($qr->id)) }}"
                                                             method="POST"
-                                                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus QR Code {{ $qr->name }}?');">
+                                                            class="delete-qr-form">
 
                                                             @csrf
-
                                                             @method('DELETE')
 
                                                             <button
@@ -355,9 +333,7 @@
                                                                 title="Hapus QR Code">
 
                                                                 <i class="fa-solid fa-trash-can"></i>
-
                                                             </button>
-
                                                         </form>
 
                                                     </div>
