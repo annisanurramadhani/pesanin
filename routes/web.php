@@ -5,7 +5,7 @@
     use App\Http\Controllers\MenuController;
     use App\Http\Controllers\OrderController;
     use App\Http\Controllers\ProfileController;
-    use App\Http\Controllers\StaffController;
+    use App\Http\Controllers\Merchant\StaffController;
 
     use App\Http\Controllers\PublicSubscription\PublicSubscriptionController;
 
@@ -219,10 +219,20 @@
             Route::put('/profile-kafe', [MerchantController::class, 'profileUpdate'])->name('profile-kafe.update');
 
             // Kelola Staf Kafe
-            Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
-            Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
-            Route::put('/staff/{encryptedId}', [StaffController::class, 'update'])->name('staff.update');
-            Route::delete('/staff/{encryptedId}', [StaffController::class, 'destroy'])->name('staff.destroy');
+            Route::get('/staff', [StaffController::class, 'index'])
+                ->name('staff.index');
+
+            Route::post('/staff', [StaffController::class, 'store'])
+                ->name('staff.store');
+
+            Route::get('/staff/{encryptedId}/edit', [StaffController::class, 'edit'])
+                ->name('staff.edit');
+
+            Route::put('/staff/{encryptedId}', [StaffController::class, 'update'])
+                ->name('staff.update');
+
+            Route::delete('/staff/{user}', [StaffController::class, 'destroy'])
+                ->name('staff.destroy');
         });
     });
 
