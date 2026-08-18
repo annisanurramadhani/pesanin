@@ -15,6 +15,7 @@ class SecureText implements ValidationRule
         }
 
         $patterns = [
+            '/<[^>]*>/i',
             '/<\s*script\b/i',
             '/<\s*\/\s*script\s*>/i',
             '/<\s*style\b/i',

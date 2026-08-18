@@ -305,7 +305,7 @@
                                                     <div class="flex items-center justify-center gap-2">
 
                                                         <a
-                                                            href="{{ route('merchant.qr.print', $qr->id) }}"
+                                                            href="{{ route('merchant.qr.print', encrypt($qr->id)) }}"
                                                             target="_blank"
                                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-700 hover:bg-amber-500 hover:text-slate-950 rounded-xl text-xs font-extrabold transition border border-amber-500/20"
                                                             title="Cetak Kartu Meja">
@@ -320,7 +320,7 @@
 
 
                                                         <form
-                                                            action="{{ route('merchant.qr.destroy', $qr->id) }}"
+                                                            action="{{ route('merchant.qr.destroy', encrypt($qr->id)) }}"
                                                             method="POST"
                                                             class="delete-qr-form">
 
