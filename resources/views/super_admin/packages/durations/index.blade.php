@@ -508,19 +508,7 @@
                     </span>.
 
                 </p>
-
-
-                <a
-                    href="{{ route('super_admin.packages.durations.create', [
-                        'encryptedId' => encryptId($package->id)
-                    ]) }}"
-                    class="mt-5 inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400"
-                >
-                    <i class="fa-solid fa-plus"></i>
-
-                    Tambah Durasi
-                </a>
-
+                
             </div>
 
         @endif

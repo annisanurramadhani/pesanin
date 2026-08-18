@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Hapus',
                 cancelButtonText: 'Batal',
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#6b7280',
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#111827',
                 background: '#ffffff',
                 color: '#111827',
                 reverseButtons: true,
@@ -276,46 +276,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Status',
                     'Status paket tidak valid.',
                     statusInput
-                );
-
-                return;
-            }
-
-
-            // =================================================
-            // SORT ORDER
-            // =================================================
-
-            if (sortOrder === '') {
-
-                showError(
-                    'Urutan',
-                    'Urutan paket wajib diisi.',
-                    sortOrderInput
-                );
-
-                return;
-            }
-
-
-            if (!/^\d+$/.test(sortOrder)) {
-
-                showError(
-                    'Urutan',
-                    'Urutan paket hanya boleh berupa angka.',
-                    sortOrderInput
-                );
-
-                return;
-            }
-
-
-            if (Number(sortOrder) < 0) {
-
-                showError(
-                    'Urutan',
-                    'Urutan paket tidak boleh kurang dari 0.',
-                    sortOrderInput
                 );
 
                 return;
