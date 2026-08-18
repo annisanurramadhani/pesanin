@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MenuController extends Controller
 {
@@ -29,44 +30,23 @@ class MenuController extends Controller
 
         Category::create([
             'merchant_id' => $request->user()->merchant_id,
-            'name' => $request->name,
+            'name'        => trim($request->name),
+            'slug'        => Str::slug($request->name),
         ]);
 
         return back()->with('success', 'Kategori berhasil ditambahkan!');
     }
 
     // 3. Simpan Menu Baru
-    public function storeMenu(Request $request)
-    {
-        $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:100',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-        ]);
-
-        Menu::create([
-            'merchant_id' => $request->user()->merchant_id,
-            'category_id' => $request->category_id,
-            'name' => $request->name,
-            'price' => $request->price,
-            'description' => $request->description,
-            'is_available' => true,
-        ]);
-
-        return back()->with('success', 'Menu berhasil ditambahkan!');
-    }
-
-    // Store Menu Baru
     public function store(Request $request)
     {
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name'        => 'required|string|max:255',
             'price'       => 'required|numeric|min:0',
-            'stock'       => 'required|integer|min:0', // <-- Validasi Stok
+            'stock'       => 'required|integer|min:0',
             'description' => 'nullable|string',
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $imagePath = null;
@@ -77,39 +57,58 @@ class MenuController extends Controller
         Menu::create([
             'merchant_id'  => $request->user()->merchant_id,
             'category_id'  => $request->category_id,
-            'name'         => $request->name,
+            'name'         => trim($request->name),
+            'slug'         => Str::slug($request->name),
             'price'        => $request->price,
-            'stock'        => $request->stock, // <-- Simpan Stok
+            'stock'        => $request->stock,
             'description'  => $request->description,
+            'is_available' => $request->stock > 0,
             'image'        => $imagePath,
-            'is_available' => $request->stock > 0, // Otomatis ready jika stok > 0
         ]);
 
         return back()->with('success', 'Menu berhasil ditambahkan!');
     }
 
-    // Update Menu
-    public function update(Request $request, Menu $menu)
+    // 4. Halaman Edit Menu (Dengan Dekripsi ID)
+    public function edit(Request $request, $encryptedId)
     {
-        if ($menu->merchant_id !== $request->user()->merchant_id) {
-            abort(403);
+        $id = decryptId($encryptedId);
+        if (!$id) {
+            abort(404, 'ID Menu tidak valid.');
         }
+
+        $menu = Menu::where('merchant_id', $request->user()->merchant_id)->findOrFail($id);
+        $categories = Category::where('merchant_id', $request->user()->merchant_id)->get();
+
+        return view('merchant.menu.edit', compact('menu', 'categories'));
+    }
+
+    // 5. Update Menu (Dengan Dekripsi ID)
+    public function update(Request $request, $encryptedId)
+    {
+        $id = decryptId($encryptedId);
+        if (!$id) {
+            abort(404, 'ID Menu tidak valid.');
+        }
+
+        $menu = Menu::where('merchant_id', $request->user()->merchant_id)->findOrFail($id);
 
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name'        => 'required|string|max:255',
             'price'       => 'required|numeric|min:0',
-            'stock'       => 'required|integer|min:0', // <-- Validasi Stok
+            'stock'       => 'required|integer|min:0',
             'description' => 'nullable|string',
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $data = [
-            'category_id' => $request->category_id,
-            'name'        => $request->name,
-            'price'       => $request->price,
-            'stock'       => $request->stock, // <-- Update Stok
-            'description' => $request->description,
+            'category_id'  => $request->category_id,
+            'name'         => trim($request->name),
+            'slug'         => Str::slug($request->name),
+            'price'        => $request->price,
+            'stock'        => $request->stock,
+            'description'  => $request->description,
             'is_available' => $request->stock > 0,
         ];
 
@@ -125,11 +124,18 @@ class MenuController extends Controller
         return redirect()->route('merchant.menu.index')->with('success', 'Menu berhasil diperbarui!');
     }
 
-    // 4. Hapus Menu
-    public function destroyMenu(Request $request, Menu $menu)
+    // 6. Hapus Menu (Dengan Dekripsi ID)
+    public function destroy(Request $request, $encryptedId)
     {
-        if ($menu->merchant_id !== $request->user()->merchant_id) {
-            abort(403);
+        $id = decryptId($encryptedId);
+        if (!$id) {
+            abort(404, 'ID Menu tidak valid.');
+        }
+
+        $menu = Menu::where('merchant_id', $request->user()->merchant_id)->findOrFail($id);
+
+        if ($menu->image) {
+            Storage::disk('public')->delete($menu->image);
         }
 
         $menu->delete();
@@ -137,14 +143,19 @@ class MenuController extends Controller
         return back()->with('success', 'Menu berhasil dihapus!');
     }
 
-    public function edit(Request $request, Menu $menu)
+    // 7. Toggle Status Ready / Habis (Dengan Dekripsi ID)
+    public function toggle(Request $request, $encryptedId)
     {
-        if ($menu->merchant_id !== $request->user()->merchant_id) {
-            abort(403);
+        $id = decryptId($encryptedId);
+        if (!$id) {
+            abort(404, 'ID Menu tidak valid.');
         }
 
-        $categories = Category::where('merchant_id', $request->user()->merchant_id)->get();
+        $menu = Menu::where('merchant_id', $request->user()->merchant_id)->findOrFail($id);
+        $menu->update([
+            'is_available' => !$menu->is_available
+        ]);
 
-        return view('merchant.menu.edit', compact('menu', 'categories'));
+        return back()->with('success', 'Status ketersediaan menu berhasil diubah!');
     }
 }

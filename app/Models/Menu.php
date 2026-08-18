@@ -14,20 +14,24 @@ class Menu extends Model
         'merchant_id',
         'category_id',
         'name',
-        'price',
-        'stock',
+        'slug',
         'description',
         'image',
-        'is_available',
+        'price',
+        'stock',
+        'status',
     ];
 
-    // Relasi ke Model Category
+    protected $casts = [
+        'price' => 'decimal:2',
+        'stock' => 'integer',
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    // Relasi ke Model Merchant
     public function merchant()
     {
         return $this->belongsTo(Merchant::class);
