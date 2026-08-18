@@ -45,7 +45,7 @@
 
         <!-- QR Code (Diubah Menggunakan API Gambar) -->
         <div class="bg-amber-50 p-4 rounded-2xl border-2 border-dashed border-amber-300 inline-block my-2">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode(route('customer.menu', $qrCode->code_hash)) }}" 
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode(route('customer.menu', $qrCode->code)) }}" 
                  alt="QR Code {{ $qrCode->name }}" 
                  class="w-44 h-44 rounded-xl mx-auto">
         </div>

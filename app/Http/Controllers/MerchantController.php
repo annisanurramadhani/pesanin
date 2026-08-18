@@ -60,9 +60,9 @@ class MerchantController extends Controller
         QrCode::create([
             'merchant_id' => $user->merchant_id,
             'name'        => $request->name,
-            'type'        => $request->type, // table, takeaway, atau vip
-            'code_hash'   => Str::random(10),
-            'is_active'   => true,
+            'type'        => $request->type,
+            'code'        => Str::random(10),
+            'status'      => 'active',
         ]);
 
         return back()->with('success', 'QR Code Meja berhasil dibuat!');

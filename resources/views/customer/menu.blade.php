@@ -15,7 +15,7 @@
 
     <div class="max-w-md mx-auto bg-white min-h-screen shadow-2xl relative pb-32">
         
-        <form action="{{ route('customer.checkout', $qrCode->code_hash) }}" method="POST" id="orderForm">
+        <form action="{{ route('customer.checkout', $qrCode->code) }}" method="POST" id="orderForm">
             @csrf
             <input type="hidden" name="payment_method" value="qris">
 

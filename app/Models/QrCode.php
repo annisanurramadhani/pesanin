@@ -14,8 +14,8 @@ class QrCode extends Model
         'merchant_id',
         'name',
         'type',
-        'code_hash',
-        'is_active',
+        'code',
+        'status',
     ];
 
     public function merchant()
