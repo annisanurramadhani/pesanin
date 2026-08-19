@@ -28,7 +28,7 @@
                         Kelola Menu
                     </a>
                     <a href="{{ route('merchant.orders.index') }}" class="px-3.5 py-2 rounded-xl text-sm font-semibold transition {{ request()->routeIs('merchant.orders.*') ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                        Kelola Pesanan
+                        Riwayat Pesanan
                     </a>
                 </div>
             </div>

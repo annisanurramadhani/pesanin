@@ -20,8 +20,6 @@ class CustomerController extends Controller
         $merchant = $qrCode->merchant;
 
         $categories = Category::where('merchant_id', $merchant->id)->get();
-        
-        // Hapus where('is_available', true) dan where('stock', '>', 0) agar menu yang habis tetap terkirim ke halaman
         $menus = Menu::where('merchant_id', $merchant->id)->get(); 
 
         return view('customer.menu', compact('qrCode', 'merchant', 'categories', 'menus'));
@@ -32,9 +30,13 @@ class CustomerController extends Controller
     {
         $qrCode = QrCode::where('code', $code)->firstOrFail();
 
+        $customerName = trim($request->customer_name);
+        if (empty($customerName)) {
+            $customerName = 'Pelanggan ' . ($qrCode->name ?? 'Meja');
+        }
+
         $request->validate([
-            'customer_name' => 'required|string|max:255',
-            'items'         => 'required|array|min:1',
+            'items' => 'required|array|min:1',
         ]);
 
         DB::beginTransaction();
@@ -63,7 +65,6 @@ class CustomerController extends Controller
                     'quantity' => $quantity,
                     'price'    => $menu->price,
                     'subtotal' => $subtotal,
-                    'notes'    => $item['notes'] ?? null,
                 ];
             }
 
@@ -71,26 +72,26 @@ class CustomerController extends Controller
                 return back()->with('error', 'Silakan pilih minimal 1 menu sebelum memesan.');
             }
 
-            // Simpan Order (Otomatis diset ke QRIS)
+            // Simpan Order
             $order = Order::create([
                 'merchant_id'    => $qrCode->merchant_id,
                 'qr_code_id'     => $qrCode->id,
                 'order_number'   => $orderNumber,
-                'customer_name'  => $request->customer_name,
+                'customer_name'  => $customerName,
                 'total_amount'   => $totalPrice,
-                'payment_method' => 'qris', // Default QRIS
+                'payment_method' => $request->payment_method ?? 'qris',
                 'payment_status' => 'unpaid',
-                'status'         => 'menunggu',
+                'status'         => 'pending',
             ]);
 
             foreach ($orderItemsData as $itemData) {
                 OrderItem::create([
-                    'order_id' => $order->id,
-                    'menu_id'  => $itemData['menu']->id,
-                    'quantity' => $itemData['quantity'],
-                    'price'    => $itemData['price'],
-                    'subtotal' => $itemData['subtotal'],
-                    'notes'    => $itemData['notes'],
+                    'order_id'  => $order->id,
+                    'menu_id'   => $itemData['menu']->id,
+                    'menu_name' => $itemData['menu']->name,
+                    'quantity'  => $itemData['quantity'],
+                    'price'     => $itemData['price'],
+                    'subtotal'  => $itemData['subtotal'],
                 ]);
 
                 if (isset($itemData['menu']->stock) && $itemData['menu']->stock > 0) {
