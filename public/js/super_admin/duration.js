@@ -272,36 +272,6 @@ console.log('name value:', name);
             }
 
             // =================================================
-            // SORT ORDER
-            // =================================================
-
-            if (sortOrder === "") {
-                showError("Urutan", "Urutan wajib diisi.", sortOrderInput);
-
-                return;
-            }
-
-            if (!/^\d+$/.test(sortOrder)) {
-                showError(
-                    "Urutan",
-                    "Urutan hanya boleh berupa angka.",
-                    sortOrderInput,
-                );
-
-                return;
-            }
-
-            if (Number(sortOrder) < 0) {
-                showError(
-                    "Urutan",
-                    "Urutan tidak boleh kurang dari 0.",
-                    sortOrderInput,
-                );
-
-                return;
-            }
-
-            // =================================================
             // STATUS
             // =================================================
 
