@@ -65,7 +65,6 @@ class CustomerController extends Controller
                     'quantity' => $quantity,
                     'price'    => $menu->price,
                     'subtotal' => $subtotal,
-                    'notes'    => $item['notes'] ?? null,
                 ];
             }
 
@@ -82,17 +81,17 @@ class CustomerController extends Controller
                 'total_amount'   => $totalPrice,
                 'payment_method' => $request->payment_method ?? 'qris',
                 'payment_status' => 'unpaid',
-                'status'         => 'process',
+                'status'         => 'pending',
             ]);
 
             foreach ($orderItemsData as $itemData) {
                 OrderItem::create([
-                    'order_id' => $order->id,
-                    'menu_id'  => $itemData['menu']->id,
-                    'quantity' => $itemData['quantity'],
-                    'price'    => $itemData['price'],
-                    'subtotal' => $itemData['subtotal'],
-                    'notes'    => $itemData['notes'],
+                    'order_id'  => $order->id,
+                    'menu_id'   => $itemData['menu']->id,
+                    'menu_name' => $itemData['menu']->name,
+                    'quantity'  => $itemData['quantity'],
+                    'price'     => $itemData['price'],
+                    'subtotal'  => $itemData['subtotal'],
                 ]);
 
                 if (isset($itemData['menu']->stock) && $itemData['menu']->stock > 0) {

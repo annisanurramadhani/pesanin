@@ -4,60 +4,62 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
-    // 1. Tampilkan Daftar Pesanan Masuk untuk Merchant
     public function index(Request $request)
     {
-        $merchantId = $request->user()->merchant_id;
+        $user = Auth::user();
+        $merchantId = $user->merchant_id ?? $user->id;
 
-        $orders = Order::with(['qrCode', 'items.menu'])
-            ->where('merchant_id', $merchantId)
-            ->latest()
-            ->paginate(10);
+        $filterType = $request->get('filter_type', 'day'); // Options: day, month, year
+        
+        $selectedDate  = $request->get('date', Carbon::today()->toDateString());
+        $selectedMonth = $request->get('month', Carbon::now()->format('Y-m'));
+        $selectedYear  = $request->get('year', Carbon::now()->year);
 
-        return view('merchant.orders.index', compact('orders'));
-    }
+        $query = Order::where('merchant_id', $merchantId)
+            ->with(['qrCode', 'items.menu']);
 
-    // Update Status Pesanan (menunggu -> diproses -> selesai / dibatalkan)
-    public function updateStatus(Request $request, Order $order)
-    {
-        if ($order->merchant_id !== $request->user()->merchant_id) {
-            abort(403);
+        // Filter Spesifik Berdasarkan Mode yang Dipilih
+        if ($filterType === 'day') {
+            $query->whereDate('created_at', $selectedDate);
+            $labelPeriode = Carbon::parse($selectedDate)->format('d M Y');
+        } elseif ($filterType === 'month') {
+            $carbonMonth = Carbon::parse($selectedMonth);
+            $query->whereYear('created_at', $carbonMonth->year)
+                  ->whereMonth('created_at', $carbonMonth->month);
+            $labelPeriode = $carbonMonth->format('F Y');
+        } elseif ($filterType === 'year') {
+            $query->whereYear('created_at', $selectedYear);
+            $labelPeriode = 'Tahun ' . $selectedYear;
         }
 
-        // Sesuaikan validasi dengan isi ENUM database MySQL
-        $request->validate([
-            'status' => 'required|in:menunggu,diproses,selesai,dibatalkan',
-        ]);
+        $orders = $query->orderBy('created_at', 'desc')->get();
 
-        $order->update(['status' => $request->status]);
+        // Hitung Total Pendapatan
+        $totalRevenue = $orders->sum(function($order) {
+            if ($order->total_amount > 0) return $order->total_amount;
+            if ($order->total_price > 0) return $order->total_price;
+            
+            return $order->items->sum(function($item) {
+                return $item->subtotal ?? ($item->price * $item->quantity);
+            });
+        });
 
-        return back()->with('success', 'Status pesanan berhasil diperbarui!');
-    }
+        $totalOrders = $orders->count();
 
-    // 3. Polling Real-time Cek Pesanan Baru
-    public function checkNew(Request $request)
-    {
-        $merchantId = $request->user()->merchant_id;
-
-        $activeOrders = Order::where('merchant_id', $merchantId)
-            ->whereIn('status', ['pending', 'processing'])
-            ->count();
-
-        return response()->json(['count' => $activeOrders]);
-    }
-
-    // 4. Cetak Struk / Nota Pembayaran
-    public function receipt(Request $request, Order $order)
-    {
-        if ($order->merchant_id !== $request->user()->merchant_id) {
-            abort(403);
-        }
-
-        $order->load(['items.menu', 'qrCode', 'merchant']);
-
-        return view('merchant.orders.receipt', compact('order'));
+        return view('merchant.orders.index', compact(
+            'orders', 
+            'filterType', 
+            'selectedDate', 
+            'selectedMonth', 
+            'selectedYear', 
+            'labelPeriode', 
+            'totalRevenue', 
+            'totalOrders'
+        ));
     }
 }
