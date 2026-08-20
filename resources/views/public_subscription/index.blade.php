@@ -115,9 +115,9 @@
                                 {{-- Deskripsi --}}
                                 @if ($package->description)
 
-                                    <p class="mt-5 text-sm leading-6 text-slate-500">
-                                        {{ $package->description }}
-                                    </p>
+                                    <div class="mt-5 text-sm leading-6 text-slate-500">
+                                        {!! $package->description !!}
+                                    </div>
 
                                 @endif
 
