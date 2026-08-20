@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\CustomerController;
+// use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
@@ -9,6 +9,8 @@ use App\Http\Controllers\Merchant\StaffController;
 
 use App\Http\Controllers\Payment\PaymentController;
 use App\Http\Controllers\Payment\MidtransNotificationController;
+use App\Http\Controllers\Payment\MidtransOrderNotificationController;
+use App\Http\Controllers\Customer\CustomerOrderController;
 
 use App\Http\Controllers\Auth\EmailVerificationController;
 
@@ -37,12 +39,58 @@ Route::get('/subscription/{slug}', [PublicSubscriptionController::class, 'show']
 Route::get('/subscription/{slug}/summary/{duration}', [PublicSubscriptionController::class, 'summary'])
     ->name('public.subscription.summary');
 
-// 2. Rute Pelanggan (Scan QR & Order)
-Route::prefix('m')->group(function () {
-    Route::get('{code}', [CustomerController::class, 'showMenu'])->name('customer.menu');
-    Route::post('{code}/checkout', [CustomerController::class, 'checkout'])->name('customer.checkout');
-});
-Route::get('/order/success/{order_number}', [CustomerController::class, 'success'])->name('customer.success');
+/// ==========================================================================
+// CUSTOMER ORDER (SCAN QR)
+// ==========================================================================
+
+Route::prefix('m/{code}')
+    ->name('customer.')
+    ->group(function () {
+
+        // Katalog Menu
+        Route::get('/', [CustomerOrderController::class, 'menu'])
+            ->name('menu');
+
+        // Keranjang
+        Route::get('/cart', [CustomerOrderController::class, 'cart'])
+            ->name('cart');
+
+        // Tambah Menu ke Keranjang
+        Route::post('/cart/add', [CustomerOrderController::class, 'addToCart'])
+            ->name('cart.add');
+
+        // Update Quantity Keranjang
+        Route::patch('/cart/update', [CustomerOrderController::class, 'updateCart'])
+            ->name('cart.update');
+
+        // Hapus Menu dari Keranjang
+        Route::delete('/cart/{menuId}', [CustomerOrderController::class, 'removeFromCart'])
+            ->name('cart.remove');
+
+        // Checkout
+        Route::get('/checkout', [CustomerOrderController::class, 'checkout'])
+            ->name('checkout');
+
+        // Simpan Pesanan
+        Route::post('/checkout', [CustomerOrderController::class, 'store'])
+            ->name('checkout.store');
+
+        // Detail / Status Pesanan
+        Route::get('/order/{orderNumber}', [CustomerOrderController::class, 'success'])
+            ->name('order.success');
+
+        // Payment
+        Route::get('/order/{orderNumber}/payment', [CustomerOrderController::class, 'payment'])
+            ->name('payment');
+    });
+
+// NOTIFIKAS ORDER PAYMENT
+Route::post(
+    '/payment/midtrans/order/notification',
+    [MidtransOrderNotificationController::class, 'handle']
+)->name('payment.midtrans.order.notification');
+
+
 
 // 3. Redirect Dashboard Default Berdasarkan Role
 Route::get('/dashboard', function () {
@@ -282,13 +330,6 @@ Route::middleware('auth')->group(function () {
         [EmailVerificationController::class, 'resend']
     )->name('verification.code.resend');
 });
-
-// 2. Rute Pelanggan (Scan QR & Order) - SUDAH DIPERBAIKI (Tidak dobel /m/m lagi)
-Route::prefix('m')->group(function () {
-    Route::get('{code}', [CustomerController::class, 'showMenu'])->name('customer.menu');
-    Route::post('{code}/checkout', [CustomerController::class, 'checkout'])->name('customer.checkout');
-});
-Route::get('/order/success/{order_number}', [CustomerController::class, 'success'])->name('customer.success');
 
 // 5. Rute MERCHANT (Owner, Kasir, Dapur) - WITH ENCRYPTED ID SUPPORT
 Route::middleware(['auth'])->prefix('merchant')->name('merchant.')->group(function () {
