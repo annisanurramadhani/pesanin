@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\QrCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Midtrans\Config;
@@ -54,15 +55,19 @@ class CustomerOrderController extends Controller
         ));
     }
 
-
     /**
      * Menambahkan menu ke keranjang.
      */
     public function addToCart(Request $request, string $code)
     {
         $request->validate([
-            'menu_id' => ['required', 'integer'],
-            'quantity' => ['required', 'integer', 'min:1'],
+            'menu_id'  => ['required', 'integer', 'exists:menus,id'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:50'],
+        ], [
+            'menu_id.required'  => 'Menu tidak valid.',
+            'quantity.required' => 'Jumlah pesanan wajib diisi.',
+            'quantity.min'      => 'Jumlah minimal pesanan adalah 1.',
+            'quantity.max'      => 'Jumlah pesanan melebihi batas per item.',
         ]);
 
         $qrCode = QrCode::where('code', $code)
@@ -113,10 +118,7 @@ class CustomerOrderController extends Controller
         */
 
         if (isset($cart[$menu->id])) {
-
-            $newQuantity =
-                $cart[$menu->id] +
-                $request->quantity;
+            $newQuantity = $cart[$menu->id] + $request->quantity;
 
             if ($newQuantity > $menu->stock) {
 
@@ -127,9 +129,7 @@ class CustomerOrderController extends Controller
             }
 
             $cart[$menu->id] = $newQuantity;
-
         } else {
-
             $cart[$menu->id] = $request->quantity;
         }
 
@@ -156,7 +156,6 @@ class CustomerOrderController extends Controller
         ]);
     }
 
-
     /**
      * Menampilkan keranjang.
      */
@@ -179,7 +178,6 @@ class CustomerOrderController extends Controller
         $cartItems = [];
 
         foreach ($cart as $menuId => $quantity) {
-
             if (!isset($menus[$menuId])) {
                 continue;
             }
@@ -187,7 +185,7 @@ class CustomerOrderController extends Controller
             $menu = $menus[$menuId];
 
             $cartItems[] = [
-                'menu' => $menu,
+                'menu'     => $menu,
                 'quantity' => $quantity,
                 'subtotal' => $menu->price * $quantity,
             ];
@@ -203,16 +201,15 @@ class CustomerOrderController extends Controller
         ));
     }
 
-
     /**
      * Mengubah jumlah menu di keranjang.
      */
     public function updateCart(Request $request, string $code)
-{
-    $request->validate([
-        'menu_id' => ['required', 'integer'],
-        'quantity' => ['required', 'integer', 'min:0'],
-    ]);
+    {
+        $request->validate([
+            'menu_id'  => ['required', 'integer'],
+            'quantity' => ['required', 'integer', 'min:0', 'max:50'],
+        ]);
 
     $qrCode = QrCode::where('code', $code)
         ->where('status', 'active')
@@ -225,53 +222,21 @@ class CustomerOrderController extends Controller
 
     $cart = session()->get('cart', []);
 
-    if ($request->quantity <= 0) {
-        unset($cart[$menu->id]);
-    } else {
-        if ($request->quantity > $menu->stock) {
-            return response()->json([
-                'success' => false,
-                'message' => "Maaf, stok {$menu->name} hanya tersisa {$menu->stock}.",
-            ], 422);
+        if ($request->quantity <= 0) {
+            unset($cart[$menu->id]);
+        } else {
+            if ($request->quantity > $menu->stock) {
+                return back()->with(
+                    'error',
+                    "Maaf, stok {$menu->name} hanya tersisa {$menu->stock}."
+                );
+            }
+
+            $cart[$menu->id] = $request->quantity;
         }
 
         $cart[$menu->id] = $request->quantity;
     }
-
-    session()->put('cart', $cart);
-
-    $items = [];
-
-    foreach ($cart as $menuId => $quantity) {
-        $cartMenu = Menu::where('id', $menuId)
-            ->where('merchant_id', $qrCode->merchant_id)
-            ->where('status', 'available')
-            ->first();
-
-        if (!$cartMenu) {
-            continue;
-        }
-
-        $items[] = [
-            'menu_id' => $cartMenu->id,
-            'quantity' => $quantity,
-            'subtotal' => $cartMenu->price * $quantity,
-        ];
-    }
-
-    $total = collect($items)->sum('subtotal');
-
-    $currentItem = collect($items)->firstWhere('menu_id', $menu->id);
-
-    return response()->json([
-        'success' => true,
-        'quantity' => $currentItem['quantity'] ?? 0,
-        'subtotal' => $currentItem['subtotal'] ?? 0,
-        'total' => $total,
-        'removed' => !isset($cart[$menu->id]),
-    ]);
-}
-
 
     /**
      * Menghapus menu dari keranjang.
@@ -297,7 +262,6 @@ class CustomerOrderController extends Controller
             "{$menu->name} dihapus dari keranjang."
         );
     }
-
 
     /**
      * Menampilkan halaman checkout.
@@ -330,7 +294,6 @@ class CustomerOrderController extends Controller
         $cartItems = [];
 
         foreach ($cart as $menuId => $quantity) {
-
             if (!isset($menus[$menuId])) {
                 continue;
             }
@@ -338,7 +301,7 @@ class CustomerOrderController extends Controller
             $menu = $menus[$menuId];
 
             $cartItems[] = [
-                'menu' => $menu,
+                'menu'     => $menu,
                 'quantity' => $quantity,
                 'subtotal' => $menu->price * $quantity,
             ];
@@ -354,35 +317,40 @@ class CustomerOrderController extends Controller
         ));
     }
 
-
     /**
      * Membuat pesanan.
      */
     public function store(Request $request, string $code)
     {
-        $request->validate([
+        // Validasi Input Keamanan Server-Side
+        $validated = $request->validate([
             'customer_name' => [
                 'required',
                 'string',
-                'max:255',
+                'max:50',
+                'regex:/^[a-zA-Z\s]+$/', // Hanya diperbolehkan huruf dan spasi
             ],
-
             'customer_phone' => [
                 'nullable',
                 'string',
-                'max:30',
+                'digits_between:10,14', // Hanya format angka telepon yang sah
             ],
-
             'customer_email' => [
                 'nullable',
-                'email',
-                'max:255',
+                'email:dns',
+                'max:100',
             ],
-
             'payment_method' => [
                 'required',
                 'in:qris,cash',
             ],
+        ], [
+            'customer_name.required' => 'Nama pemesan wajib diisi.',
+            'customer_name.regex'    => 'Nama pemesan hanya boleh berisi huruf dan spasi.',
+            'customer_name.max'      => 'Nama pemesan maksimal 50 karakter.',
+            'customer_phone.digits_between' => 'Nomor telepon harus berupa angka antara 10-14 digit.',
+            'customer_email.email'   => 'Format email tidak valid.',
+            'payment_method.in'      => 'Metode pembayaran tidak valid.',
         ]);
 
         /*
@@ -390,20 +358,17 @@ class CustomerOrderController extends Controller
         | QR CODE
         |--------------------------------------------------------------------------
         */
-
         $qrCode = QrCode::where('code', $code)
             ->where('status', 'active')
             ->firstOrFail();
 
         $merchant = $qrCode->merchant;
 
-
         /*
         |--------------------------------------------------------------------------
         | CART
         |--------------------------------------------------------------------------
         */
-
         $cart = session()->get('cart', []);
 
         if (empty($cart)) {
@@ -415,13 +380,11 @@ class CustomerOrderController extends Controller
                 );
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | AMBIL MENU
         |--------------------------------------------------------------------------
         */
-
         $menus = Menu::whereIn('id', array_keys($cart))
             ->where('merchant_id', $merchant->id)
             ->where('status', 'available')
@@ -437,17 +400,14 @@ class CustomerOrderController extends Controller
                 );
         }
 
-
         /*
         |--------------------------------------------------------------------------
-        | VALIDASI STOCK & HITUNG SUBTOTAL
+        | VALIDASI STOCK & HITUNG SUBTOTAL REAL
         |--------------------------------------------------------------------------
         */
-
         $subtotal = 0;
 
         foreach ($cart as $menuId => $quantity) {
-
             if (!isset($menus[$menuId])) {
                 continue;
             }
@@ -455,7 +415,6 @@ class CustomerOrderController extends Controller
             $menu = $menus[$menuId];
 
             if ($quantity > $menu->stock) {
-
                 return redirect()
                     ->route('customer.cart', $code)
                     ->with(
@@ -464,32 +423,23 @@ class CustomerOrderController extends Controller
                     );
             }
 
-            $subtotal +=
-                $menu->price * $quantity;
+            $subtotal += $menu->price * $quantity;
         }
-
 
         /*
         |--------------------------------------------------------------------------
         | GENERATE ORDER NUMBER
         |--------------------------------------------------------------------------
         */
-
-        $orderNumber =
-            'ORD-' .
-            now()->format('YmdHis') .
-            '-' .
-            strtoupper(str()->random(6));
-
+        $orderNumber = 'ORD-' . now()->format('YmdHis') . '-' . strtoupper(str()->random(6));
 
         /*
         |--------------------------------------------------------------------------
-        | CREATE ORDER
+        | CREATE ORDER (TRANSACTION)
         |--------------------------------------------------------------------------
         */
-
         $order = DB::transaction(function () use (
-            $request,
+            $validated,
             $qrCode,
             $merchant,
             $cart,
@@ -497,51 +447,26 @@ class CustomerOrderController extends Controller
             $subtotal,
             $orderNumber
         ) {
-
             $order = Order::create([
-
-                'merchant_id' =>
-                    $merchant->id,
-
-                'qr_code_id' =>
-                    $qrCode->id,
-
-                'order_number' =>
-                    $orderNumber,
-
-                'customer_name' =>
-                    $request->customer_name,
-
-                'customer_phone' =>
-                    $request->customer_phone,
-
-                'customer_email' =>
-                    $request->customer_email,
-
-                'subtotal' =>
-                    $subtotal,
-
-                'total' =>
-                    $subtotal,
-
-                'payment_method' =>
-                    $request->payment_method,
-
+                'merchant_id'    => $merchant->id,
+                'qr_code_id'     => $qrCode->id,
+                'order_number'   => $orderNumber,
+                'customer_name'  => strip_tags($validated['customer_name']), // Sanitasi Anti-XSS
+                'customer_phone' => $validated['customer_phone'] ?? null,
+                'customer_email' => $validated['customer_email'] ?? null,
+                'subtotal'       => $subtotal,
+                'total'          => $subtotal,
+                'payment_method' => $validated['payment_method'],
                 'payment_provider' => null,
-
-                'status' =>
-                    'pending',
+                'status'         => 'pending',
             ]);
-
 
             /*
             |--------------------------------------------------------------------------
             | CREATE ORDER ITEMS
             |--------------------------------------------------------------------------
             */
-
             foreach ($cart as $menuId => $quantity) {
-
                 if (!isset($menus[$menuId])) {
                     continue;
                 }
@@ -549,48 +474,33 @@ class CustomerOrderController extends Controller
                 $menu = $menus[$menuId];
 
                 OrderItem::create([
-
-                    'order_id' =>
-                        $order->id,
-
-                    'menu_id' =>
-                        $menu->id,
-
-                    'menu_name' =>
-                        $menu->name,
-
-                    'quantity' =>
-                        $quantity,
-
-                    'price' =>
-                        $menu->price,
-
-                    'subtotal' =>
-                        $menu->price * $quantity,
+                    'order_id'  => $order->id,
+                    'menu_id'   => $menu->id,
+                    'menu_name' => $menu->name,
+                    'quantity'  => $quantity,
+                    'price'     => $menu->price,
+                    'subtotal'  => $menu->price * $quantity,
                 ]);
             }
 
             return $order;
         });
 
+        // Enkripsi Order Number untuk Keamanan URL Redirect
+        $encryptedOrderNumber = Crypt::encryptString($order->order_number);
 
         /*
         |--------------------------------------------------------------------------
         | CASH
         |--------------------------------------------------------------------------
         */
-
-        if ($request->payment_method === 'cash') {
-
+        if ($validated['payment_method'] === 'cash') {
             session()->forget('cart');
 
             return redirect()
                 ->route('customer.order.success', [
-                    'code' =>
-                        $code,
-
-                    'orderNumber' =>
-                        $order->order_number,
+                    'code'        => $code,
+                    'orderNumber' => $encryptedOrderNumber,
                 ])
                 ->with(
                     'success',
@@ -598,75 +508,46 @@ class CustomerOrderController extends Controller
                 );
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | MIDTRANS CONFIG
         |--------------------------------------------------------------------------
         */
-
-        Config::$serverKey = config(
-            'services.midtrans.server_key'
-        );
-
-        Config::$clientKey = config(
-            'services.midtrans.client_key'
-        );
-
-        Config::$isProduction = config(
-            'services.midtrans.is_production',
-            false
-        );
-
-        Config::$isSanitized = true;
-        Config::$is3ds = true;
-
+        Config::$serverKey     = config('services.midtrans.server_key');
+        Config::$clientKey     = config('services.midtrans.client_key');
+        Config::$isProduction = config('services.midtrans.is_production', false);
+        Config::$isSanitized  = true;
+        Config::$is3ds        = true;
 
         /*
         |--------------------------------------------------------------------------
         | VALIDASI SERVER KEY
         |--------------------------------------------------------------------------
         */
-
         if (empty(Config::$serverKey)) {
+            Log::error('Midtrans Server Key belum dikonfigurasi.');
 
-            Log::error(
-                'Midtrans Server Key belum dikonfigurasi.'
+            return back()->with(
+                'error',
+                'Konfigurasi pembayaran belum tersedia.'
             );
-
-            return back()
-                ->with(
-                    'error',
-                    'Konfigurasi pembayaran belum tersedia.'
-                );
         }
-
 
         /*
         |--------------------------------------------------------------------------
         | MIDTRANS ORDER ID
         |--------------------------------------------------------------------------
         */
-
-        $midtransOrderId =
-            'ORD-' .
-            $order->id .
-            '-' .
-            now()->format('YmdHis') .
-            '-' .
-            strtoupper(str()->random(6));
-
+        $midtransOrderId = 'ORD-' . $order->id . '-' . now()->format('YmdHis') . '-' . strtoupper(str()->random(6));
 
         /*
         |--------------------------------------------------------------------------
         | ITEM DETAILS
         |--------------------------------------------------------------------------
         */
-
         $itemDetails = [];
 
         foreach ($cart as $menuId => $quantity) {
-
             if (!isset($menus[$menuId])) {
                 continue;
             }
@@ -674,95 +555,51 @@ class CustomerOrderController extends Controller
             $menu = $menus[$menuId];
 
             $itemDetails[] = [
-
-                'id' =>
-                    'MENU-' . $menu->id,
-
-                'price' =>
-                    (int) $menu->price,
-
-                'quantity' =>
-                    (int) $quantity,
-
-                'name' =>
-                    $menu->name,
+                'id'       => 'MENU-' . $menu->id,
+                'price'    => (int) $menu->price,
+                'quantity' => (int) $quantity,
+                'name'     => $menu->name,
             ];
         }
-
 
         /*
         |--------------------------------------------------------------------------
         | QRIS PARAMETER
         |--------------------------------------------------------------------------
         */
-
         $params = [
-
-            'payment_type' =>
-                'qris',
-
+            'payment_type' => 'qris',
             'transaction_details' => [
-
-                'order_id' =>
-                    $midtransOrderId,
-
-                'gross_amount' =>
-                    (int) $order->total,
+                'order_id'     => $midtransOrderId,
+                'gross_amount' => (int) $order->total,
             ],
-
-            'item_details' =>
-                $itemDetails,
-
+            'item_details'     => $itemDetails,
             'customer_details' => [
-
-                'first_name' =>
-                    $order->customer_name,
-
-                'email' =>
-                    $order->customer_email,
-
-                'phone' =>
-                    $order->customer_phone,
+                'first_name' => $order->customer_name,
+                'email'      => $order->customer_email,
+                'phone'      => $order->customer_phone,
             ],
-
         ];
-
 
         /*
         |--------------------------------------------------------------------------
         | CHARGE QRIS
         |--------------------------------------------------------------------------
         */
-
         try {
-
             $response = CoreApi::charge($params);
 
             Log::info('MIDTRANS QRIS DATA', [
-    'qr_string' => $response->qr_string ?? null,
-    'actions' => $response->actions ?? null,
-]);
-
-
+                'qr_string' => $response->qr_string ?? null,
+                'actions'   => $response->actions ?? null,
+            ]);
         } catch (Throwable $e) {
-
-            Log::error(
-                'Midtrans QRIS Charge Error',
-                [
-
-                    'order_id' =>
-                        $order->id,
-
-                    'midtrans_order_id' =>
-                        $midtransOrderId,
-
-                    'message' =>
-                        $e->getMessage(),
-
-                    'trace' =>
-                        $e->getTraceAsString(),
-                ]
-            );
+            Log::error('Midtrans QRIS Charge Error', [
+                'order_id'          => $order->id,
+                'midtrans_order_id' => $midtransOrderId,
+                'message'           => $e->getMessage(),
+                'trace'             => $e->getTraceAsString(),
+            ]);
 
             return back()->with(
                 'error',
@@ -770,46 +607,16 @@ class CustomerOrderController extends Controller
             );
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | LOG RESPONSE MIDTRANS
-        |--------------------------------------------------------------------------
-        */
-
-        Log::info(
-            'MIDTRANS QRIS RESPONSE',
-            [
-                'order_id' =>
-                    $order->id,
-
-                'midtrans_order_id' =>
-                    $midtransOrderId,
-
-                'response' =>
-                    json_encode($response),
-            ]
-        );
-
-
         /*
         |--------------------------------------------------------------------------
         | VALIDASI RESPONSE
         |--------------------------------------------------------------------------
         */
-
         if (empty($response->transaction_id)) {
-
-            Log::error(
-                'Midtrans transaction_id tidak ditemukan.',
-                [
-                    'order_id' =>
-                        $order->id,
-
-                    'response' =>
-                        json_encode($response),
-                ]
-            );
+            Log::error('Midtrans transaction_id tidak ditemukan.', [
+                'order_id' => $order->id,
+                'response' => json_encode($response),
+            ]);
 
             return back()->with(
                 'error',
@@ -817,65 +624,27 @@ class CustomerOrderController extends Controller
             );
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | AMBIL QR CODE URL
         |--------------------------------------------------------------------------
-        |
-        | Midtrans mengembalikan actions:
-        |
-        | generate-qr-code
-        | generate-qr-code-v2
-        |
         */
+        $actions = collect($response->actions ?? []);
 
-        $actions = collect(
-            $response->actions ?? []
-        );
-
-        $qrCodeAction =
-            $actions->firstWhere(
-                'name',
-                'generate-qr-code-v2'
-            );
+        $qrCodeAction = $actions->firstWhere('name', 'generate-qr-code-v2');
 
         if (!$qrCodeAction) {
-
-            $qrCodeAction =
-                $actions->firstWhere(
-                    'name',
-                    'generate-qr-code'
-                );
+            $qrCodeAction = $actions->firstWhere('name', 'generate-qr-code');
         }
 
-        $qrCodeUrl =
-            $qrCodeAction->url ?? null;
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI QR CODE URL
-        |--------------------------------------------------------------------------
-        */
+        $qrCodeUrl = $qrCodeAction->url ?? null;
 
         if (empty($qrCodeUrl)) {
-
-            Log::error(
-                'Midtrans QR Code URL tidak ditemukan.',
-                [
-                    'order_id' =>
-                        $order->id,
-
-                    'transaction_id' =>
-                        $response->transaction_id,
-
-                    'actions' =>
-                        json_encode(
-                            $response->actions ?? []
-                        ),
-                ]
-            );
+            Log::error('Midtrans QR Code URL tidak ditemukan.', [
+                'order_id'       => $order->id,
+                'transaction_id' => $response->transaction_id,
+                'actions'        => json_encode($response->actions ?? []),
+            ]);
 
             return back()->with(
                 'error',
@@ -883,79 +652,33 @@ class CustomerOrderController extends Controller
             );
         }
 
-
         /*
         |--------------------------------------------------------------------------
-        | UPDATE PAYMENT PROVIDER
+        | UPDATE PAYMENT PROVIDER & SESSION
         |--------------------------------------------------------------------------
         */
-
         $order->update([
-
-    'payment_provider' =>
-        'midtrans:' . $midtransOrderId,
-]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | SIMPAN DATA MIDTRANS KE SESSION
-        |--------------------------------------------------------------------------
-        */
+            'payment_provider' => 'midtrans:' . $midtransOrderId,
+        ]);
 
         session()->put(
             'midtrans_order_' . $order->id,
             [
-
-                'midtrans_order_id' =>
-                    $midtransOrderId,
-
-                'transaction_id' =>
-                    $response->transaction_id,
-
-                'qr_string' =>
-                    $response->qr_string ?? null,
-
-                'qr_code_url' =>
-                    $qrCodeUrl,
-
-                'transaction_status' =>
-                    $response->transaction_status
-                    ?? 'pending',
-
-                'expiry_time' =>
-                    $response->expiry_time
-                    ?? null,
+                'midtrans_order_id'  => $midtransOrderId,
+                'transaction_id'     => $response->transaction_id,
+                'qr_string'          => $response->qr_string ?? null,
+                'qr_code_url'        => $qrCodeUrl,
+                'transaction_status' => $response->transaction_status ?? 'pending',
+                'expiry_time'        => $response->expiry_time ?? null,
             ]
         );
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | HAPUS CART
-        |--------------------------------------------------------------------------
-        */
-
         session()->forget('cart');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | LANGSUNG KE HALAMAN SUCCESS
-        |--------------------------------------------------------------------------
-        |
-        | QRIS akan langsung tampil di order-success.blade.php
-        |
-        */
 
         return redirect()
             ->route('customer.order.success', [
-
-                'code' =>
-                    $code,
-
-                'orderNumber' =>
-                    $order->order_number,
-
+                'code'        => $code,
+                'orderNumber' => $encryptedOrderNumber,
             ])
             ->with(
                 'success',
@@ -963,63 +686,30 @@ class CustomerOrderController extends Controller
             );
     }
 
-
     /**
      * Detail / Status Pesanan.
      */
-    public function success(
-        string $code,
-        string $orderNumber
-    ) {
-
-        /*
-        |--------------------------------------------------------------------------
-        | QR CODE
-        |--------------------------------------------------------------------------
-        */
+    public function success(string $code, string $orderNumber)
+    {
+        // Dekripsi parameter orderNumber jika terenkripsi
+        try {
+            $decryptedOrderNumber = Crypt::decryptString($orderNumber);
+        } catch (\Exception $e) {
+            $decryptedOrderNumber = $orderNumber; // Fallback jika tidak terenkripsi
+        }
 
         $qrCode = QrCode::where('code', $code)
             ->where('status', 'active')
             ->firstOrFail();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | MERCHANT
-        |--------------------------------------------------------------------------
-        */
-
         $merchant = $qrCode->merchant;
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | ORDER
-        |--------------------------------------------------------------------------
-        */
-
         $order = Order::with('items')
-            ->where('order_number', $orderNumber)
+            ->where('order_number', $decryptedOrderNumber)
             ->where('merchant_id', $merchant->id)
             ->firstOrFail();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | PAYMENT DATA
-        |--------------------------------------------------------------------------
-        */
-
-        $payment = session()->get(
-            'midtrans_order_' . $order->id
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | VIEW
-        |--------------------------------------------------------------------------
-        */
+        $payment = session()->get('midtrans_order_' . $order->id);
 
         return view(
             'customer.order-success',

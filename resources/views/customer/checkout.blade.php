@@ -37,7 +37,7 @@
 
     <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6">
 
-        {{-- Flash Message --}}
+        {{-- Flash Message Success --}}
         @if (session('success'))
 
             <div class="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
@@ -61,7 +61,7 @@
 
         @endif
 
-
+        {{-- Flash Message Error --}}
         @if (session('error'))
 
             <div class="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
@@ -83,6 +83,25 @@
 
             </div>
 
+        @endif
+
+        {{-- Validation Errors List Notification --}}
+        @if ($errors->any())
+            <div class="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-red-800">Mohon periksa kembali inputan Anda:</p>
+                        <ul class="mt-1 text-xs text-red-700 list-disc list-inside space-y-0.5">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
         @endif
 
 
@@ -150,10 +169,12 @@
                             name="customer_name"
                             value="{{ old('customer_name') }}"
                             required
-                            maxlength="100"
+                            maxlength="50"
+                            pattern="[a-zA-Z\s]+"
+                            title="Nama hanya boleh diisi huruf dan spasi"
                             placeholder="Masukkan nama Anda"
-                            class="w-full rounded-xl border border-slate-200
-                                   bg-slate-50 pl-11 pr-4 py-3
+                            class="w-full rounded-xl border @error('customer_name') border-red-500 bg-red-50/30 @else border-slate-200 bg-slate-50 @enderror
+                                   pl-11 pr-4 py-3
                                    text-sm text-slate-800
                                    outline-none transition
                                    placeholder:text-slate-400
@@ -165,8 +186,8 @@
                     </div>
 
                     @error('customer_name')
-                        <p class="mt-1.5 text-xs text-red-500">
-                            {{ $message }}
+                        <p class="mt-1.5 text-xs text-red-500 font-medium">
+                            <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ $message }}
                         </p>
                     @enderror
 
@@ -201,10 +222,10 @@
                             id="customer_phone"
                             name="customer_phone"
                             value="{{ old('customer_phone') }}"
-                            maxlength="20"
+                            maxlength="14"
                             placeholder="Contoh: 081234567890"
-                            class="w-full rounded-xl border border-slate-200
-                                   bg-slate-50 pl-11 pr-4 py-3
+                            class="w-full rounded-xl border @error('customer_phone') border-red-500 bg-red-50/30 @else border-slate-200 bg-slate-50 @enderror
+                                   pl-11 pr-4 py-3
                                    text-sm text-slate-800
                                    outline-none transition
                                    placeholder:text-slate-400
@@ -216,8 +237,8 @@
                     </div>
 
                     @error('customer_phone')
-                        <p class="mt-1.5 text-xs text-red-500">
-                            {{ $message }}
+                        <p class="mt-1.5 text-xs text-red-500 font-medium">
+                            <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ $message }}
                         </p>
                     @enderror
 
@@ -252,10 +273,10 @@
                             id="customer_email"
                             name="customer_email"
                             value="{{ old('customer_email') }}"
-                            maxlength="255"
+                            maxlength="100"
                             placeholder="Contoh: nama@email.com"
-                            class="w-full rounded-xl border border-slate-200
-                                   bg-slate-50 pl-11 pr-4 py-3
+                            class="w-full rounded-xl border @error('customer_email') border-red-500 bg-red-50/30 @else border-slate-200 bg-slate-50 @enderror
+                                   pl-11 pr-4 py-3
                                    text-sm text-slate-800
                                    outline-none transition
                                    placeholder:text-slate-400
@@ -279,8 +300,8 @@
                     </div>
 
                     @error('customer_email')
-                        <p class="mt-1.5 text-xs text-red-500">
-                            {{ $message }}
+                        <p class="mt-1.5 text-xs text-red-500 font-medium">
+                            <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ $message }}
                         </p>
                     @enderror
 
@@ -330,7 +351,7 @@
                             name="payment_method"
                             value="cash"
                             class="peer sr-only"
-                            {{ old('payment_method') === 'cash' ? 'checked' : '' }}
+                            {{ old('payment_method', 'cash') === 'cash' ? 'checked' : '' }}
                         >
 
                         <div
@@ -421,8 +442,8 @@
 
 
                 @error('payment_method')
-                    <p class="mt-2 text-xs text-red-500">
-                        {{ $message }}
+                    <p class="mt-2 text-xs text-red-500 font-medium">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ $message }}
                     </p>
                 @enderror
 
@@ -526,7 +547,7 @@
                        shadow-lg shadow-slate-900/10
                        hover:bg-slate-800
                        active:scale-[0.99]
-                       transition"
+                       transition cursor-pointer"
             >
 
                 <i class="fa-solid fa-check mr-2"></i>
