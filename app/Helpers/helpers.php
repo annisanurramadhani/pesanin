@@ -25,3 +25,12 @@ if (!function_exists('decryptId')) {
         }
     }
 }
+
+if (!function_exists('menuImage')) {
+    function menuImage($image = null): string
+    {
+        return $image
+            ? asset('storage/' . $image)
+            : asset('assets/images/menu-default.jpg');
+    }
+}

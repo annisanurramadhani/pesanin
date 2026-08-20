@@ -222,21 +222,9 @@
                                                     </div>
 
                                                     <div class="flex gap-3 mb-3">
-                                                        @php
-                                                            $img = $menu->image_path ?? $menu->image;
-                                                        @endphp
-
-                                                        @if($img)
-                                                            <img src="{{ asset('storage/' . $img) }}"
-                                                                alt="{{ $menu->name }}"
-                                                                class="w-14 h-14 rounded-xl object-cover border border-slate-200 shrink-0">
-                                                        @else
-                                                            {{-- Ikon 2-in-1 Serbaguna (Minuman + Makanan) --}}
-                                                            <div class="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center shrink-0 shadow-sm gap-1">
-                                                                <i class="fa-solid fa-mug-hot text-xs"></i>
-                                                                <i class="fa-solid fa-utensils text-xs"></i>
-                                                            </div>
-                                                        @endif
+                                                        <img src="{{ menuImage($menu->image_path ?? $menu->image) }}"
+                                                        alt="{{ $menu->name }}"
+                                                        class="w-14 h-14 rounded-xl object-cover border border-slate-200 shrink-0">
 
                                                         <div>
                                                             <h4 class="font-extrabold text-slate-900 text-base group-hover/card:text-amber-600 transition leading-tight">

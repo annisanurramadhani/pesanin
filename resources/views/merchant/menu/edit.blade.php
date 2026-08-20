@@ -111,19 +111,12 @@
                                 <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
                                     Foto Saat Ini
                                 </label>
-                                @if($menu->image)
-                                    <div class="mb-3">
-                                        <img src="{{ asset('storage/' . $menu->image) }}"
-                                            alt="{{ $menu->name }}"
-                                            class="w-24 h-24 rounded-2xl object-cover border border-slate-200 shadow-sm">
-                                    </div>
-                                @else
-                                    <div class="mb-3 w-24 h-24 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400">
-                                        <i class="fa-solid fa-image text-xl"></i>
-                                    </div>
-                                    <p class="text-xs text-slate-400 mb-2">Belum ada foto.</p>
-                                @endif
-
+                                <div class="mb-3">
+                                    <img src="{{ menuImage($menu->image_path ?? $menu->image) }}"
+                                        alt="{{ $menu->name }}"
+                                        class="w-24 h-24 rounded-2xl object-cover border border-slate-200 shadow-sm">
+                                </div>
+                                        
                                 <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
                                     Ganti Foto
                                 </label>
