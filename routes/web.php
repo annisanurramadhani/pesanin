@@ -193,12 +193,22 @@ Route::middleware(['auth'])->prefix('merchant')->name('merchant.')->group(functi
     });
 
     // Kelola Pesanan (Owner, Kasir, Dapur)
-    Route::middleware(['role:owner,kasir,dapur'])->group(function () {
-        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/check', [OrderController::class, 'checkNew'])->name('orders.check');
-        Route::get('/orders/{encryptedId}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
-        Route::patch('/orders/{encryptedId}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
-    });
+Route::middleware(['role:owner,kasir,dapur'])->group(function () {
+    Route::get('/orders', [OrderController::class, 'index'])
+        ->name('orders.index');
+
+    Route::get('/orders/check', [OrderController::class, 'checkNew'])
+        ->name('orders.check');
+
+    Route::get('/orders/{encryptedId}/receipt', [OrderController::class, 'receipt'])
+        ->name('orders.receipt');
+
+    Route::post('/orders/{encryptedId}/receipt/email', [OrderController::class, 'sendReceipt'])
+        ->name('orders.receipt.email');
+
+    Route::patch('/orders/{encryptedId}/status', [OrderController::class, 'updateStatus'])
+        ->name('orders.status');
+});
 
     // Khusus OWNER (QR Code, Menu, Profil Kafe, & Staf)
     Route::middleware(['role:owner'])->group(function () {

@@ -6,6 +6,8 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Mail\OrderReceiptMail;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -51,7 +53,7 @@ class OrderController extends Controller
         $totalRevenue = $orders->sum(function($order) {
             if ($order->total_amount > 0) return $order->total_amount;
             if ($order->total_price > 0) return $order->total_price;
-            
+
             return $order->items->sum(function($item) {
                 return $item->subtotal ?? ($item->price * $item->quantity);
             });
@@ -60,13 +62,13 @@ class OrderController extends Controller
         $totalOrders = $orders->count();
 
         return view('merchant.orders.index', compact(
-            'orders', 
-            'filterType', 
-            'selectedDate', 
-            'selectedMonth', 
-            'selectedYear', 
-            'labelPeriode', 
-            'totalRevenue', 
+            'orders',
+            'filterType',
+            'selectedDate',
+            'selectedMonth',
+            'selectedYear',
+            'labelPeriode',
+            'totalRevenue',
             'totalOrders'
         ));
     }
@@ -84,4 +86,55 @@ class OrderController extends Controller
 
         return back()->with('success', 'Status pesanan #' . $order->order_number . ' berhasil diperbarui!');
     }
+
+
+    public function receipt($id)
+{
+    $user = Auth::user();
+    $merchantId = $user->merchant_id ?? $user->id;
+
+    $order = Order::where('merchant_id', $merchantId)
+        ->with([
+            'merchant',
+            'qrCode',
+            'items.menu',
+        ])
+        ->findOrFail($id);
+
+    return view('merchant.orders.receipt', compact('order'));
+}
+
+public function sendReceipt($id)
+{
+    $user = Auth::user();
+    $merchantId = $user->merchant_id ?? $user->id;
+
+    $order = Order::where('merchant_id', $merchantId)
+        ->with([
+            'merchant',
+            'qrCode',
+            'items.menu',
+        ])
+        ->findOrFail($id);
+
+    if (!$order->customer_email) {
+        return back()->with(
+            'error',
+            'Email pelanggan belum tersedia.'
+        );
+    }
+
+    Mail::to($order->customer_email)
+        ->send(new OrderReceiptMail($order));
+
+    $order->update([
+        'receipt_sent_at' => now(),
+    ]);
+
+    return back()->with(
+        'success',
+        'Struk berhasil dikirim ke email pelanggan.'
+    );
+}
+
 }
