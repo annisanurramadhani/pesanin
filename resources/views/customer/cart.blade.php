@@ -159,6 +159,7 @@
                         @endphp
 
                         <div
+                            data-cart-item="{{ $menu->id }}"
                             class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition overflow-hidden">
 
                             <div class="p-4">
@@ -237,7 +238,7 @@
                                             <form
                                                 action="{{ route('customer.cart.update', $qrCode->code) }}"
                                                 method="POST"
-                                                class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">
+                                                class="quantity-form inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">
 
                                                 @csrf
                                                 @method('PATCH')
@@ -246,28 +247,26 @@
                                                     name="menu_id"
                                                     value="{{ $menu->id }}">
 
-
-                                                <button type="submit"
+                                                <input type="hidden"
                                                     name="quantity"
-                                                    value="{{ max(0, $quantity - 1) }}"
+                                                    value="{{ $quantity }}">
+
+                                                <button type="button"
+                                                    data-action="minus"
                                                     class="w-8 h-8 rounded-lg text-slate-600 hover:bg-white hover:shadow-sm flex items-center justify-center transition">
 
                                                     <i class="fa-solid fa-minus text-[10px]"></i>
 
                                                 </button>
 
-
                                                 <span
+                                                    data-quantity
                                                     class="w-8 text-center text-xs sm:text-sm font-extrabold text-slate-800">
-
                                                     {{ $quantity }}
-
                                                 </span>
 
-
-                                                <button type="submit"
-                                                    name="quantity"
-                                                    value="{{ $quantity + 1 }}"
+                                                <button type="button"
+                                                    data-action="plus"
                                                     class="w-8 h-8 rounded-lg text-slate-600 hover:bg-white hover:shadow-sm flex items-center justify-center transition">
 
                                                     <i class="fa-solid fa-plus text-[10px]"></i>
@@ -284,7 +283,8 @@
                                                     Subtotal
                                                 </p>
 
-                                                <p class="text-sm sm:text-base font-extrabold text-slate-900 mt-0.5">
+                                                <p data-subtotal
+                                                    class="text-sm sm:text-base font-extrabold text-slate-900 mt-0.5">
                                                     Rp {{ number_format($subtotal, 0, ',', '.') }}
                                                 </p>
 
@@ -351,7 +351,8 @@
                                         Total Pesanan
                                     </span>
 
-                                    <span class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                                    <span id="cart-total"
+                                        class="text-xl sm:text-2xl font-extrabold text-slate-900">
                                         Rp {{ number_format($total, 0, ',', '.') }}
                                     </span>
 
@@ -386,5 +387,102 @@
         </main>
 
     </div>
+<script>
+    document.querySelectorAll('.quantity-form').forEach(form => {
+        const minusButton = form.querySelector('[data-action="minus"]');
+        const plusButton = form.querySelector('[data-action="plus"]');
+        const quantityInput = form.querySelector('[name="quantity"]');
+        const quantityText = form.querySelector('[data-quantity]');
+        const cartItem = form.closest('[data-cart-item]');
+        const subtotalElement = cartItem.querySelector('[data-subtotal]');
 
+        async function updateQuantity(quantity) {
+            if (quantity < 0) return;
+
+            minusButton.disabled = true;
+            plusButton.disabled = true;
+
+            const formData = new FormData(form);
+            formData.set('quantity', quantity);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Stok Tidak Mencukupi',
+                        text: data.message,
+                        confirmButtonText: 'Mengerti',
+                        confirmButtonColor: '#f59e0b',
+                        background: '#ffffff',
+                        color: '#111827',
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            confirmButton: 'rounded-xl px-5 py-2.5 font-bold'
+                        }
+                    });
+
+                    return;
+                }
+
+                if (data.removed) {
+                    cartItem.remove();
+                    window.location.reload();
+                    return;
+                }
+
+                quantityInput.value = data.quantity;
+                quantityText.textContent = data.quantity;
+
+                subtotalElement.textContent =
+                    'Rp ' + new Intl.NumberFormat('id-ID').format(data.subtotal);
+
+                document.querySelector('#cart-total').textContent =
+                    'Rp ' + new Intl.NumberFormat('id-ID').format(data.total);
+
+            } 
+            catch (error) {
+                console.error(error);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan',
+                    text: 'Gagal mengubah jumlah menu. Silakan coba lagi.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#111827',
+                    background: '#ffffff',
+                    color: '#111827',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-5 py-2.5 font-bold'
+                    }
+                });
+            }
+            finally {
+                minusButton.disabled = false;
+                plusButton.disabled = false;
+            }
+        }
+
+        minusButton.addEventListener('click', () => {
+            const quantity = parseInt(quantityInput.value);
+            updateQuantity(quantity - 1);
+        });
+
+        plusButton.addEventListener('click', () => {
+            const quantity = parseInt(quantityInput.value);
+            updateQuantity(quantity + 1);
+        });
+    });
+</script>
 @endsection
