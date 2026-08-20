@@ -1,25 +1,69 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+
+    <div class="mb-7">
+        <h2 class="text-2xl font-extrabold text-[#111827]">
+            Lupa Password?
+        </h2>
+
+        <p class="mt-1.5 text-sm text-slate-500">
+            Masukkan email yang terdaftar untuk mendapatkan tautan
+            pengaturan ulang password.
+        </p>
     </div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form method="POST" action="{{ route('password.email') }}">
+    <form
+        method="POST"
+        action="{{ route('password.email') }}"
+        class="space-y-5"
+    >
         @csrf
 
-        <!-- Email Address -->
+        <!-- Email -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            <x-input-label
+                for="email"
+                value="Email"
+                class="mb-2 text-sm font-bold text-slate-700"
+            />
+
+            <x-text-input
+                id="email"
+                type="email"
+                name="email"
+                :value="old('email')"
+                required
+                autofocus
+                autocomplete="email"
+                placeholder="Masukkan email terdaftar"
+                class="block w-full rounded-xl border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+            />
+
+            <x-input-error
+                :messages="$errors->get('email')"
+                class="mt-2"
+            />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
+        <!-- Button -->
+        <div class="flex items-center justify-between gap-4 pt-3">
+
+            <a
+                href="{{ route('login') }}"
+                class="text-sm font-semibold text-slate-600 underline underline-offset-4 hover:text-amber-600 transition"
+            >
+                Kembali ke Login
+            </a>
+
+            <button
+                type="submit"
+                class="flex items-center gap-2 rounded-xl bg-[#111827] px-6 py-3 text-sm font-extrabold text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+            >
+                Kirim Tautan
+                <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+
         </div>
+
     </form>
+
 </x-guest-layout>

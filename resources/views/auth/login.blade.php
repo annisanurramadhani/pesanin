@@ -48,7 +48,7 @@
                     class="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500">
 
                 <span class="text-sm font-medium text-slate-600">
-                    {{ __('Remember me') }}
+                    {{ __('Ingat Saya') }}
                 </span>
 
             </label>
@@ -59,13 +59,13 @@
             @if (Route::has('password.request'))
                 <a href="{{ route('password.request') }}"
                     class="text-sm font-semibold text-slate-600 underline underline-offset-4 hover:text-amber-600 transition">
-                    {{ __('Forgot your password?') }}
+                    {{ __('Lupa Password?') }}
                 </a>
             @endif
 
             <button type="submit"
                 class="flex items-center gap-2 rounded-xl bg-[#111827] px-6 py-3 text-sm font-extrabold text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
-                {{ __('Log in') }}
+                {{ __('Masuk') }}
 
                 <i class="fa-solid fa-arrow-right text-xs"></i>
             </button>
@@ -73,4 +73,17 @@
         </div>
 
     </form>
+    @if (session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: @json(session('success')),
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#111827'
+            });
+        });
+    </script>
+@endif
 </x-guest-layout>
