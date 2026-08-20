@@ -165,6 +165,18 @@
 
         </section>
 
-    </div>
+        {{-- ======================================================
+                FOOTER
+            ======================================================= --}}
+            <footer class="border-t border-slate-200 pt-6 pb-8 text-center">
 
+                <p class="text-[11px] text-slate-400">
+                    Powered by
+                    <span class="font-extrabold text-slate-500">
+                        PesanIn
+                    </span>
+                </p>
+            </footer>
+
+    </div>
 @endsection

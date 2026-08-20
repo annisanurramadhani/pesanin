@@ -1,34 +1,32 @@
 @extends('layouts.customer')
 
+@section('disableSweetAlert')
+@endsection
+
 @section('content')
 
-    <div class="min-h-screen bg-[#F3F4F8]">
+    <div class="min-h-screen bg-slate-50">
 
         {{-- ==========================================================
             HEADER
         =========================================================== --}}
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-20">
+        <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
 
-            <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6">
 
-                <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center justify-between gap-4 py-4">
 
                     {{-- Merchant Info --}}
                     <div class="min-w-0">
 
-                        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate">
+                        <h1 class="truncate text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
                             {{ $merchant->name ?? 'PesanIn' }}
                         </h1>
 
-                        <div class="flex items-center gap-2 mt-1">
-
-                            <i class="fa-solid fa-location-dot text-xs text-slate-400"></i>
-
-                            <p class="text-xs sm:text-sm text-slate-500 truncate">
-                                {{ $qrCode->name }}
-                            </p>
-
-                        </div>
+                        <p class="mt-1 truncate text-xs text-slate-500 sm:text-sm">
+                            <i class="fa-solid fa-location-dot mr-1 text-[11px] text-amber-500"></i>
+                            {{ $qrCode->name }}
+                        </p>
 
                     </div>
 
@@ -36,7 +34,7 @@
                     {{-- Cart --}}
                     <a
                         href="{{ route('customer.cart', $qrCode->code) }}"
-                        class="relative flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition shadow-sm"
+                        class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-400 active:scale-95"
                     >
 
                         <i class="fa-solid fa-cart-shopping text-sm"></i>
@@ -57,7 +55,7 @@
         {{-- ==========================================================
             MAIN
         =========================================================== --}}
-        <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <main class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
 
 
             {{-- ======================================================
@@ -65,20 +63,47 @@
             ======================================================= --}}
             @if (session('success'))
 
-                <div class="mb-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5">
+                <div
+                    id="successNotification"
+                    class="fixed left-1/2 top-5 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2"
+                >
 
-                    <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-                        <i class="fa-solid fa-check text-sm text-emerald-600"></i>
-                    </div>
+                    <div
+                        class="flex items-center gap-3 rounded-2xl border border-emerald-200/70 bg-emerald-50/90 px-4 py-3.5 shadow-lg shadow-emerald-900/10 backdrop-blur-md"
+                    >
 
-                    <div class="pt-0.5">
-                        <p class="text-sm font-semibold text-emerald-800">
-                            Berhasil
-                        </p>
+                        {{-- Icon --}}
+                        <div
+                            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100/90 text-emerald-600"
+                        >
+                            <i class="fa-solid fa-check text-sm"></i>
+                        </div>
 
-                        <p class="text-xs text-emerald-700 mt-0.5">
-                            {{ session('success') }}
-                        </p>
+
+                        {{-- Message --}}
+                        <div class="min-w-0 flex-1">
+
+                            <p class="text-sm font-extrabold text-emerald-800">
+                                Berhasil
+                            </p>
+
+                            <p class="mt-0.5 text-xs leading-5 text-emerald-700">
+                                {{ session('success') }}
+                            </p>
+
+                        </div>
+
+
+                        {{-- Close --}}
+                        <button
+                            type="button"
+                            onclick="closeSuccessNotification()"
+                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-emerald-500 transition hover:bg-emerald-100 hover:text-emerald-700"
+                            aria-label="Tutup notifikasi"
+                        >
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+
                     </div>
 
                 </div>
@@ -88,20 +113,24 @@
 
             @if (session('error'))
 
-                <div class="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5">
+                <div class="mb-8 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-4">
 
-                    <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-red-100">
-                        <i class="fa-solid fa-exclamation text-sm text-red-600"></i>
+                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+
+                        <i class="fa-solid fa-exclamation text-sm"></i>
+
                     </div>
 
                     <div class="pt-0.5">
-                        <p class="text-sm font-semibold text-red-800">
+
+                        <p class="text-sm font-extrabold text-red-800">
                             Tidak dapat menambahkan menu
                         </p>
 
-                        <p class="text-xs text-red-700 mt-0.5">
+                        <p class="mt-0.5 text-xs leading-5 text-red-700">
                             {{ session('error') }}
                         </p>
+
                     </div>
 
                 </div>
@@ -110,23 +139,52 @@
 
 
             {{-- ======================================================
-                INTRO
+                HERO / INTRO
             ======================================================= --}}
-            <div class="mb-8">
+            <section class="pb-8 pt-4 text-center sm:pb-10">
 
-                <p class="text-xs font-bold uppercase tracking-widest text-slate-400">
+                <span
+                    class="inline-flex rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-[10px] font-extrabold uppercase tracking-widest text-amber-600 sm:text-xs"
+                >
                     Menu
-                </p>
+                </span>
 
-                <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                <h2 class="mx-auto mt-4 max-w-2xl text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
                     Mau pesan apa hari ini?
                 </h2>
 
-                <p class="mt-2 text-sm text-slate-500">
+                <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
                     Pilih menu favoritmu dan tambahkan ke keranjang.
                 </p>
 
-            </div>
+            </section>
+
+
+            {{-- ======================================================
+                CATEGORY NAVIGATION
+            ======================================================= --}}
+            @if ($categories->count() > 0)
+
+                <div class="mb-8 overflow-x-auto pb-1">
+
+                    <div class="flex min-w-max items-center justify-center gap-2">
+
+                        @foreach ($categories as $category)
+
+                            <a
+                                href="#category-{{ $category->id }}"
+                                class="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 shadow-sm transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600"
+                            >
+                                {{ $category->name }}
+                            </a>
+
+                        @endforeach
+
+                    </div>
+
+                </div>
+
+            @endif
 
 
             {{-- ======================================================
@@ -134,22 +192,27 @@
             ======================================================= --}}
             @forelse ($categories as $category)
 
-                <section class="mb-10">
+                <section
+                    id="category-{{ $category->id }}"
+                    class="mb-10 scroll-mt-28"
+                >
 
                     {{-- Category Header --}}
-                    <div class="flex items-center gap-3 mb-4">
+                    <div class="mb-5 flex items-center gap-3">
 
-                        <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+
                             <i class="fa-solid fa-utensils text-sm"></i>
+
                         </div>
 
                         <div>
 
-                            <h2 class="text-lg sm:text-xl font-bold text-slate-900">
+                            <h2 class="text-lg font-black text-slate-900 sm:text-xl">
                                 {{ $category->name }}
                             </h2>
 
-                            <p class="text-xs text-slate-400 mt-0.5">
+                            <p class="mt-0.5 text-xs text-slate-500">
                                 {{ $category->menus->count() }} menu
                             </p>
 
@@ -159,51 +222,31 @@
 
 
                     {{-- Menu Grid --}}
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
                         @forelse ($category->menus as $menu)
 
-                            <div class="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 transition duration-200">
-
+                            <article
+                                class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                            >
 
                                 {{-- ==================================================
                                     IMAGE
                                 =================================================== --}}
-                                <div class="relative h-48 sm:h-52 overflow-hidden bg-slate-100">
+                                <div class="relative h-48 overflow-hidden bg-slate-100 sm:h-52">
 
-                                    @if ($menu->image)
-
-                                        <img
-                                            src="{{ asset('storage/' . $menu->image) }}"
-                                            alt="{{ $menu->name }}"
-                                            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                                        >
-
-                                    @else
-
-                                        <div class="w-full h-full flex flex-col items-center justify-center bg-slate-100">
-
-                                            <div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-
-                                                <i class="fa-solid fa-utensils text-xl text-slate-300"></i>
-
-                                            </div>
-
-                                            <span class="text-xs text-slate-400 mt-2">
-                                                Tidak ada gambar
-                                            </span>
-
-                                        </div>
-
-                                    @endif
-
+                                    <img
+                                        src="{{ menuImage($menu->image_path ?? $menu->image) }}"
+                                        alt="{{ $menu->name }}"
+                                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                    >
 
                                     {{-- Stock Badge --}}
                                     @if ($menu->stock > 0)
 
-                                        <div class="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur px-2.5 py-1 text-[10px] font-bold text-emerald-600 shadow-sm">
+                                        <div class="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-extrabold text-emerald-600 shadow-sm backdrop-blur">
 
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
 
                                             Tersedia
 
@@ -211,9 +254,9 @@
 
                                     @else
 
-                                        <div class="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur px-2.5 py-1 text-[10px] font-bold text-red-500 shadow-sm">
+                                        <div class="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-extrabold text-red-500 shadow-sm backdrop-blur">
 
-                                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                            <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
 
                                             Habis
 
@@ -227,38 +270,40 @@
                                 {{-- ==================================================
                                     CONTENT
                                 =================================================== --}}
-                                <div class="p-4 sm:p-5">
+                                <div class="flex flex-1 flex-col p-5">
 
-                                    <h3 class="font-bold text-slate-900 text-base sm:text-lg leading-snug">
+                                    {{-- Menu Name --}}
+                                    <h3 class="text-base font-black leading-snug text-slate-900 sm:text-lg">
                                         {{ $menu->name }}
                                     </h3>
 
 
+                                    {{-- Description --}}
                                     @if ($menu->description)
 
-                                        <p class="text-xs sm:text-sm text-slate-500 mt-2 line-clamp-2 leading-relaxed">
-                                            {{ $menu->description }}
+                                        <p class="mt-2 line-clamp-2 text-xs leading-5 text-slate-500 sm:text-sm">
+                                            {{ strip_tags($menu->description ?? '') }}
                                         </p>
 
                                     @else
 
-                                        <p class="text-xs sm:text-sm text-slate-400 mt-2 italic">
+                                        <p class="mt-2 text-xs italic text-slate-400 sm:text-sm">
                                             Tidak ada deskripsi.
                                         </p>
 
                                     @endif
 
 
-                                    {{-- Price + Add --}}
-                                    <div class="flex items-end justify-between gap-3 mt-5">
+                                    {{-- Price + Button --}}
+                                    <div class="mt-auto flex items-end justify-between gap-3 pt-6">
 
                                         <div>
 
-                                            <p class="text-[10px] uppercase tracking-wider font-semibold text-slate-400">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                                                 Harga
                                             </p>
 
-                                            <p class="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5">
+                                            <p class="mt-0.5 text-base font-black text-slate-900 sm:text-lg">
                                                 Rp {{ number_format($menu->price, 0, ',', '.') }}
                                             </p>
 
@@ -271,8 +316,8 @@
                                             <form
                                                 action="{{ route('customer.cart.add', $qrCode->code) }}"
                                                 method="POST"
+                                                class="add-to-cart-form"
                                             >
-
                                                 @csrf
 
                                                 <input
@@ -289,15 +334,11 @@
 
                                                 <button
                                                     type="submit"
-                                                    class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 active:scale-95 transition"
+                                                    class="add-to-cart-btn inline-flex items-center gap-2 rounded-xl bg-amber-500 px-3.5 py-2.5 text-xs font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-400 active:scale-95 sm:text-sm"
                                                 >
-
                                                     <i class="fa-solid fa-plus text-[10px]"></i>
-
                                                     Tambah
-
                                                 </button>
-
                                             </form>
 
                                         @else
@@ -305,7 +346,7 @@
                                             <button
                                                 type="button"
                                                 disabled
-                                                class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-100 text-slate-400 text-xs sm:text-sm font-bold cursor-not-allowed"
+                                                class="inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-slate-100 px-3.5 py-2.5 text-xs font-extrabold text-slate-400 sm:text-sm"
                                             >
 
                                                 <i class="fa-solid fa-ban text-[10px]"></i>
@@ -320,25 +361,25 @@
 
                                 </div>
 
-                            </div>
+                            </article>
 
                         @empty
 
                             <div class="sm:col-span-2 lg:col-span-3">
 
-                                <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+                                <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
 
-                                    <div class="w-12 h-12 mx-auto rounded-xl bg-slate-100 flex items-center justify-center">
+                                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
 
-                                        <i class="fa-solid fa-utensils text-slate-400"></i>
+                                        <i class="fa-solid fa-utensils text-xl"></i>
 
                                     </div>
 
-                                    <p class="mt-3 text-sm font-semibold text-slate-700">
+                                    <h3 class="mt-4 text-sm font-extrabold text-slate-800">
                                         Belum ada menu
-                                    </p>
+                                    </h3>
 
-                                    <p class="mt-1 text-xs text-slate-400">
+                                    <p class="mx-auto mt-1 max-w-sm text-xs leading-5 text-slate-500">
                                         Belum ada menu tersedia pada kategori ini.
                                     </p>
 
@@ -357,19 +398,19 @@
                 {{-- ======================================================
                     NO CATEGORY
                 ======================================================= --}}
-                <div class="bg-white rounded-2xl border border-slate-200 px-6 py-14 text-center shadow-sm">
+                <div class="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
 
-                    <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center">
+                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 text-amber-500">
 
-                        <i class="fa-solid fa-utensils text-2xl text-slate-400"></i>
+                        <i class="fa-solid fa-utensils text-2xl"></i>
 
                     </div>
 
-                    <h2 class="mt-4 text-lg font-bold text-slate-800">
+                    <h2 class="mt-5 text-lg font-black text-slate-900">
                         Menu belum tersedia
                     </h2>
 
-                    <p class="mt-2 text-sm text-slate-500 max-w-sm mx-auto">
+                    <p class="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
                         Saat ini belum ada kategori atau menu yang tersedia.
                     </p>
 
@@ -381,19 +422,25 @@
             {{-- ======================================================
                 FOOTER
             ======================================================= --}}
-            <div class="pt-4 pb-8 text-center">
+            <footer class="border-t border-slate-200 pt-6 pb-8 text-center">
 
                 <p class="text-[11px] text-slate-400">
                     Powered by
-                    <span class="font-bold text-slate-500">
+                    <span class="font-extrabold text-slate-500">
                         PesanIn
                     </span>
                 </p>
 
-            </div>
+            </footer>
 
         </main>
 
     </div>
 
 @endsection
+@push('scripts')
+    @vite('resources/js/customer/menu.js')
+@endpush
+@push('styles')
+    @vite('resources/css/customer/menu.css')
+@endpush

@@ -37,7 +37,9 @@
 
     @yield('body')
 
+    @if (!View::hasSection('disableSweetAlert'))
     @include('components.sweetalert')
+    @endif
 
     @stack('scripts')
 
