@@ -1,344 +1,399 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.customer')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu - {{ $merchant->name }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
+@section('content')
 
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
-</head>
+    <div class="min-h-screen bg-[#F3F4F8]">
 
-<body class="bg-slate-100 min-h-screen text-slate-800">
+        {{-- ==========================================================
+            HEADER
+        =========================================================== --}}
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-20">
 
-    <div class="max-w-md mx-auto bg-white min-h-screen shadow-2xl relative pb-36">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4">
 
-        <form action="{{ route('customer.checkout', $qrCode->code) }}" method="POST" id="orderForm">
-            @csrf
+                <div class="flex items-center justify-between gap-4">
 
-            <!-- ================= STICKY HEADER ================= -->
-            <div class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+                    {{-- Merchant Info --}}
+                    <div class="min-w-0">
 
-                <!-- Merchant Branding -->
-                <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center font-black text-slate-950 text-lg shadow">
-                            <i class="fa-solid fa-mug-hot"></i>
-                        </div>
-                        <div>
-                            <h1 class="font-extrabold text-base leading-tight">{{ $merchant->name }}</h1>
-                            <span class="inline-block text-amber-400 text-[10px] font-bold">
-                                <i class="fa-solid fa-chair mr-1"></i>{{ $qrCode->name }} • Self Order
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate">
+                            {{ $merchant->name ?? 'PesanIn' }}
+                        </h1>
 
-                <!-- FORM PEMESAN (NAMA, WA, EMAIL - OPSIONAL) & METODE PEMBAYARAN -->
-                <div class="p-3 bg-slate-50 border-b border-slate-100 space-y-2">
+                        <div class="flex items-center gap-2 mt-1">
 
-                    <!-- Input Nama Pemesan (Opsional) -->
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-3 flex items-center text-amber-500 text-xs">
-                            <i class="fa-solid fa-user"></i>
-                        </span>
-                        <input type="text" name="customer_name"
-                            class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none placeholder:text-slate-400"
-                            placeholder="Masukkan nama pemesan... (Opsional)">
-                    </div>
+                            <i class="fa-solid fa-location-dot text-xs text-slate-400"></i>
 
-                    <!-- Input No. WhatsApp (Opsional) -->
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-3 flex items-center text-amber-500 text-xs">
-                            <i class="fa-brands fa-whatsapp"></i>
-                        </span>
-                        <input type="tel" name="customer_phone"
-                            class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none placeholder:text-slate-400"
-                            placeholder="No. WhatsApp (misal: 08123456789) (Opsional)">
-                    </div>
-
-                    <!-- Input Email (Opsional) -->
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-3 flex items-center text-amber-500 text-xs">
-                            <i class="fa-solid fa-envelope"></i>
-                        </span>
-                        <input type="email" name="customer_email"
-                            class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none placeholder:text-slate-400"
-                            placeholder="Email (Opsional)">
-                    </div>
-
-                    <!-- PILIHAN METODE PEMBAYARAN -->
-                    <div class="pt-1">
-                        <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">
-                            Pilih Pembayaran:
-                        </label>
-                        <div class="grid grid-cols-2 gap-2">
-
-                            <!-- Opsi QRIS -->
-                            <label
-                                class="relative flex items-center p-2 rounded-xl border border-amber-500 bg-amber-50 cursor-pointer transition shadow-sm"
-                                id="label-qris">
-                                <input type="radio" name="payment_method" value="qris" checked
-                                    onclick="togglePayment('qris')" class="sr-only">
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-qrcode text-amber-600 text-sm"></i>
-                                    <div>
-                                        <p class="text-[11px] font-black text-slate-900 leading-none">QRIS</p>
-                                        <p class="text-[9px] text-slate-500 font-medium">Scan Langsung</p>
-                                    </div>
-                                </div>
-                            </label>
-
-                            <!-- Opsi Kasir -->
-                            <!-- Opsi Kasir -->
-                            <label
-                                class="relative flex items-center p-2 rounded-xl border border-slate-200 bg-white cursor-pointer transition"
-                                id="label-kasir">
-                                <input type="radio" name="payment_method" value="cash"
-                                    onclick="togglePayment('kasir')" class="sr-only">
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-cash-register text-slate-400 text-sm" id="icon-kasir"></i>
-                                    <div>
-                                        <p class="text-[11px] font-black text-slate-900 leading-none">Bayar Kasir</p>
-                                        <p class="text-[9px] text-slate-500 font-medium">Tunai / EDC</p>
-                                    </div>
-                                </div>
-                            </label>
+                            <p class="text-xs sm:text-sm text-slate-500 truncate">
+                                {{ $qrCode->name }}
+                            </p>
 
                         </div>
+
                     </div>
+
+
+                    {{-- Cart --}}
+                    <a
+                        href="{{ route('customer.cart', $qrCode->code) }}"
+                        class="relative flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition shadow-sm"
+                    >
+
+                        <i class="fa-solid fa-cart-shopping text-sm"></i>
+
+                        <span class="hidden sm:inline">
+                            Keranjang
+                        </span>
+
+                    </a>
 
                 </div>
 
-                <!-- TAB KATEGORI MENU -->
-                <div class="flex items-center gap-2 px-3 py-2 overflow-x-auto no-scrollbar bg-white">
-                    <button type="button" onclick="filterCategory('all')" id="tab-all"
-                        class="category-tab px-4 py-1.5 bg-amber-500 text-slate-950 font-black rounded-full text-xs whitespace-nowrap transition shadow-sm">
-                        Semua
-                    </button>
-                    @foreach ($categories as $category)
-                        <button type="button" onclick="filterCategory({{ $category->id }})"
-                            id="tab-{{ $category->id }}"
-                            class="category-tab px-4 py-1.5 bg-slate-100 text-slate-600 font-bold rounded-full text-xs whitespace-nowrap transition hover:bg-slate-200">
-                            {{ $category->name }}
-                        </button>
-                    @endforeach
-                </div>
             </div>
 
-            <!-- ================= DAFTAR MENU ================= -->
-            <div class="p-4 space-y-6">
-                @if (session('error'))
-                    <div class="p-3 bg-rose-100 text-rose-800 text-xs font-bold rounded-xl border border-rose-200">
-                        {{ session('error') }}
-                    </div>
-                @endif
+        </header>
 
-                @foreach ($categories as $category)
-                    @php $categoryMenus = $menus->where('category_id', $category->id); @endphp
-                    @if ($categoryMenus->count() > 0)
-                        <div class="category-group space-y-3" id="category-group-{{ $category->id }}">
-                            <h2
-                                class="font-black text-slate-900 text-xs tracking-wider border-l-4 border-amber-500 pl-2 uppercase">
+
+        {{-- ==========================================================
+            MAIN
+        =========================================================== --}}
+        <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+
+            {{-- ======================================================
+                FLASH MESSAGE
+            ======================================================= --}}
+            @if (session('success'))
+
+                <div class="mb-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5">
+
+                    <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+                        <i class="fa-solid fa-check text-sm text-emerald-600"></i>
+                    </div>
+
+                    <div class="pt-0.5">
+                        <p class="text-sm font-semibold text-emerald-800">
+                            Berhasil
+                        </p>
+
+                        <p class="text-xs text-emerald-700 mt-0.5">
+                            {{ session('success') }}
+                        </p>
+                    </div>
+
+                </div>
+
+            @endif
+
+
+            @if (session('error'))
+
+                <div class="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5">
+
+                    <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-red-100">
+                        <i class="fa-solid fa-exclamation text-sm text-red-600"></i>
+                    </div>
+
+                    <div class="pt-0.5">
+                        <p class="text-sm font-semibold text-red-800">
+                            Tidak dapat menambahkan menu
+                        </p>
+
+                        <p class="text-xs text-red-700 mt-0.5">
+                            {{ session('error') }}
+                        </p>
+                    </div>
+
+                </div>
+
+            @endif
+
+
+            {{-- ======================================================
+                INTRO
+            ======================================================= --}}
+            <div class="mb-8">
+
+                <p class="text-xs font-bold uppercase tracking-widest text-slate-400">
+                    Menu
+                </p>
+
+                <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                    Mau pesan apa hari ini?
+                </h2>
+
+                <p class="mt-2 text-sm text-slate-500">
+                    Pilih menu favoritmu dan tambahkan ke keranjang.
+                </p>
+
+            </div>
+
+
+            {{-- ======================================================
+                CATEGORIES
+            ======================================================= --}}
+            @forelse ($categories as $category)
+
+                <section class="mb-10">
+
+                    {{-- Category Header --}}
+                    <div class="flex items-center gap-3 mb-4">
+
+                        <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+                            <i class="fa-solid fa-utensils text-sm"></i>
+                        </div>
+
+                        <div>
+
+                            <h2 class="text-lg sm:text-xl font-bold text-slate-900">
                                 {{ $category->name }}
                             </h2>
 
-                            <div class="grid grid-cols-1 gap-3">
-                                @foreach ($categoryMenus as $menu)
-                                    @php $isHabis = ($menu->is_available ?? true) == false || ($menu->stock ?? 0) <= 0; @endphp
-                                    <div
-                                        class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3 transition {{ $isHabis ? 'opacity-50 grayscale select-none' : '' }}">
+                            <p class="text-xs text-slate-400 mt-0.5">
+                                {{ $category->menus->count() }} menu
+                            </p>
 
-                                        <!-- Gambar Menu / Icon Fallback -->
-                                        <div
-                                            class="w-16 h-16 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0 relative border border-slate-100">
-                                            @if (!empty($menu->image_url) || !empty($menu->image))
-                                                <img src="{{ asset('storage/' . ($menu->image_url ?? $menu->image)) }}"
-                                                    alt="{{ $menu->name }}" class="w-full h-full object-cover">
-                                            @else
-                                                <div
-                                                    class="w-full h-full flex items-center justify-center text-slate-300">
-                                                    <i class="fa-solid fa-utensils text-lg"></i>
-                                                </div>
-                                            @endif
-                                            @if ($isHabis)
-                                                <div
-                                                    class="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
-                                                    <span
-                                                        class="bg-rose-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">Habis</span>
-                                                </div>
-                                            @endif
-                                        </div>
-
-                                        <!-- Detail Nama & Harga -->
-                                        <div class="flex-1 min-w-0">
-                                            <h3 class="font-black text-slate-900 text-xs truncate">{{ $menu->name }}
-                                            </h3>
-                                            <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5 leading-tight">
-                                                {{ $menu->description ?? 'Sensasi nikmat siap disajikan.' }}</p>
-                                            <div class="flex items-center gap-2 mt-1">
-                                                <span class="font-black text-amber-600 text-xs">Rp
-                                                    {{ number_format($menu->price, 0, ',', '.') }}</span>
-                                                @if (!$isHabis && isset($menu->stock))
-                                                    <span
-                                                        class="text-[9px] font-extrabold text-slate-400 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-md">Sisa:
-                                                        {{ $menu->stock }}</span>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        <!-- Pengatur Kuantitas -->
-                                        @if ($isHabis)
-                                            <div class="flex-shrink-0">
-                                                <span
-                                                    class="text-[9px] font-black text-rose-500 bg-rose-50 px-2 py-1.5 rounded-lg border border-rose-100">KOSONG</span>
-                                            </div>
-                                        @else
-                                            <div
-                                                class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl flex-shrink-0">
-                                                <button type="button"
-                                                    onclick="updateQty({{ $menu->id }}, -1, {{ $menu->price }}, {{ $menu->stock ?? 999 }})"
-                                                    class="w-6 h-6 bg-white text-slate-800 font-black rounded-lg shadow-sm flex items-center justify-center text-xs active:scale-95 transition">-</button>
-                                                <span id="qty-{{ $menu->id }}"
-                                                    class="font-black text-xs w-4 text-center">0</span>
-                                                <button type="button"
-                                                    onclick="updateQty({{ $menu->id }}, 1, {{ $menu->price }}, {{ $menu->stock ?? 999 }})"
-                                                    class="w-6 h-6 bg-amber-500 text-slate-950 font-black rounded-lg shadow-sm flex items-center justify-center text-xs active:scale-95 transition">+</button>
-                                            </div>
-                                            <div id="inputs-{{ $menu->id }}"></div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            </div>
                         </div>
-                    @endif
-                @endforeach
-            </div>
 
-            <!-- Bottom Navigation -->
-            <div
-                class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-200 p-4 shadow-2xl flex items-center justify-between z-50">
-                <div>
-                    <span class="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">Total
-                        Pesanan</span>
-                    <span id="totalDisplay" class="font-black text-slate-900 text-base">Rp 0</span>
+                    </div>
+
+
+                    {{-- Menu Grid --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+
+                        @forelse ($category->menus as $menu)
+
+                            <div class="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 transition duration-200">
+
+
+                                {{-- ==================================================
+                                    IMAGE
+                                =================================================== --}}
+                                <div class="relative h-48 sm:h-52 overflow-hidden bg-slate-100">
+
+                                    @if ($menu->image)
+
+                                        <img
+                                            src="{{ asset('storage/' . $menu->image) }}"
+                                            alt="{{ $menu->name }}"
+                                            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                                        >
+
+                                    @else
+
+                                        <div class="w-full h-full flex flex-col items-center justify-center bg-slate-100">
+
+                                            <div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+
+                                                <i class="fa-solid fa-utensils text-xl text-slate-300"></i>
+
+                                            </div>
+
+                                            <span class="text-xs text-slate-400 mt-2">
+                                                Tidak ada gambar
+                                            </span>
+
+                                        </div>
+
+                                    @endif
+
+
+                                    {{-- Stock Badge --}}
+                                    @if ($menu->stock > 0)
+
+                                        <div class="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur px-2.5 py-1 text-[10px] font-bold text-emerald-600 shadow-sm">
+
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+
+                                            Tersedia
+
+                                        </div>
+
+                                    @else
+
+                                        <div class="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur px-2.5 py-1 text-[10px] font-bold text-red-500 shadow-sm">
+
+                                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+
+                                            Habis
+
+                                        </div>
+
+                                    @endif
+
+                                </div>
+
+
+                                {{-- ==================================================
+                                    CONTENT
+                                =================================================== --}}
+                                <div class="p-4 sm:p-5">
+
+                                    <h3 class="font-bold text-slate-900 text-base sm:text-lg leading-snug">
+                                        {{ $menu->name }}
+                                    </h3>
+
+
+                                    @if ($menu->description)
+
+                                        <p class="text-xs sm:text-sm text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                                            {{ $menu->description }}
+                                        </p>
+
+                                    @else
+
+                                        <p class="text-xs sm:text-sm text-slate-400 mt-2 italic">
+                                            Tidak ada deskripsi.
+                                        </p>
+
+                                    @endif
+
+
+                                    {{-- Price + Add --}}
+                                    <div class="flex items-end justify-between gap-3 mt-5">
+
+                                        <div>
+
+                                            <p class="text-[10px] uppercase tracking-wider font-semibold text-slate-400">
+                                                Harga
+                                            </p>
+
+                                            <p class="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5">
+                                                Rp {{ number_format($menu->price, 0, ',', '.') }}
+                                            </p>
+
+                                        </div>
+
+
+                                        {{-- Add Cart --}}
+                                        @if ($menu->stock > 0)
+
+                                            <form
+                                                action="{{ route('customer.cart.add', $qrCode->code) }}"
+                                                method="POST"
+                                            >
+
+                                                @csrf
+
+                                                <input
+                                                    type="hidden"
+                                                    name="menu_id"
+                                                    value="{{ $menu->id }}"
+                                                >
+
+                                                <input
+                                                    type="hidden"
+                                                    name="quantity"
+                                                    value="1"
+                                                >
+
+                                                <button
+                                                    type="submit"
+                                                    class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 active:scale-95 transition"
+                                                >
+
+                                                    <i class="fa-solid fa-plus text-[10px]"></i>
+
+                                                    Tambah
+
+                                                </button>
+
+                                            </form>
+
+                                        @else
+
+                                            <button
+                                                type="button"
+                                                disabled
+                                                class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-100 text-slate-400 text-xs sm:text-sm font-bold cursor-not-allowed"
+                                            >
+
+                                                <i class="fa-solid fa-ban text-[10px]"></i>
+
+                                                Habis
+
+                                            </button>
+
+                                        @endif
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        @empty
+
+                            <div class="sm:col-span-2 lg:col-span-3">
+
+                                <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+
+                                    <div class="w-12 h-12 mx-auto rounded-xl bg-slate-100 flex items-center justify-center">
+
+                                        <i class="fa-solid fa-utensils text-slate-400"></i>
+
+                                    </div>
+
+                                    <p class="mt-3 text-sm font-semibold text-slate-700">
+                                        Belum ada menu
+                                    </p>
+
+                                    <p class="mt-1 text-xs text-slate-400">
+                                        Belum ada menu tersedia pada kategori ini.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        @endforelse
+
+                    </div>
+
+                </section>
+
+            @empty
+
+                {{-- ======================================================
+                    NO CATEGORY
+                ======================================================= --}}
+                <div class="bg-white rounded-2xl border border-slate-200 px-6 py-14 text-center shadow-sm">
+
+                    <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center">
+
+                        <i class="fa-solid fa-utensils text-2xl text-slate-400"></i>
+
+                    </div>
+
+                    <h2 class="mt-4 text-lg font-bold text-slate-800">
+                        Menu belum tersedia
+                    </h2>
+
+                    <p class="mt-2 text-sm text-slate-500 max-w-sm mx-auto">
+                        Saat ini belum ada kategori atau menu yang tersedia.
+                    </p>
+
                 </div>
 
-                <button type="submit" id="submitBtn" disabled
-                    class="bg-slate-200 text-slate-400 font-black px-6 py-3 rounded-xl text-xs transition cursor-not-allowed">
-                    <span id="btnText">Pesan & Bayar QRIS</span> <i class="fa-solid fa-arrow-right ml-1"></i>
-                </button>
+            @endforelse
+
+
+            {{-- ======================================================
+                FOOTER
+            ======================================================= --}}
+            <div class="pt-4 pb-8 text-center">
+
+                <p class="text-[11px] text-slate-400">
+                    Powered by
+                    <span class="font-bold text-slate-500">
+                        PesanIn
+                    </span>
+                </p>
+
             </div>
-        </form>
+
+        </main>
 
     </div>
 
-    <!-- JavaScript Logika Keranjang & Filter Tab -->
-    <script>
-        let cart = {};
-        let selectedPayment = 'qris';
-
-        function togglePayment(method) {
-            selectedPayment = method;
-            const qrisLabel = document.getElementById('label-qris');
-            const kasirLabel = document.getElementById('label-kasir');
-            const kasirIcon = document.getElementById('icon-kasir');
-            const btnText = document.getElementById('btnText');
-
-            if (method === 'qris') {
-                qrisLabel.className =
-                    "relative flex items-center p-2 rounded-xl border border-amber-500 bg-amber-50 cursor-pointer transition shadow-sm";
-                kasirLabel.className =
-                    "relative flex items-center p-2 rounded-xl border border-slate-200 bg-white cursor-pointer transition";
-                if (kasirIcon) kasirIcon.className = "fa-solid fa-cash-register text-slate-400 text-sm";
-                if (btnText) btnText.innerText = "Pesan & Bayar QRIS";
-            } else {
-                kasirLabel.className =
-                    "relative flex items-center p-2 rounded-xl border border-amber-500 bg-amber-50 cursor-pointer transition shadow-sm";
-                qrisLabel.className =
-                    "relative flex items-center p-2 rounded-xl border border-slate-200 bg-white cursor-pointer transition";
-                if (kasirIcon) kasirIcon.className = "fa-solid fa-cash-register text-amber-600 text-sm";
-                if (btnText) btnText.innerText = "Pesan & Bayar di Kasir";
-            }
-        }
-
-        function filterCategory(catId) {
-            document.querySelectorAll('.category-tab').forEach(tab => {
-                tab.className =
-                    "category-tab px-4 py-1.5 bg-slate-100 text-slate-600 font-bold rounded-full text-xs whitespace-nowrap transition hover:bg-slate-200";
-            });
-
-            if (catId === 'all') {
-                document.getElementById('tab-all').className =
-                    "category-tab px-4 py-1.5 bg-amber-500 text-slate-950 font-black rounded-full text-xs whitespace-nowrap transition shadow-sm";
-                document.querySelectorAll('.category-group').forEach(group => group.style.display = 'block');
-            } else {
-                document.getElementById('tab-' + catId).className =
-                    "category-tab px-4 py-1.5 bg-amber-500 text-slate-950 font-black rounded-full text-xs whitespace-nowrap transition shadow-sm";
-                document.querySelectorAll('.category-group').forEach(group => group.style.display = 'none');
-                let targetGroup = document.getElementById('category-group-' + catId);
-                if (targetGroup) targetGroup.style.display = 'block';
-            }
-        }
-
-        function updateQty(menuId, change, price, maxStock) {
-            if (!cart[menuId]) {
-                cart[menuId] = {
-                    qty: 0,
-                    price: price
-                };
-            }
-            let newQty = cart[menuId].qty + change;
-            if (newQty > maxStock) {
-                alert("Maaf, stok hanya tersisa " + maxStock + " porsi.");
-                return;
-            }
-            cart[menuId].qty = newQty;
-            if (cart[menuId].qty <= 0) {
-                delete cart[menuId];
-                document.getElementById('qty-' + menuId).innerText = 0;
-                document.getElementById('inputs-' + menuId).innerHTML = '';
-            } else {
-                document.getElementById('qty-' + menuId).innerText = cart[menuId].qty;
-                document.getElementById('inputs-' + menuId).innerHTML = `
-                    <input type="hidden" name="items[${menuId}][menu_id]" value="${menuId}">
-                    <input type="hidden" name="items[${menuId}][quantity]" value="${cart[menuId].qty}">
-                `;
-            }
-            calculateTotal();
-        }
-
-        function calculateTotal() {
-            let total = 0;
-            let itemCount = 0;
-            for (let id in cart) {
-                total += cart[id].qty * cart[id].price;
-                itemCount += cart[id].qty;
-            }
-            document.getElementById('totalDisplay').innerText = 'Rp ' + total.toLocaleString('id-ID');
-            let btn = document.getElementById('submitBtn');
-            if (itemCount > 0) {
-                btn.disabled = false;
-                btn.className =
-                    "bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-6 py-3 rounded-xl text-xs transition shadow-lg shadow-amber-500/20 active:scale-95 cursor-pointer";
-            } else {
-                btn.disabled = true;
-                btn.className =
-                    "bg-slate-200 text-slate-400 font-black px-6 py-3 rounded-xl text-xs transition cursor-not-allowed";
-            }
-        }
-    </script>
-</body>
-
-</html>
+@endsection

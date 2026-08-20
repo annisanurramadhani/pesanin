@@ -153,8 +153,23 @@
                                     <div class="flex items-center gap-3">
 
                                         <div
-                                            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
-                                            <i class="fa-solid fa-user"></i>
+                                            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 font-extrabold text-xs">
+
+                                            @php
+                                                $nameParts = preg_split('/\s+/', trim(strip_tags($user->name)));
+
+                                                if (count($nameParts) >= 2) {
+                                                    $initials = strtoupper(
+                                                        substr($nameParts[0], 0, 1) .
+                                                        substr($nameParts[count($nameParts) - 1], 0, 1)
+                                                    );
+                                                } else {
+                                                    $initials = strtoupper(substr($nameParts[0], 0, 1));
+                                                }
+                                            @endphp
+
+                                            {{ $initials }}
+
                                         </div>
 
                                         <span class="font-bold text-slate-800">
