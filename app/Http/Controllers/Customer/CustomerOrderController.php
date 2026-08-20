@@ -74,21 +74,43 @@ class CustomerOrderController extends Controller
             ->where('status', 'available')
             ->firstOrFail();
 
+        /*
+        |--------------------------------------------------------------------------
+        | CEK STOCK
+        |--------------------------------------------------------------------------
+        */
+
         if ($menu->stock <= 0) {
-            return back()->with(
-                'error',
-                "Maaf, {$menu->name} sedang habis."
-            );
+
+            return response()->json([
+                'success' => false,
+                'message' => "Maaf, {$menu->name} sedang habis."
+            ], 422);
         }
 
         if ($request->quantity > $menu->stock) {
-            return back()->with(
-                'error',
-                "Maaf, stok {$menu->name} hanya tersisa {$menu->stock}."
-            );
+
+            return response()->json([
+                'success' => false,
+                'message' => "Maaf, stok {$menu->name} hanya tersisa {$menu->stock}."
+            ], 422);
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | CART
+        |--------------------------------------------------------------------------
+        */
+
         $cart = session()->get('cart', []);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | MENU SUDAH ADA DI CART
+        |--------------------------------------------------------------------------
+        */
 
         if (isset($cart[$menu->id])) {
 
@@ -97,10 +119,11 @@ class CustomerOrderController extends Controller
                 $request->quantity;
 
             if ($newQuantity > $menu->stock) {
-                return back()->with(
-                    'error',
-                    "Maaf, stok {$menu->name} hanya tersisa {$menu->stock}."
-                );
+
+                return response()->json([
+                    'success' => false,
+                    'message' => "Maaf, stok {$menu->name} hanya tersisa {$menu->stock}."
+                ], 422);
             }
 
             $cart[$menu->id] = $newQuantity;
@@ -110,12 +133,27 @@ class CustomerOrderController extends Controller
             $cart[$menu->id] = $request->quantity;
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN CART
+        |--------------------------------------------------------------------------
+        */
+
         session()->put('cart', $cart);
 
-        return back()->with(
-            'success',
-            "{$menu->name} berhasil ditambahkan ke keranjang."
-        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE AJAX
+        |--------------------------------------------------------------------------
+        */
+
+        return response()->json([
+            'success' => true,
+            'message' => "{$menu->name} berhasil ditambahkan ke keranjang.",
+            'cart_count' => array_sum($cart),
+        ]);
     }
 
 
