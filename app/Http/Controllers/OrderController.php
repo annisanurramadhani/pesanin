@@ -14,27 +14,35 @@ class OrderController extends Controller
         $user = Auth::user();
         $merchantId = $user->merchant_id ?? $user->id;
 
-        $filterType = $request->get('filter_type', 'day'); // Options: day, month, year
-        
-        $selectedDate  = $request->get('date', Carbon::today()->toDateString());
-        $selectedMonth = $request->get('month', Carbon::now()->format('Y-m'));
-        $selectedYear  = $request->get('year', Carbon::now()->year);
-
         $query = Order::where('merchant_id', $merchantId)
             ->with(['qrCode', 'items.menu']);
 
-        // Filter Spesifik Berdasarkan Mode yang Dipilih
-        if ($filterType === 'day') {
-            $query->whereDate('created_at', $selectedDate);
-            $labelPeriode = Carbon::parse($selectedDate)->format('d M Y');
-        } elseif ($filterType === 'month') {
-            $carbonMonth = Carbon::parse($selectedMonth);
-            $query->whereYear('created_at', $carbonMonth->year)
-                  ->whereMonth('created_at', $carbonMonth->month);
-            $labelPeriode = $carbonMonth->format('F Y');
-        } elseif ($filterType === 'year') {
-            $query->whereYear('created_at', $selectedYear);
-            $labelPeriode = 'Tahun ' . $selectedYear;
+        // Default variabel untuk compact view
+        $filterType    = $request->get('filter_type', 'day');
+        $selectedDate  = $request->get('date', Carbon::today()->toDateString());
+        $selectedMonth = $request->get('month', Carbon::now()->format('Y-m'));
+        $selectedYear  = $request->get('year', Carbon::now()->year);
+        $labelPeriode  = Carbon::today()->format('d M Y');
+
+        // LOGIKA PERBEDAAN ROLE (KASIR VS OWNER)
+        if ($user->role === 'kasir') {
+            // KASIR: Hanya melihat pesanan HARI INI
+            $query->whereDate('created_at', Carbon::today());
+            $labelPeriode = 'Hari Ini (' . Carbon::today()->format('d M Y') . ')';
+        } else {
+            // OWNER: Filter fleksibel (Per Hari, Per Bulan, Per Tahun)
+            if ($filterType === 'day') {
+                $query->whereDate('created_at', $selectedDate);
+                $labelPeriode = Carbon::parse($selectedDate)->format('d M Y');
+            } elseif ($filterType === 'month') {
+                $carbonMonth = Carbon::parse($selectedMonth);
+                $query->whereYear('created_at', $carbonMonth->year)
+                      ->whereMonth('created_at', $carbonMonth->month);
+                $labelPeriode = $carbonMonth->format('F Y');
+            } elseif ($filterType === 'year') {
+                $query->whereYear('created_at', $selectedYear);
+                $labelPeriode = 'Tahun ' . $selectedYear;
+            }
         }
 
         $orders = $query->orderBy('created_at', 'desc')->get();
@@ -61,5 +69,19 @@ class OrderController extends Controller
             'totalRevenue', 
             'totalOrders'
         ));
+    }
+
+    // Method untuk Kasir Memperbarui / Memvalidasi Status Pesanan
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string',
+        ]);
+
+        $order = Order::findOrFail($id);
+        $order->status = $request->status;
+        $order->save();
+
+        return back()->with('success', 'Status pesanan #' . $order->order_number . ' berhasil diperbarui!');
     }
 }

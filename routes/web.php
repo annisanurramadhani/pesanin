@@ -1,6 +1,5 @@
 <?php
 
-// use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
@@ -39,7 +38,7 @@ Route::get('/subscription/{slug}', [PublicSubscriptionController::class, 'show']
 Route::get('/subscription/{slug}/summary/{duration}', [PublicSubscriptionController::class, 'summary'])
     ->name('public.subscription.summary');
 
-/// ==========================================================================
+// ==========================================================================
 // CUSTOMER ORDER (SCAN QR)
 // ==========================================================================
 
@@ -84,12 +83,11 @@ Route::prefix('m/{code}')
             ->name('payment');
     });
 
-// NOTIFIKAS ORDER PAYMENT
+// NOTIFIKASI ORDER PAYMENT
 Route::post(
     '/payment/midtrans/order/notification',
     [MidtransOrderNotificationController::class, 'handle']
 )->name('payment.midtrans.order.notification');
-
 
 
 // 3. Redirect Dashboard Default Berdasarkan Role
@@ -118,220 +116,75 @@ Route::middleware(['auth', 'role:super_admin'])
             return view('super_admin.dashboard');
         })->name('dashboard');
 
-
-        // =====================================================
         // MERCHANTS
-        // =====================================================
+        Route::get('/merchants', [SuperAdminMerchantController::class, 'index'])->name('merchants.index');
+        Route::get('/merchants/create', [SuperAdminMerchantController::class, 'create'])->name('merchants.create');
+        Route::post('/merchants', [SuperAdminMerchantController::class, 'store'])->name('merchants.store');
+        Route::get('/merchants/{encryptedId}/edit', [SuperAdminMerchantController::class, 'edit'])->name('merchants.edit');
+        Route::put('/merchants/{encryptedId}', [SuperAdminMerchantController::class, 'update'])->name('merchants.update');
+        Route::delete('/merchants/{encryptedId}', [SuperAdminMerchantController::class, 'destroy'])->name('merchants.destroy');
 
-        Route::get('/merchants', [SuperAdminMerchantController::class, 'index'])
-            ->name('merchants.index');
-
-        Route::get('/merchants/create', [SuperAdminMerchantController::class, 'create'])
-            ->name('merchants.create');
-
-        Route::post('/merchants', [SuperAdminMerchantController::class, 'store'])
-            ->name('merchants.store');
-
-        Route::get('/merchants/{encryptedId}/edit', [SuperAdminMerchantController::class, 'edit'])
-            ->name('merchants.edit');
-
-        Route::put('/merchants/{encryptedId}', [SuperAdminMerchantController::class, 'update'])
-            ->name('merchants.update');
-
-        Route::delete('/merchants/{encryptedId}', [SuperAdminMerchantController::class, 'destroy'])
-            ->name('merchants.destroy');
-
-
-        // =====================================================
         // PACKAGES
-        // =====================================================
+        Route::get('/packages', [PackageController::class, 'index'])->name('packages.index');
+        Route::get('/packages/create', [PackageController::class, 'create'])->name('packages.create');
+        Route::post('/packages', [PackageController::class, 'store'])->name('packages.store');
+        Route::get('/packages/{encryptedId}/edit', [PackageController::class, 'edit'])->name('packages.edit');
+        Route::put('/packages/{encryptedId}', [PackageController::class, 'update'])->name('packages.update');
+        Route::delete('/packages/{encryptedId}', [PackageController::class, 'destroy'])->name('packages.destroy');
 
-        Route::get('/packages', [PackageController::class, 'index'])
-            ->name('packages.index');
-
-        Route::get('/packages/create', [PackageController::class, 'create'])
-            ->name('packages.create');
-
-        Route::post('/packages', [PackageController::class, 'store'])
-            ->name('packages.store');
-
-        Route::get('/packages/{encryptedId}/edit', [PackageController::class, 'edit'])
-            ->name('packages.edit');
-
-        Route::put('/packages/{encryptedId}', [PackageController::class, 'update'])
-            ->name('packages.update');
-
-        Route::delete('/packages/{encryptedId}', [PackageController::class, 'destroy'])
-            ->name('packages.destroy');
-
-
-        // =====================================================
         // PACKAGE DURATIONS
-        // =====================================================
+        Route::get('/packages/{encryptedId}/durations', [PackageDurationController::class, 'index'])->name('packages.durations.index');
+        Route::get('/packages/{encryptedId}/durations/create', [PackageDurationController::class, 'create'])->name('packages.durations.create');
+        Route::post('/packages/{encryptedId}/durations', [PackageDurationController::class, 'store'])->name('packages.durations.store');
+        Route::get('/packages/{encryptedId}/durations/{duration}/edit', [PackageDurationController::class, 'edit'])->name('packages.durations.edit');
+        Route::put('/packages/{encryptedId}/durations/{duration}', [PackageDurationController::class, 'update'])->name('packages.update.duration');
+        Route::delete('/packages/{encryptedId}/durations/{duration}', [PackageDurationController::class, 'destroy'])->name('packages.durations.destroy');
 
-        Route::get('/packages/{encryptedId}/durations', [PackageDurationController::class, 'index'])
-            ->name('packages.durations.index');
-
-        Route::get('/packages/{encryptedId}/durations/create', [PackageDurationController::class, 'create'])
-            ->name('packages.durations.create');
-
-        Route::post('/packages/{encryptedId}/durations', [PackageDurationController::class, 'store'])
-            ->name('packages.durations.store');
-
-        Route::get('/packages/{encryptedId}/durations/{duration}/edit', [PackageDurationController::class, 'edit'])
-            ->name('packages.durations.edit');
-
-        Route::put('/packages/{encryptedId}/durations/{duration}', [PackageDurationController::class, 'update'])
-            ->name('packages.durations.update');
-
-        Route::delete('/packages/{encryptedId}/durations/{duration}', [PackageDurationController::class, 'destroy'])
-            ->name('packages.durations.destroy');
-
-        // =====================================================
         // SUBSCRIPTIONS
-        // =====================================================
-        Route::get('/subscriptions', [SuperAdminSubscriptionController::class, 'index'])
-            ->name('subscriptions.index');
+        Route::get('/subscriptions', [SuperAdminSubscriptionController::class, 'index'])->name('subscriptions.index');
+        Route::get('/subscriptions/create', [SuperAdminSubscriptionController::class, 'create'])->name('subscriptions.create');
+        Route::post('/subscriptions', [SuperAdminSubscriptionController::class, 'store'])->name('subscriptions.store');
+        Route::get('/subscriptions/{encryptedId}', [SuperAdminSubscriptionController::class, 'show'])->name('subscriptions.show');
+        Route::get('/subscriptions/{encryptedId}/edit', [SuperAdminSubscriptionController::class, 'edit'])->name('subscriptions.edit');
+        Route::put('/subscriptions/{encryptedId}', [SuperAdminSubscriptionController::class, 'update'])->name('subscriptions.update');
+        Route::delete('/subscriptions/{encryptedId}', [SuperAdminSubscriptionController::class, 'destroy'])->name('subscriptions.destroy');
 
-        Route::get('/subscriptions/create', [SuperAdminSubscriptionController::class, 'create'])
-            ->name('subscriptions.create');
-
-        Route::post('/subscriptions', [SuperAdminSubscriptionController::class, 'store'])
-            ->name('subscriptions.store');
-
-        Route::get('/subscriptions/{encryptedId}', [SuperAdminSubscriptionController::class, 'show'])
-            ->name('subscriptions.show');
-
-        Route::get('/subscriptions/{encryptedId}/edit', [SuperAdminSubscriptionController::class, 'edit'])
-            ->name('subscriptions.edit');
-
-        Route::put('/subscriptions/{encryptedId}', [SuperAdminSubscriptionController::class, 'update'])
-            ->name('subscriptions.update');
-
-        Route::delete('/subscriptions/{encryptedId}', [SuperAdminSubscriptionController::class, 'destroy'])
-            ->name('subscriptions.destroy');
-
-        // =====================================================
         // ACCOUNTS
-        // =====================================================
-
-        Route::get('/accounts', [AccountController::class, 'index'])
-            ->name('accounts.index');
-
-        Route::get('/accounts/create', [AccountController::class, 'create'])
-            ->name('accounts.create');
-
-        Route::post('/accounts', [AccountController::class, 'store'])
-            ->name('accounts.store');
-
-        Route::get('/accounts/{encryptedId}/edit', [AccountController::class, 'edit'])
-            ->name('accounts.edit');
-
-        Route::put('/accounts/{encryptedId}', [AccountController::class, 'update'])
-            ->name('accounts.update');
-
-        Route::delete('/accounts/{encryptedId}', [AccountController::class, 'destroy'])
-            ->name('accounts.destroy');
+        Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
+        Route::get('/accounts/create', [AccountController::class, 'create'])->name('accounts.create');
+        Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
+        Route::get('/accounts/{encryptedId}/edit', [AccountController::class, 'edit'])->name('accounts.edit');
+        Route::put('/accounts/{encryptedId}', [AccountController::class, 'update'])->name('accounts.update');
+        Route::delete('/accounts/{encryptedId}', [AccountController::class, 'destroy'])->name('accounts.destroy');
     });
 
-Route::post('midtrans/notification', [MidtransNotificationController::class, 'handle'])
-    ->name('midtrans.notification');
+Route::post('midtrans/notification', [MidtransNotificationController::class, 'handle'])->name('midtrans.notification');
 
-// ==========================================================================
 // PAYMENT
-// ==========================================================================
-
 Route::middleware('auth')->group(function () {
-
-    Route::get('/subscription/payment/{encryptedSubscription}', [PaymentController::class, 'show'])
-        ->name('public.subscription.payment');
-    Route::post('/subscription/payment/{encryptedSubscription}', [PaymentController::class, 'process'])
-        ->name('public.subscription.payment.process');
+    Route::get('/subscription/payment/{encryptedSubscription}', [PaymentController::class, 'show'])->name('public.subscription.payment');
+    Route::post('/subscription/payment/{encryptedSubscription}', [PaymentController::class, 'process'])->name('public.subscription.payment.process');
 });
 
-// ==========================================================================
 // PUBLIC SUBSCRIPTION
-// ==========================================================================
-
-Route::prefix('subscription')
-    ->name('public.subscription.')
-    ->group(function () {
-
-        // Halaman daftar paket
-        Route::get('/', [
-            PublicSubscriptionController::class,
-            'index'
-        ])->name('index');
-
-
-        // Pilih akun
-        Route::get('/account/{encryptedDuration}', [
-            PublicSubscriptionController::class,
-            'account'
-        ])->name('account');
-
-
-        // Pilih paket
-        Route::get('/{slug}', [
-            PublicSubscriptionController::class,
-            'show'
-        ])->name('show');
-
-
-        // Pilih durasi → Summary
-        Route::get('/{slug}/{duration}', [
-            PublicSubscriptionController::class,
-            'summary'
-        ])->name('summary');
-    });
-
-
-// ==========================================================================
-// AUTHENTICATED SUBSCRIPTION FLOW
-// ==========================================================================
-
-Route::middleware('auth')->group(function () {
-
-    /*
-            |--------------------------------------------------------------------------
-            | Data Toko
-            |--------------------------------------------------------------------------
-            */
-
-    Route::get(
-        '/merchant/setup',
-        [MerchantSetupController::class, 'create']
-    )->name('merchant.setup');
-
-    Route::post(
-        '/merchant/setup',
-        [MerchantSetupController::class, 'store']
-    )->name('merchant.setup.store');
-
-
-    /*
-            |--------------------------------------------------------------------------
-            | Email Verification OTP
-            |--------------------------------------------------------------------------
-            */
-
-    Route::get(
-        '/verify-email',
-        [EmailVerificationController::class, 'show']
-    )->name('verification.code');
-
-    Route::post(
-        '/verify-email',
-        [EmailVerificationController::class, 'verify']
-    )->name('verification.code.verify');
-
-    Route::post(
-        '/verify-email/resend',
-        [EmailVerificationController::class, 'resend']
-    )->name('verification.code.resend');
+Route::prefix('subscription')->name('public.subscription.')->group(function () {
+    Route::get('/', [PublicSubscriptionController::class, 'index'])->name('index');
+    Route::get('/account/{encryptedDuration}', [PublicSubscriptionController::class, 'account'])->name('account');
+    Route::get('/{slug}', [PublicSubscriptionController::class, 'show'])->name('show');
+    Route::get('/{slug}/{duration}', [PublicSubscriptionController::class, 'summary'])->name('summary');
 });
 
-// 5. Rute MERCHANT (Owner, Kasir, Dapur) - WITH ENCRYPTED ID SUPPORT
+// AUTHENTICATED SUBSCRIPTION FLOW
+Route::middleware('auth')->group(function () {
+    Route::get('/merchant/setup', [MerchantSetupController::class, 'create'])->name('merchant.setup');
+    Route::post('/merchant/setup', [MerchantSetupController::class, 'store'])->name('merchant.setup.store');
+
+    Route::get('/verify-email', [EmailVerificationController::class, 'show'])->name('verification.code');
+    Route::post('/verify-email', [EmailVerificationController::class, 'verify'])->name('verification.code.verify');
+    Route::post('/verify-email/resend', [EmailVerificationController::class, 'resend'])->name('verification.code.resend');
+});
+
+// 5. Rute MERCHANT (Owner, Kasir, Dapur)
 Route::middleware(['auth'])->prefix('merchant')->name('merchant.')->group(function () {
 
     // Dashboard Merchant (Owner & Kasir)
@@ -349,13 +202,11 @@ Route::middleware(['auth'])->prefix('merchant')->name('merchant.')->group(functi
 
     // Khusus OWNER (QR Code, Menu, Profil Kafe, & Staf)
     Route::middleware(['role:owner'])->group(function () {
-        // QR Code Meja
         Route::get('/qr', [MerchantController::class, 'qrIndex'])->name('qr.index');
         Route::post('/qr', [MerchantController::class, 'qrStore'])->name('qr.store');
         Route::get('/qr/{encryptedId}/print', [MerchantController::class, 'qrPrint'])->name('qr.print');
         Route::delete('/qr/{encryptedId}', [MerchantController::class, 'qrDestroy'])->name('qr.destroy');
 
-        // Menu & Kategori
         Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
         Route::post('/category', [MenuController::class, 'storeCategory'])->name('category.store');
         Route::post('/menu', [MenuController::class, 'store'])->name('menu.store');
@@ -364,30 +215,19 @@ Route::middleware(['auth'])->prefix('merchant')->name('merchant.')->group(functi
         Route::patch('/menu/{encryptedId}/toggle', [MenuController::class, 'toggle'])->name('menu.toggle');
         Route::delete('/menu/{encryptedId}', [MenuController::class, 'destroy'])->name('menu.destroy');
 
-        // Kelola Profil Kafe (Owner)
         Route::get('/profile-kafe', [MerchantController::class, 'profileEdit'])->name('profile-kafe.edit');
         Route::put('/profile-kafe', [MerchantController::class, 'profileUpdate'])->name('profile-kafe.update');
 
-        // Kelola Staf Kafe
-        Route::get('/staff', [StaffController::class, 'index'])
-            ->name('staff.index');
-
-        Route::post('/staff', [StaffController::class, 'store'])
-            ->name('staff.store');
-
-        Route::get('/staff/{encryptedId}/edit', [StaffController::class, 'edit'])
-            ->name('staff.edit');
-
-        Route::put('/staff/{encryptedId}', [StaffController::class, 'update'])
-            ->name('staff.update');
-
-        Route::delete('/staff/{user}', [StaffController::class, 'destroy'])
-            ->name('staff.destroy');
+        Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
+        Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
+        Route::get('/staff/{encryptedId}/edit', [StaffController::class, 'edit'])->name('staff.edit');
+        Route::put('/staff/{encryptedId}', [StaffController::class, 'update'])->name('staff.update');
+        Route::delete('/staff/{encryptedId}', [StaffController::class, 'destroy'])->name('staff.destroy');
     });
 });
 
 // 6. Profile User Bawaan Auth
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

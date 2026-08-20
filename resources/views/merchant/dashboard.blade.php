@@ -1,27 +1,27 @@
 @extends('layouts.merchant')
 
 @section('header')
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h2 class="font-extrabold text-2xl text-slate-900 tracking-tight flex items-center gap-2">
-                    Dashboard Merchant
-                </h2>
-                <p class="text-xs font-medium text-slate-500 mt-1">Pantau aktivitas penjualan, pesanan masuk, dan performa kafemu secara real-time.</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center gap-2 shadow-sm">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                    Sistem Pesanan On
-                </div>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h2 class="font-extrabold text-2xl text-slate-900 tracking-tight flex items-center gap-2">
+                Dashboard Merchant
+            </h2>
+            <p class="text-xs font-medium text-slate-500 mt-1">Pantau aktivitas penjualan, pesanan masuk, dan performa kafemu secara real-time.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center gap-2 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                Sistem Pesanan On
             </div>
         </div>
-    @endsection
+    </div>
+@endsection
 
-    @section('content')
+@section('content')
 
     <div class="space-y-8">
 
-        <!-- Stat Cards Grid (Lebih Besar & Berwarna Mewah) -->
+        <!-- Stat Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             <!-- Card 1: Total Menu -->
@@ -67,7 +67,7 @@
 
         </div>
 
-        <!-- Section Tabel Pesanan Terbaru (Lebar & Sleek) -->
+        <!-- Section Tabel Pesanan Terbaru -->
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
             <div class="p-6 border-b border-slate-100 flex items-center justify-between">
                 <div>
@@ -93,39 +93,59 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @forelse($recentOrders ?? [] as $order)
+                            @php
+                                // Kalkulasi otomatis total harga jika bernilai 0 di database
+                                $itemTotal = $order->items->sum(function($item) {
+                                    return $item->subtotal ?? ($item->price * $item->quantity);
+                                });
+                                $grandTotal = ($order->total_amount > 0) ? $order->total_amount : (($order->total_price > 0) ? $order->total_price : $itemTotal);
+                                $statusStr = strtolower($order->status ?? '');
+                            @endphp
                             <tr class="hover:bg-slate-50/60 transition">
+                                <!-- No Order & Meja -->
                                 <td class="p-4 pl-6">
                                     <span class="font-black text-slate-900 block text-base">#{{ $order->order_number }}</span>
-                                    <span class="inline-flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-md mt-1">
+                                    <span class="inline-flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-md mt-1 border border-amber-200/60">
                                         <i class="fa-solid fa-location-dot"></i> {{ $order->qrCode->name ?? 'Meja General' }}
                                     </span>
                                 </td>
+
+                                <!-- Pelanggan & Tanggal + Jam -->
                                 <td class="p-4">
                                     <p class="font-bold text-slate-800">{{ $order->customer_name }}</p>
-                                    <p class="text-[11px] text-slate-400 font-medium">{{ $order->created_at->format('H:i Waktu') }}</p>
+                                    <p class="text-[11px] text-slate-400 font-medium mt-0.5">
+                                        <i class="fa-regular fa-clock text-[10px] mr-0.5"></i>
+                                        {{ $order->created_at->format('d M Y, H:i') }} WIB
+                                    </p>
                                 </td>
+
+                                <!-- Detail Item Menu -->
                                 <td class="p-4">
                                     <div class="flex flex-wrap gap-1">
                                         @foreach($order->items as $item)
                                             <span class="bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-lg text-xs">
-                                                {{ $item->menu->name ?? 'Menu' }} <b class="text-slate-900 font-black">x{{ $item->quantity }}</b>
+                                                {{ $item->menu_name ?? $item->menu->name ?? 'Menu' }} <b class="text-slate-900 font-black">x{{ $item->quantity }}</b>
                                             </span>
                                         @endforeach
                                     </div>
                                 </td>
+
+                                <!-- Total Harga -->
                                 <td class="p-4">
-                                    <span class="font-black text-slate-900 text-base">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
+                                    <span class="font-black text-slate-900 text-base">Rp {{ number_format($grandTotal, 0, ',', '.') }}</span>
                                 </td>
+
+                                <!-- Status Badge -->
                                 <td class="p-4 pr-6">
-                                    @if($order->status == 'menunggu')
+                                    @if(in_array($statusStr, ['menunggu', 'pending']))
                                         <span class="px-3 py-1.5 text-xs bg-amber-50 text-amber-700 font-extrabold rounded-xl border border-amber-200/80 inline-flex items-center gap-1.5">
                                             <i class="fa-solid fa-clock"></i> Menunggu
                                         </span>
-                                    @elseif($order->status == 'diproses')
+                                    @elseif(in_array($statusStr, ['diproses', 'process', 'processing', 'cash']))
                                         <span class="px-3 py-1.5 text-xs bg-blue-50 text-blue-700 font-extrabold rounded-xl border border-blue-200/80 inline-flex items-center gap-1.5">
                                             <i class="fa-solid fa-fire"></i> Diproses
                                         </span>
-                                    @elseif($order->status == 'selesai')
+                                    @elseif(in_array($statusStr, ['selesai', 'completed', 'lunas']))
                                         <span class="px-3 py-1.5 text-xs bg-emerald-50 text-emerald-700 font-extrabold rounded-xl border border-emerald-200/80 inline-flex items-center gap-1.5">
                                             <i class="fa-solid fa-check"></i> Selesai
                                         </span>
@@ -152,6 +172,6 @@
             </div>
         </div>
 
-        </div>
+    </div>
 
 @endsection
