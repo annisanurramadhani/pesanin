@@ -302,6 +302,42 @@
 
     {{-- Script SweetAlert2 untuk Konfirmasi Hapus --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: @json(session('success')),
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: 'OK',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl text-xs font-bold px-4 py-2.5'
+                }
+            });
+        });
+    </script>
+    @endif
+
+    @if($errors->any())
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                icon: 'error',
+                title: 'Menu Sudah Ada',
+                text: @json($errors->first()),
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'OK',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl text-xs font-bold px-4 py-2.5'
+                }
+            });
+        });
+    </script>
+    @endif
+
     <script>
         function confirmDelete(event, buttonElement, menuName) {
             event.stopPropagation();
