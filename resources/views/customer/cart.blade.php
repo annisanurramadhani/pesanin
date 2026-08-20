@@ -29,11 +29,6 @@
 
                     </div>
 
-                    <div
-                        class="w-10 h-10 shrink-0 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                    </div>
-
                 </div>
 
             </div>
