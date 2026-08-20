@@ -170,14 +170,30 @@
                                                 {{-- Nama --}}
                                                 <td class="p-4 pl-6">
                                                     <div class="flex items-center gap-3">
-                                                        <div
-                                                            class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">
-                                                            <i class="fa-solid fa-user"></i>
+
+                                                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-extrabold text-xs flex-shrink-0">
+
+                                                            @php
+                                                                $nameParts = preg_split('/\s+/', trim(strip_tags($staff->name)));
+
+                                                                if (count($nameParts) >= 2) {
+                                                                    $initials = strtoupper(
+                                                                        substr($nameParts[0], 0, 1) .
+                                                                        substr($nameParts[count($nameParts) - 1], 0, 1)
+                                                                    );
+                                                                } else {
+                                                                    $initials = strtoupper(substr($nameParts[0], 0, 1));
+                                                                }
+                                                            @endphp
+
+                                                            {{ $initials }}
+
                                                         </div>
 
                                                         <span class="font-extrabold text-slate-900 text-sm">
                                                             {{ strip_tags($staff->name) }}
                                                         </span>
+
                                                     </div>
                                                 </td>
 
