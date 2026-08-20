@@ -1,7 +1,10 @@
 @extends('layouts.merchant')
 
+@section('title', 'Struk Pesanan #' . $order->order_number)
+
 @section('header')
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="no-print flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
         <div>
             <h2 class="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-slate-900">
                 <i class="fa-solid fa-receipt text-amber-500"></i>
@@ -13,33 +16,42 @@
             </p>
         </div>
 
-        <div class="no-print flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
 
-            {{-- Cetak Struk --}}
-            <button type="button" onclick="window.print()"
-                class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-slate-800">
+            {{-- Cetak --}}
+            <button
+                type="button"
+                onclick="printReceipt()"
+                class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-slate-800"
+            >
                 <i class="fa-solid fa-print"></i>
                 Cetak Struk
             </button>
 
-
-            {{-- Kirim ke Email --}}
+            {{-- Kirim Email --}}
             @if ($order->customer_email)
-                <form action="{{ route('merchant.orders.receipt.email', $order->id) }}" method="POST">
+                <form
+                    action="{{ route('merchant.orders.receipt.email', $order->id) }}"
+                    method="POST"
+                >
                     @csrf
 
-                    <button type="submit"
-                        class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-400">
+                    <button
+                        type="submit"
+                        class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-400"
+                    >
                         <i class="fa-solid fa-envelope"></i>
                         Kirim ke Email
                     </button>
                 </form>
             @endif
 
-
             {{-- Tutup --}}
-            <button type="button" onclick="window.close()"
-                class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-700 transition hover:bg-slate-50">
+            <button
+                type="button"
+                onclick="window.close()"
+                class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-700 transition hover:bg-slate-50"
+            >
                 <i class="fa-solid fa-xmark"></i>
                 Tutup
             </button>
@@ -48,17 +60,26 @@
     </div>
 @endsection
 
+
 @section('content')
-    <div class="flex justify-center py-4">
 
-        <div id="receipt"
-            class="receipt-paper w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-lg">
+    {{-- Wrapper halaman --}}
+    <div class="receipt-page flex justify-center py-4">
 
-            {{-- Merchant --}}
+        {{-- STRUK --}}
+        <div
+            id="receipt"
+            class="receipt-paper w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-lg"
+        >
+
+            {{-- ========================================= --}}
+            {{-- MERCHANT --}}
+            {{-- ========================================= --}}
             <div class="text-center">
 
                 <div
-                    class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600">
+                    class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600"
+                >
                     <i class="fa-solid fa-store text-lg"></i>
                 </div>
 
@@ -66,7 +87,7 @@
                     {{ $order->merchant->name ?? 'PESANIN' }}
                 </h3>
 
-                @if ($order->merchant->address)
+                @if ($order->merchant?->address)
                     <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
                         {{ $order->merchant->address }}
                     </p>
@@ -74,9 +95,14 @@
 
             </div>
 
+
+            {{-- Divider --}}
             <div class="my-4 border-t border-dashed border-slate-300"></div>
 
-            {{-- Informasi Order --}}
+
+            {{-- ========================================= --}}
+            {{-- INFORMASI ORDER --}}
+            {{-- ========================================= --}}
             <div class="space-y-1.5 text-[11px]">
 
                 <div class="flex justify-between gap-4">
@@ -105,7 +131,7 @@
                     </span>
 
                     <span class="font-bold text-slate-700">
-                        {{ $order->qrCode->name ?? '-' }}
+                        {{ $order->qrCode?->name ?? '-' }}
                     </span>
                 </div>
 
@@ -121,31 +147,37 @@
 
             </div>
 
+
+            {{-- Divider --}}
             <div class="my-4 border-t border-dashed border-slate-300"></div>
 
-            {{-- Detail Item --}}
+
+            {{-- ========================================= --}}
+            {{-- DETAIL ITEM --}}
+            {{-- ========================================= --}}
             <div class="space-y-3">
 
                 @foreach ($order->items as $item)
+
                     <div>
 
-                        <p class="text-[11px] font-extrabold text-slate-800">
-                            {{ $item->menu_name ?? ($item->menu->name ?? 'Item') }}
-                        </p>
+                        <div class="flex items-start justify-between gap-3">
 
-                        <div class="mt-1 flex items-center justify-between gap-3 text-[10px]">
+                            <p class="min-w-0 text-[11px] font-extrabold text-slate-800">
+                                {{ $item->menu_name ?? ($item->menu?->name ?? 'Item') }}
+                            </p>
 
-                            <span class="text-slate-500">
-                                {{ $item->quantity }}
-                                ×
-                                Rp {{ number_format($item->price, 0, ',', '.') }}
-                            </span>
-
-                            <span class="font-black text-slate-900">
+                            <span class="shrink-0 text-[10px] font-black text-slate-900">
                                 Rp {{ number_format($item->subtotal, 0, ',', '.') }}
                             </span>
 
                         </div>
+
+                        <p class="mt-1 text-[10px] text-slate-500">
+                            {{ $item->quantity }}
+                            ×
+                            Rp {{ number_format($item->price, 0, ',', '.') }}
+                        </p>
 
                         @if ($item->notes)
                             <p class="mt-1 text-[9px] italic text-slate-400">
@@ -154,13 +186,19 @@
                         @endif
 
                     </div>
+
                 @endforeach
 
             </div>
 
+
+            {{-- Divider --}}
             <div class="my-4 border-t border-dashed border-slate-300"></div>
 
-            {{-- Total --}}
+
+            {{-- ========================================= --}}
+            {{-- TOTAL --}}
+            {{-- ========================================= --}}
             <div class="space-y-2 text-[11px]">
 
                 <div class="flex justify-between">
@@ -174,6 +212,7 @@
                 </div>
 
                 <div class="flex items-center justify-between pt-1">
+
                     <span class="font-black text-slate-900">
                         TOTAL
                     </span>
@@ -181,32 +220,47 @@
                     <span class="text-lg font-black text-amber-600">
                         Rp {{ number_format($order->total, 0, ',', '.') }}
                     </span>
+
                 </div>
 
             </div>
 
+
+            {{-- Divider --}}
             <div class="my-4 border-t border-dashed border-slate-300"></div>
 
-            {{-- Payment --}}
+
+            {{-- ========================================= --}}
+            {{-- PAYMENT --}}
+            {{-- ========================================= --}}
             <div class="text-center">
 
                 @if (strtolower($order->payment_method) === 'qris')
+
                     <span
-                        class="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-black text-amber-700">
+                        class="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-black text-amber-700"
+                    >
                         <i class="fa-solid fa-qrcode text-amber-600"></i>
                         QRIS
                     </span>
+
                 @else
+
                     <span
-                        class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3 py-1.5 text-[10px] font-black text-slate-700">
+                        class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3 py-1.5 text-[10px] font-black text-slate-700"
+                    >
                         <i class="fa-solid fa-cash-register text-slate-500"></i>
                         Bayar Kasir
                     </span>
+
                 @endif
 
             </div>
 
-            {{-- Footer --}}
+
+            {{-- ========================================= --}}
+            {{-- FOOTER STRUK --}}
+            {{-- ========================================= --}}
             <div class="mt-5 text-center">
 
                 <p class="text-[11px] font-extrabold text-slate-800">
@@ -222,48 +276,174 @@
         </div>
 
     </div>
+
 @endsection
 
+
 @push('styles')
-    <style>
-        @media print {
+<style>
+    @media print {
 
-            @page {
-                size: 58mm auto;
-                margin: 0;
-            }
-
-            html,
-            body {
-                width: 58mm !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: #fff !important;
-            }
-
-            body * {
-                visibility: hidden;
-            }
-
-            #receipt,
-            #receipt * {
-                visibility: visible;
-            }
-
-            #receipt {
-                width: 58mm !important;
-                max-width: 58mm !important;
-                margin: 0 !important;
-                padding: 8px !important;
-
-                border: none !important;
-                border-radius: 0 !important;
-                box-shadow: none !important;
-            }
-
-            .no-print {
-                display: none !important;
-            }
+        @page {
+            size: 58mm auto;
+            margin: 0;
         }
-    </style>
+
+        html,
+        body {
+            width: 58mm !important;
+            min-width: 58mm !important;
+            max-width: 58mm !important;
+
+            margin: 0 !important;
+            padding: 0 !important;
+
+            background: #ffffff !important;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sembunyikan layout merchant
+        |--------------------------------------------------------------------------
+        */
+
+        body * {
+            visibility: hidden !important;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hanya struk yang terlihat
+        |--------------------------------------------------------------------------
+        */
+
+        #receipt,
+        #receipt * {
+            visibility: visible !important;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hilangkan sidebar, header, tombol
+        |--------------------------------------------------------------------------
+        */
+
+        aside,
+        nav,
+        header,
+        footer,
+        .no-print {
+            display: none !important;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Container halaman
+        |--------------------------------------------------------------------------
+        */
+
+        main {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 58mm !important;
+            min-width: 58mm !important;
+            max-width: 58mm !important;
+        }
+
+        .receipt-page {
+            display: block !important;
+
+            width: 58mm !important;
+            min-width: 58mm !important;
+            max-width: 58mm !important;
+
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | STRUK
+        |--------------------------------------------------------------------------
+        */
+
+        #receipt {
+            display: block !important;
+
+            width: 58mm !important;
+            min-width: 58mm !important;
+            max-width: 58mm !important;
+
+            box-sizing: border-box !important;
+
+            margin: 0 !important;
+            padding: 3mm !important;
+
+            border: none !important;
+            border-radius: 0 !important;
+
+            box-shadow: none !important;
+
+            background: #ffffff !important;
+
+            overflow: visible !important;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jangan paksa max-width seluruh isi
+        |--------------------------------------------------------------------------
+        */
+
+        #receipt .flex {
+            max-width: none !important;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Item tidak terpotong
+        |--------------------------------------------------------------------------
+        */
+
+        #receipt p,
+        #receipt span {
+            overflow: visible !important;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Font
+        |--------------------------------------------------------------------------
+        */
+
+        #receipt {
+            font-family: Arial, Helvetica, sans-serif !important;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hindari item terpotong antar halaman
+        |--------------------------------------------------------------------------
+        */
+
+        #receipt > div {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+    }
+</style>
+@endpush
+
+@push('scripts')
+
+<script>
+
+    function printReceipt() {
+
+        window.print();
+
+    }
+
+</script>
+
 @endpush
