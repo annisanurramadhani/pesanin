@@ -12,6 +12,7 @@ use App\Http\Controllers\Payment\MidtransOrderNotificationController;
 use App\Http\Controllers\Customer\CustomerOrderController;
 
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\VerifyEmailController;
 
 use App\Http\Controllers\Merchant\MerchantSetupController;
 
@@ -173,6 +174,10 @@ Route::prefix('subscription')->name('public.subscription.')->group(function () {
     Route::get('/{slug}', [PublicSubscriptionController::class, 'show'])->name('show');
     Route::get('/{slug}/{duration}', [PublicSubscriptionController::class, 'summary'])->name('summary');
 });
+
+// EMAIL VERIFICATION
+Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
+    ->name('verification.verify');
 
 // AUTHENTICATED SUBSCRIPTION FLOW
 Route::middleware('auth')->group(function () {
