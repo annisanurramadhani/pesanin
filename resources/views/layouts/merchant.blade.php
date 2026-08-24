@@ -4,7 +4,10 @@
 
     <div class="min-h-screen flex">
 
-        @include('components.sidebar.merchant')
+        {{-- Sidebar disembunyikan khusus halaman receipt --}}
+        @if (!request()->routeIs('merchant.orders.receipt'))
+            @include('components.sidebar.merchant')
+        @endif
 
         <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
 
