@@ -136,11 +136,13 @@
                     </div>
 
                     <a href="{{ route('customer.menu', $qrCode->code) }}"
-                        class="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-amber-600 hover:text-amber-700 transition">
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-600 hover:bg-amber-100 transition">
 
                         <i class="fa-solid fa-plus text-xs"></i>
 
-                        Tambah Menu
+                        <span class="text-xs sm:text-sm font-extrabold">
+                            Tambah Menu
+                        </span>
 
                     </a>
 
@@ -388,7 +390,8 @@
 
     </div>
 <script>
-    document.querySelectorAll('.quantity-form').forEach(form => {
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.quantity-form').forEach(function (form) {
         const minusButton = form.querySelector('[data-action="minus"]');
         const plusButton = form.querySelector('[data-action="plus"]');
         const quantityInput = form.querySelector('[name="quantity"]');
@@ -397,7 +400,9 @@
         const subtotalElement = cartItem.querySelector('[data-subtotal]');
 
         async function updateQuantity(quantity) {
-            if (quantity < 0) return;
+            if (quantity < 0) {
+                return;
+            }
 
             minusButton.disabled = true;
             plusButton.disabled = true;
@@ -450,8 +455,7 @@
                 document.querySelector('#cart-total').textContent =
                     'Rp ' + new Intl.NumberFormat('id-ID').format(data.total);
 
-            } 
-            catch (error) {
+            } catch (error) {
                 console.error(error);
 
                 Swal.fire({
@@ -467,22 +471,22 @@
                         confirmButton: 'rounded-xl px-5 py-2.5 font-bold'
                     }
                 });
-            }
-            finally {
+            } finally {
                 minusButton.disabled = false;
                 plusButton.disabled = false;
             }
         }
 
-        minusButton.addEventListener('click', () => {
+        minusButton.addEventListener('click', function () {
             const quantity = parseInt(quantityInput.value);
             updateQuantity(quantity - 1);
         });
 
-        plusButton.addEventListener('click', () => {
+        plusButton.addEventListener('click', function () {
             const quantity = parseInt(quantityInput.value);
             updateQuantity(quantity + 1);
         });
     });
+});
 </script>
 @endsection
