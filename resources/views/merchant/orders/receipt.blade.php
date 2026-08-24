@@ -31,7 +31,7 @@
             {{-- Kirim Email --}}
             @if ($order->customer_email)
                 <form
-                    action="{{ route('merchant.orders.receipt.email', $order->id) }}"
+                    action="{{ route('merchant.orders.receipt.email', encryptId($order->id))}}"
                     method="POST"
                 >
                     @csrf
