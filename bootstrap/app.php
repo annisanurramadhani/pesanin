@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // DAFTARKAN ALIAS ROLE DI SINI
         $middleware->alias([
             'role' => CheckRole::class,
+            'subscription.active' => \App\Http\Middleware\EnsureActiveSubscription::class,
         ]);
 
         // EXCLUDE WEBHOOK MIDTRANS DARI CSRF

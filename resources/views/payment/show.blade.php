@@ -1,15 +1,18 @@
 @extends('layouts.app')
 
 @section('body')
+
     <div class="min-h-screen bg-slate-50">
 
         {{-- =========================================================
             HEADER
         ========================================================== --}}
         <header class="border-b border-slate-200 bg-white">
+
             <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
 
                 <div>
+
                     <h1 class="text-xl font-extrabold text-slate-900">
                         PesanIn
                     </h1>
@@ -17,15 +20,18 @@
                     <p class="text-xs text-slate-500">
                         Solusi digital untuk bisnis Anda
                     </p>
+
                 </div>
 
-                <span class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-500">
+                <span
+                    class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-500">
 
                     Pembayaran
 
                 </span>
 
             </div>
+
         </header>
 
 
@@ -57,7 +63,7 @@
 
                     <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-500">
 
-                        Silakan lakukan pembayaran untuk mengaktifkan
+                        Silakan pilih metode pembayaran untuk mengaktifkan
                         langganan PesanIn Anda.
 
                     </p>
@@ -76,7 +82,8 @@
                     ================================================== --}}
                     <div class="md:col-span-2">
 
-                        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div
+                            class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
 
                             {{-- Card Header --}}
@@ -95,9 +102,7 @@
                             <div class="space-y-6 p-6">
 
 
-                                {{-- =================================================
-                                    PAKET
-                                ================================================== --}}
+                                {{-- Paket --}}
                                 <div class="flex items-center gap-4">
 
                                     <div
@@ -110,13 +115,15 @@
 
                                     <div>
 
-                                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                        <p
+                                            class="text-xs font-semibold uppercase tracking-wide text-slate-400">
 
                                             Paket
 
                                         </p>
 
-                                        <p class="mt-1 text-lg font-extrabold text-slate-900">
+                                        <p
+                                            class="mt-1 text-lg font-extrabold text-slate-900">
 
                                             {{ $subscription->packageDuration->package->name }}
 
@@ -130,9 +137,7 @@
                                 <div class="border-t border-slate-100"></div>
 
 
-                                {{-- =================================================
-                                    DURASI
-                                ================================================== --}}
+                                {{-- Durasi --}}
                                 <div class="flex items-center gap-4">
 
                                     <div
@@ -145,19 +150,19 @@
 
                                     <div>
 
-                                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                        <p
+                                            class="text-xs font-semibold uppercase tracking-wide text-slate-400">
 
                                             Durasi
 
                                         </p>
 
-
-                                        <p class="mt-1 text-lg font-extrabold text-slate-900">
+                                        <p
+                                            class="mt-1 text-lg font-extrabold text-slate-900">
 
                                             {{ $subscription->packageDuration->name }}
 
                                         </p>
-
 
                                         <p class="mt-1 text-sm text-slate-500">
 
@@ -174,9 +179,7 @@
                                 <div class="border-t border-slate-100"></div>
 
 
-                                {{-- =================================================
-                                    MERCHANT
-                                ================================================== --}}
+                                {{-- Merchant --}}
                                 <div class="flex items-center gap-4">
 
                                     <div
@@ -189,14 +192,15 @@
 
                                     <div>
 
-                                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                        <p
+                                            class="text-xs font-semibold uppercase tracking-wide text-slate-400">
 
                                             Toko
 
                                         </p>
 
-
-                                        <p class="mt-1 text-lg font-extrabold text-slate-900">
+                                        <p
+                                            class="mt-1 text-lg font-extrabold text-slate-900">
 
                                             {{ $subscription->merchant->name }}
 
@@ -210,9 +214,7 @@
                                 <div class="border-t border-slate-100"></div>
 
 
-                                {{-- =================================================
-                                    STATUS
-                                ================================================== --}}
+                                {{-- Status --}}
                                 <div class="flex items-center justify-between">
 
                                     <span class="text-sm text-slate-500">
@@ -222,7 +224,8 @@
                                     </span>
 
 
-                                    <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-600">
+                                    <span
+                                        class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-600">
 
                                         Menunggu Pembayaran
 
@@ -242,7 +245,8 @@
                     ================================================== --}}
                     <div>
 
-                        <div class="sticky top-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div
+                            class="sticky top-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
 
                             {{-- Card Header --}}
@@ -261,9 +265,7 @@
                             <div class="p-6">
 
 
-                                {{-- =================================================
-                                    TOTAL
-                                ================================================== --}}
+                                {{-- Total --}}
                                 <div class="flex items-center justify-between gap-4">
 
                                     <span class="text-sm text-slate-500">
@@ -283,26 +285,23 @@
                                 </div>
 
 
-                                <div class="my-5 border-t border-slate-200">
-                                </div>
+                                <div class="my-5 border-t border-slate-200"></div>
 
 
-                                {{-- =================================================
-                                    INFO
-                                ================================================== --}}
+                                {{-- Info --}}
                                 <div class="rounded-xl bg-slate-50 p-4">
 
                                     <div class="flex gap-3">
 
-                                        <i class="fa-solid fa-circle-info mt-0.5 text-amber-500">
+                                        <i
+                                            class="fa-solid fa-circle-info mt-0.5 text-amber-500">
                                         </i>
 
 
                                         <p class="text-xs leading-5 text-slate-500">
 
-                                            Setelah pembayaran berhasil
-                                            dan dikonfirmasi oleh Midtrans,
-                                            langganan akan diaktifkan.
+                                            Pilih metode pembayaran yang ingin
+                                            Anda gunakan.
 
                                         </p>
 
@@ -312,10 +311,12 @@
 
 
                                 {{-- =================================================
-                                    PAYMENT BUTTON
+                                    SNAP DEFAULT
                                 ================================================== --}}
-                                <button type="button" id="pay-button"
-                                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3.5 text-sm font-extrabold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400">
+                                <button
+                                    type="button"
+                                    id="pay-button"
+                                    class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3.5 text-sm font-extrabold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400">
 
                                     <i class="fa-solid fa-credit-card"></i>
 
@@ -327,8 +328,26 @@
 
 
                                 {{-- =================================================
-                                    SECURITY INFO
+                                    QRIS CUSTOM
                                 ================================================== --}}
+                                <a
+                                    href="{{ route(
+                                        'public.subscription.payment.qris',
+                                        encryptId($subscription->id)
+                                    ) }}"
+                                    id="qris-button"
+                                    class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-5 py-3.5 text-sm font-extrabold text-slate-800 transition hover:border-amber-400 hover:bg-amber-50">
+
+                                    <i class="fa-solid fa-qrcode text-amber-500"></i>
+
+                                    <span>
+                                        Bayar via QRIS
+                                    </span>
+
+                                </a>
+
+
+                                {{-- Security --}}
                                 <div class="mt-4 text-center">
 
                                     <p class="text-xs text-slate-400">
@@ -357,42 +376,55 @@
 
     {{-- =============================================================
         MIDTRANS SNAP JS
-    ==============================================================
-
-    Karena kita masih menggunakan Sandbox,
-    gunakan URL sandbox Midtrans.
-
     ============================================================= --}}
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js"
-        data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+    <script
+        src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="{{ config('services.midtrans.client_key') }}">
+    </script>
 
 
     {{-- =============================================================
-        MIDTRANS PAYMENT SCRIPT
+        MIDTRANS SNAP SCRIPT
     ============================================================= --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
 
-            const payButton = document.getElementById('pay-button');
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const payButton =
+                document.getElementById('pay-button');
+
+            const qrisButton =
+                document.getElementById('qris-button');
+
 
             if (!payButton) {
                 return;
             }
 
 
-            payButton.addEventListener('click', function() {
+            /*
+            |--------------------------------------------------------------------------
+            | BAYAR MENGGUNAKAN SNAP
+            |--------------------------------------------------------------------------
+            */
+
+            payButton.addEventListener('click', function () {
 
                 /*
                 |--------------------------------------------------------------------------
-                | Pastikan Snap tersedia
+                | Cek Snap
                 |--------------------------------------------------------------------------
                 */
 
                 if (typeof snap === 'undefined') {
 
-                    alert(
-                        'Midtrans belum berhasil dimuat. Silakan refresh halaman.'
-                    );
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Pembayaran Tidak Tersedia',
+                        text: 'Midtrans belum berhasil dimuat. Silakan refresh halaman.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#f59e0b'
+                    });
 
                     return;
                 }
@@ -402,9 +434,6 @@
                 |--------------------------------------------------------------------------
                 | Disable Button
                 |--------------------------------------------------------------------------
-                |
-                | Mencegah user melakukan klik berkali-kali.
-                |
                 */
 
                 payButton.disabled = true;
@@ -423,32 +452,23 @@
 
                 /*
                 |--------------------------------------------------------------------------
-                | Buka Midtrans Snap
+                | Buka Snap
                 |--------------------------------------------------------------------------
                 */
 
                 snap.pay(
+
                     @json($snapToken),
 
                     {
 
                         /*
                         |--------------------------------------------------------------------------
-                        | Pembayaran Berhasil
-                        |--------------------------------------------------------------------------
-                        |
-                        | Untuk tahap testing, kita hanya memberi informasi
-                        | bahwa pembayaran berhasil.
-                        |
-                        | Subscription BELUM kita ubah di sini.
-                        |
-                        | Aktivasi sebenarnya nanti dilakukan oleh
-                        | Midtrans Notification / Webhook.
-                        |
+                        | SUCCESS
                         |--------------------------------------------------------------------------
                         */
 
-                        onSuccess: function(result) {
+                        onSuccess: function (result) {
 
                             console.log(
                                 'Midtrans Success:',
@@ -456,29 +476,41 @@
                             );
 
 
-                            alert(
-                                'Pembayaran berhasil diproses. Sistem akan memverifikasi pembayaran Anda.'
-                            );
+                            Swal.fire({
 
+                                icon: 'success',
 
-                            /*
-                            |--------------------------------------------------------------------------
-                            | Untuk sementara reload halaman.
-                            |--------------------------------------------------------------------------
-                            */
+                                title: 'Pembayaran Berhasil!',
 
-                            window.location.reload();
+                                text:
+                                    'Pembayaran Anda berhasil diproses. Langganan sedang diaktifkan.',
+
+                                confirmButtonText:
+                                    'Lanjutkan',
+
+                                confirmButtonColor:
+                                    '#f59e0b',
+
+                                allowOutsideClick:
+                                    false
+
+                            }).then(function () {
+
+                                window.location.href =
+                                    "{{ route('dashboard') }}";
+
+                            });
 
                         },
 
 
                         /*
                         |--------------------------------------------------------------------------
-                        | Pembayaran Pending
+                        | PENDING
                         |--------------------------------------------------------------------------
                         */
 
-                        onPending: function(result) {
+                        onPending: function (result) {
 
                             console.log(
                                 'Midtrans Pending:',
@@ -486,34 +518,36 @@
                             );
 
 
-                            alert(
-                                'Pembayaran masih menunggu penyelesaian.'
-                            );
+                            Swal.fire({
+
+                                icon: 'info',
+
+                                title: 'Pembayaran Menunggu',
+
+                                text:
+                                    'Pembayaran belum selesai. Silakan selesaikan pembayaran Anda.',
+
+                                confirmButtonText:
+                                    'OK',
+
+                                confirmButtonColor:
+                                    '#f59e0b'
+
+                            });
 
 
-                            payButton.disabled = false;
-
-                            payButton.classList.remove(
-                                'cursor-not-allowed',
-                                'opacity-70'
-                            );
-
-
-                            payButton.innerHTML = `
-                                <i class="fa-solid fa-credit-card"></i>
-                                <span>Bayar Sekarang</span>
-                            `;
+                            resetPayButton();
 
                         },
 
 
                         /*
                         |--------------------------------------------------------------------------
-                        | Pembayaran Gagal
+                        | ERROR
                         |--------------------------------------------------------------------------
                         */
 
-                        onError: function(result) {
+                        onError: function (result) {
 
                             console.error(
                                 'Midtrans Error:',
@@ -521,105 +555,77 @@
                             );
 
 
-                            alert(
-                                'Pembayaran gagal. Silakan coba lagi.'
-                            );
+                            Swal.fire({
+
+                                icon: 'error',
+
+                                title: 'Pembayaran Gagal',
+
+                                text:
+                                    'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.',
+
+                                confirmButtonText:
+                                    'Coba Lagi',
+
+                                confirmButtonColor:
+                                    '#111827'
+
+                            });
 
 
-                            payButton.disabled = false;
-
-                            payButton.classList.remove(
-                                'cursor-not-allowed',
-                                'opacity-70'
-                            );
-
-
-                            payButton.innerHTML = `
-                                <i class="fa-solid fa-credit-card"></i>
-                                <span>Bayar Sekarang</span>
-                            `;
+                            resetPayButton();
 
                         },
 
 
                         /*
                         |--------------------------------------------------------------------------
-                        | Popup Ditutup
+                        | CLOSE
                         |--------------------------------------------------------------------------
                         */
 
-                        onClose: function() {
+                        onClose: function () {
 
                             console.log(
-                                'Midtrans popup ditutup.'
+                                'Popup Midtrans ditutup.'
                             );
 
 
-                            payButton.disabled = false;
-
-                            payButton.classList.remove(
-                                'cursor-not-allowed',
-                                'opacity-70'
-                            );
-
-
-                            payButton.innerHTML = `
-                                <i class="fa-solid fa-credit-card"></i>
-                                <span>Bayar Sekarang</span>
-                            `;
+                            resetPayButton();
 
                         }
 
                     }
+
                 );
 
             });
 
-        });
-    </script>
-    <script
-    src="https://app.sandbox.midtrans.com/snap/snap.js"
-    data-client-key="{{ config('services.midtrans.client_key') }}">
-</script>
 
-<script>
-    document.getElementById('pay-button').addEventListener('click', function () {
+            /*
+            |--------------------------------------------------------------------------
+            | RESET BUTTON
+            |--------------------------------------------------------------------------
+            */
 
-        window.snap.pay(
-            @json($snapToken),
+            function resetPayButton() {
 
-            {
-                onSuccess: function (result) {
+                payButton.disabled = false;
 
-                    console.log('Pembayaran berhasil');
-                    console.log(result);
+                payButton.classList.remove(
+                    'cursor-not-allowed',
+                    'opacity-70'
+                );
 
-                    window.location.href = "{{ route('dashboard') }}";
+                payButton.innerHTML = `
+                    <i class="fa-solid fa-credit-card"></i>
+                    <span>Bayar Sekarang</span>
+                `;
 
-                },
-
-                onPending: function (result) {
-
-                    console.log('Pembayaran pending');
-                    console.log(result);
-
-                },
-
-                onError: function (result) {
-
-                    console.log('Pembayaran gagal');
-                    console.log(result);
-
-                },
-
-                onClose: function () {
-
-                    console.log('Popup pembayaran ditutup');
-
-                }
             }
-        );
 
-    });
-</script>
+        });
+
+    </script>
+
 @endsection

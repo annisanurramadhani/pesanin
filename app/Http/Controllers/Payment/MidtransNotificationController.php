@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Payment;
 
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
+use App\Notifications\SubscriptionInvoiceNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -43,10 +44,6 @@ class MidtransNotificationController extends Controller
             |--------------------------------------------------------------------------
             | Ambil Notification Midtrans
             |--------------------------------------------------------------------------
-            |
-            | Class Notification akan membaca data POST
-            | yang dikirim Midtrans.
-            |
             */
 
             $notification = new Notification();
@@ -58,7 +55,8 @@ class MidtransNotificationController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $orderId = $notification->order_id;
+            $orderId =
+                $notification->order_id;
 
             $transactionStatus =
                 $notification->transaction_status;
@@ -106,11 +104,6 @@ class MidtransNotificationController extends Controller
             |--------------------------------------------------------------------------
             | Validasi Order ID
             |--------------------------------------------------------------------------
-            |
-            | Format:
-            |
-            | SUB-10-20260818132910-FYK38N
-            |
             */
 
             if (
@@ -154,7 +147,8 @@ class MidtransNotificationController extends Controller
 
             $subscription =
                 Subscription::with([
-                    'packageDuration',
+                    'packageDuration.package',
+                    'merchant.users',
                 ])
                     ->where(
                         'id',
@@ -191,7 +185,6 @@ class MidtransNotificationController extends Controller
             |--------------------------------------------------------------------------
             |
             | Notification dari Midtrans bisa dikirim lebih dari sekali.
-            | Jadi jangan aktifkan ulang subscription.
             |
             */
 
@@ -261,6 +254,25 @@ class MidtransNotificationController extends Controller
 
             if ($paymentSuccess) {
 
+
+                /*
+                |--------------------------------------------------------------------------
+                | Cek Apakah Invoice Sudah Pernah Diproses
+                |--------------------------------------------------------------------------
+                */
+
+                $invoiceAlreadyProcessed =
+                    !is_null(
+                        $subscription->paid_at
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Subscription
+                |--------------------------------------------------------------------------
+                */
+
                 DB::transaction(
                     function () use (
                         $subscription,
@@ -286,9 +298,12 @@ class MidtransNotificationController extends Controller
 
                         $endDate =
                             $startDate->copy()->addDays(
-                                $subscription
-                                    ->packageDuration
-                                    ->duration_days
+                                max(
+                                    0,
+                                    $subscription
+                                        ->packageDuration
+                                        ->duration_days - 1
+                                )
                             );
 
 
@@ -349,6 +364,118 @@ class MidtransNotificationController extends Controller
                 );
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | Refresh Subscription
+                |--------------------------------------------------------------------------
+                */
+
+                $subscription->refresh();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Kirim Invoice ke Email
+                |--------------------------------------------------------------------------
+                |
+                | Hanya dikirim sekali.
+                |
+                */
+
+                if (
+                    !$invoiceAlreadyProcessed
+                ) {
+
+                    $user =
+                        $subscription
+                            ->merchant
+                            ->users()
+                            ->where(
+                                'status',
+                                'active'
+                            )
+                            ->orderBy('id')
+                            ->first();
+
+
+                    if ($user) {
+
+                        try {
+
+                            $user->notify(
+                                new SubscriptionInvoiceNotification(
+                                    $subscription
+                                )
+                            );
+
+
+                            Log::info(
+                                'INVOICE SUBSCRIPTION BERHASIL DIKIRIM.',
+                                [
+
+                                    'subscription_id' =>
+                                        $subscription->id,
+
+                                    'invoice_number' =>
+                                        $subscription->invoice_number,
+
+                                    'email' =>
+                                        $user->email,
+
+                                ]
+                            );
+
+                        } catch (Throwable $e) {
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Email gagal tidak membatalkan pembayaran
+                            |--------------------------------------------------------------------------
+                            */
+
+                            Log::error(
+                                'GAGAL MENGIRIM INVOICE SUBSCRIPTION.',
+                                [
+
+                                    'subscription_id' =>
+                                        $subscription->id,
+
+                                    'invoice_number' =>
+                                        $subscription->invoice_number,
+
+                                    'email' =>
+                                        $user->email,
+
+                                    'message' =>
+                                        $e->getMessage(),
+
+                                ]
+                            );
+                        }
+                    } else {
+
+                        Log::warning(
+                            'User aktif untuk invoice tidak ditemukan.',
+                            [
+
+                                'subscription_id' =>
+                                    $subscription->id,
+
+                                'merchant_id' =>
+                                    $subscription->merchant_id,
+
+                            ]
+                        );
+                    }
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Response
+                |--------------------------------------------------------------------------
+                */
+
                 return response()->json([
                     'message' =>
                         'Payment processed successfully',
@@ -369,11 +496,13 @@ class MidtransNotificationController extends Controller
                 Log::info(
                     'PAYMENT MASIH PENDING',
                     [
+
                         'subscription_id' =>
                             $subscription->id,
 
                         'order_id' =>
                             $orderId,
+
                     ]
                 );
 
@@ -416,14 +545,6 @@ class MidtransNotificationController extends Controller
 
                     ]
                 );
-
-                /*
-                | Untuk sekarang subscription
-                | tetap pending.
-                |
-                | Kalau nanti ingin status "failed",
-                | kita bisa tambahkan status tersebut.
-                */
 
                 return response()->json([
                     'message' =>

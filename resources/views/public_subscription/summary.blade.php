@@ -16,10 +16,12 @@
                     </p>
                 </div>
 
-                <a href="{{ route('public.subscription.account', encryptId($duration->id)) }}"
-                    class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
-                    Masuk
-                </a>
+                @if (!auth()->check())
+                    <a href="{{ route('public.subscription.account', encryptId($duration->id)) }}"
+                        class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+                        Masuk
+                    </a>
+                @endif
 
             </div>
         </header>

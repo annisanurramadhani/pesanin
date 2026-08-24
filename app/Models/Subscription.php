@@ -37,4 +37,26 @@ class Subscription extends Model
     {
         return $this->belongsTo(PackageDuration::class);
     }
+
+    /**
+     * Menentukan apakah subscription masih aktif.
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active'
+            && $this->end_date
+            && !$this->end_date->isPast();
+    }
+
+    /**
+     * Menentukan apakah subscription sudah expired.
+     */
+    public function isExpired(): bool
+    {
+        return $this->status === 'expired'
+            || (
+                $this->end_date
+                && $this->end_date->isPast()
+            );
+    }
 }
