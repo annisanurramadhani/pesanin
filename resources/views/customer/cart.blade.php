@@ -171,22 +171,9 @@
                                     {{-- Image --}}
                                     <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0">
 
-                                        @if ($menu->image)
-
-                                            <img src="{{ asset('storage/' . $menu->image) }}"
-                                                alt="{{ $menu->name }}"
-                                                class="w-full h-full object-cover rounded-xl">
-
-                                        @else
-
-                                            <div
-                                                class="w-full h-full rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center">
-
-                                                <i class="fa-solid fa-utensils text-xl"></i>
-
-                                            </div>
-
-                                        @endif
+                                        <img src="{{ $menu->image ? asset('storage/' . $menu->image) : asset('assets/images/menu-default.jpg') }}"
+                                            alt="{{ $menu->name }}"
+                                            class="w-full h-full object-cover rounded-xl">
 
                                     </div>
 
