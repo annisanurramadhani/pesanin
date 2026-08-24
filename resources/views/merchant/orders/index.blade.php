@@ -195,7 +195,7 @@
                                                 <form action="{{ route('merchant.orders.status', encryptId($order->id)) }}" method="POST" class="inline-block">
                                                     @csrf
                                                     @method('PATCH')
-                                                    <input type="hidden" name="status" value="selesai">
+                                                    <input type="hidden" name="status" value="completed">
                                                     <button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition shadow-sm active:scale-95 flex items-center gap-1 cursor-pointer">
                                                         <i class="fa-solid fa-circle-check"></i> Selesaikan
                                                     </button>
