@@ -28,23 +28,6 @@
 @section('content')
     <div class="space-y-6">
 
-
-        {{-- Success --}}
-        @if (session('success'))
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700">
-                {{ session('success') }}
-            </div>
-        @endif
-
-
-        {{-- Error --}}
-        @if (session('error'))
-            <div class="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700">
-                {{ session('error') }}
-            </div>
-        @endif
-
-
         <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
 
