@@ -489,6 +489,7 @@ class CustomerOrderController extends Controller
                 'total'          => $subtotal,
                 'payment_method' => $validated['payment_method'],
                 'payment_provider' => null,
+                'payment_status'   => 'pending',
                 'status'         => 'pending',
             ]);
 
@@ -526,6 +527,11 @@ class CustomerOrderController extends Controller
         |--------------------------------------------------------------------------
         */
         if ($validated['payment_method'] === 'cash') {
+
+            $order->update([
+                'payment_status' => 'paid',
+            ]);
+            
             session()->forget('cart');
 
             return redirect()

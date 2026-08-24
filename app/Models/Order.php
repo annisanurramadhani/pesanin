@@ -21,6 +21,7 @@ class Order extends Model
         'total',
         'payment_method',
         'payment_provider',
+        'payment_status',
         'status',
         'receipt_sent_at',
     ];

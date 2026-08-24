@@ -26,88 +26,79 @@ class MidtransOrderNotificationController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            Config::$serverKey =
-                config('services.midtrans.server_key');
+            Config::$serverKey = config(
+                'services.midtrans.server_key'
+            );
 
-            Config::$isProduction =
-                config(
-                    'services.midtrans.is_production',
-                    false
-                );
+            Config::$isProduction = config(
+                'services.midtrans.is_production',
+                false
+            );
 
             Config::$isSanitized = true;
-
             Config::$is3ds = true;
 
 
             /*
             |--------------------------------------------------------------------------
-            | NOTIFICATION
+            | MIDTRANS NOTIFICATION
             |--------------------------------------------------------------------------
             */
 
-            $notification =
-                new Notification();
+            $notification = new Notification();
 
 
             /*
             |--------------------------------------------------------------------------
-            | DATA
+            | DATA NOTIFICATION
             |--------------------------------------------------------------------------
             */
 
-            $midtransOrderId =
-                $notification->order_id;
+            $midtransOrderId = $notification->order_id;
 
-            $transactionStatus =
-                $notification->transaction_status;
+            $transactionStatus = $notification->transaction_status;
 
-            $fraudStatus =
-                $notification->fraud_status ?? null;
+            $fraudStatus = $notification->fraud_status ?? null;
 
-            $grossAmount =
-                $notification->gross_amount;
+            $grossAmount = $notification->gross_amount;
 
-            $transactionId =
-                $notification->transaction_id ?? null;
+            $transactionId = $notification->transaction_id ?? null;
 
 
             /*
             |--------------------------------------------------------------------------
-            | LOG
+            | LOG NOTIFICATION
             |--------------------------------------------------------------------------
             */
 
             Log::info(
                 'MIDTRANS ORDER NOTIFICATION',
                 [
+                    'order_id' => $midtransOrderId,
 
-                    'order_id' =>
-                        $midtransOrderId,
+                    'transaction_status' => $transactionStatus,
 
-                    'transaction_status' =>
-                        $transactionStatus,
+                    'fraud_status' => $fraudStatus,
 
-                    'fraud_status' =>
-                        $fraudStatus,
+                    'gross_amount' => $grossAmount,
 
-                    'gross_amount' =>
-                        $grossAmount,
-
-                    'transaction_id' =>
-                        $transactionId,
+                    'transaction_id' => $transactionId,
                 ]
             );
 
 
             /*
             |--------------------------------------------------------------------------
-            | VALIDATE ORDER ID
+            | VALIDATE MIDTRANS ORDER ID
             |--------------------------------------------------------------------------
             |
             | Format:
             |
             | ORD-{database_id}-{timestamp}-{random}
+            |
+            | Contoh:
+            |
+            | ORD-15-20260824101010-ABC123
             |
             */
 
@@ -122,15 +113,13 @@ class MidtransOrderNotificationController extends Controller
                 Log::warning(
                     'Format Order ID Midtrans tidak valid.',
                     [
-                        'order_id' =>
-                            $midtransOrderId,
+                        'order_id' => $midtransOrderId,
                     ]
                 );
 
                 return response()->json(
                     [
-                        'message' =>
-                            'Invalid order ID',
+                        'message' => 'Invalid order ID',
                     ],
                     400
                 );
@@ -143,8 +132,7 @@ class MidtransOrderNotificationController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $orderId =
-                (int) $matches[1];
+            $orderId = (int) $matches[1];
 
 
             /*
@@ -153,24 +141,21 @@ class MidtransOrderNotificationController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $order =
-                Order::find($orderId);
-
+            $order = Order::find($orderId);
 
             if (!$order) {
 
                 Log::warning(
                     'Order tidak ditemukan.',
                     [
-                        'order_id' =>
-                            $orderId,
+                        'order_id' => $orderId,
+                        'midtrans_order_id' => $midtransOrderId,
                     ]
                 );
 
                 return response()->json(
                     [
-                        'message' =>
-                            'Order not found',
+                        'message' => 'Order not found',
                     ],
                     404
                 );
@@ -179,7 +164,7 @@ class MidtransOrderNotificationController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | VALIDATE AMOUNT
+            | VALIDATE GROSS AMOUNT
             |--------------------------------------------------------------------------
             */
 
@@ -191,22 +176,19 @@ class MidtransOrderNotificationController extends Controller
                 Log::warning(
                     'Nominal pembayaran order tidak sesuai.',
                     [
+                        'order_id' => $order->id,
 
-                        'order_id' =>
-                            $order->id,
+                        'expected' => $order->total,
 
-                        'expected' =>
-                            $order->total,
+                        'received' => $grossAmount,
 
-                        'received' =>
-                            $grossAmount,
+                        'midtrans_order_id' => $midtransOrderId,
                     ]
                 );
 
                 return response()->json(
                     [
-                        'message' =>
-                            'Invalid payment amount',
+                        'message' => 'Invalid payment amount',
                     ],
                     400
                 );
@@ -217,11 +199,18 @@ class MidtransOrderNotificationController extends Controller
             |--------------------------------------------------------------------------
             | SETTLEMENT
             |--------------------------------------------------------------------------
+            |
+            | settlement berarti pembayaran berhasil.
+            |
+            | payment_status:
+            | pending -> paid
+            |
+            | status order TIDAK diubah ke processing.
+            | Status order akan diproses oleh merchant/dapur.
+            |
             */
 
-            if (
-                $transactionStatus === 'settlement'
-            ) {
+            if ($transactionStatus === 'settlement') {
 
                 DB::transaction(
                     function () use (
@@ -232,27 +221,36 @@ class MidtransOrderNotificationController extends Controller
 
                         /*
                         |--------------------------------------------------------------------------
-                        | Jangan proses ulang
+                        | CEGAH DUPLICATE NOTIFICATION
                         |--------------------------------------------------------------------------
                         */
 
-                        if (
-                            $order->status !== 'pending'
-                        ) {
+                        if ($order->payment_status === 'paid') {
+
+                            Log::info(
+                                'PEMBAYARAN ORDER SUDAH DIPROSES SEBELUMNYA.',
+                                [
+                                    'order_id' =>
+                                        $order->id,
+
+                                    'midtrans_order_id' =>
+                                        $midtransOrderId,
+                                ]
+                            );
+
                             return;
                         }
 
 
                         /*
                         |--------------------------------------------------------------------------
-                        | UPDATE ORDER
+                        | UPDATE PAYMENT
                         |--------------------------------------------------------------------------
                         */
 
                         $order->update([
-
-                            'status' =>
-                                'processing',
+                            'payment_status' =>
+                                'paid',
 
                             'payment_provider' =>
                                 'midtrans:' .
@@ -267,9 +265,8 @@ class MidtransOrderNotificationController extends Controller
                         */
 
                         Log::info(
-                            'PEMBAYARAN ORDER BERHASIL',
+                            'PEMBAYARAN ORDER BERHASIL.',
                             [
-
                                 'order_id' =>
                                     $order->id,
 
@@ -302,19 +299,17 @@ class MidtransOrderNotificationController extends Controller
             | CAPTURE
             |--------------------------------------------------------------------------
             |
-            | Beberapa metode pembayaran bisa menghasilkan
+            | Beberapa metode pembayaran dapat menghasilkan
             | status capture.
             |
             */
 
-            if (
-                $transactionStatus === 'capture'
-            ) {
+            if ($transactionStatus === 'capture') {
 
                 /*
-                |----------------------------------------------------------------------
-                | Untuk sandbox/test, anggap capture berhasil
-                |----------------------------------------------------------------------
+                |--------------------------------------------------------------------------
+                | VALIDATE FRAUD STATUS
+                |--------------------------------------------------------------------------
                 */
 
                 if (
@@ -328,10 +323,44 @@ class MidtransOrderNotificationController extends Controller
                     )
                 ) {
 
-                    $order->update([
+                    /*
+                    |--------------------------------------------------------------------------
+                    | CEGAH DUPLICATE
+                    |--------------------------------------------------------------------------
+                    */
 
-                        'status' =>
-                            'processing',
+                    if ($order->payment_status === 'paid') {
+
+                        Log::info(
+                            'PEMBAYARAN ORDER CAPTURE SUDAH DIPROSES.',
+                            [
+                                'order_id' =>
+                                    $order->id,
+
+                                'midtrans_order_id' =>
+                                    $midtransOrderId,
+                            ]
+                        );
+
+                        return response()->json(
+                            [
+                                'message' =>
+                                    'Payment already processed',
+                            ],
+                            200
+                        );
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | UPDATE PAYMENT
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $order->update([
+                        'payment_status' =>
+                            'paid',
 
                         'payment_provider' =>
                             'midtrans:' .
@@ -339,14 +368,23 @@ class MidtransOrderNotificationController extends Controller
                     ]);
 
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | LOG
+                    |--------------------------------------------------------------------------
+                    */
+
                     Log::info(
-                        'PEMBAYARAN ORDER CAPTURE',
+                        'PEMBAYARAN ORDER CAPTURE BERHASIL.',
                         [
                             'order_id' =>
                                 $order->id,
 
                             'transaction_id' =>
                                 $transactionId,
+
+                            'midtrans_order_id' =>
+                                $midtransOrderId,
                         ]
                     );
                 }
@@ -366,21 +404,24 @@ class MidtransOrderNotificationController extends Controller
             |--------------------------------------------------------------------------
             | PENDING
             |--------------------------------------------------------------------------
+            |
+            | Customer belum menyelesaikan pembayaran.
+            |
             */
 
-            if (
-                $transactionStatus === 'pending'
-            ) {
+            if ($transactionStatus === 'pending') {
 
                 Log::info(
-                    'PEMBAYARAN ORDER MASIH PENDING',
+                    'PEMBAYARAN ORDER MASIH PENDING.',
                     [
-
                         'order_id' =>
                             $order->id,
 
                         'midtrans_order_id' =>
                             $midtransOrderId,
+
+                        'transaction_status' =>
+                            $transactionStatus,
                     ]
                 );
 
@@ -396,36 +437,36 @@ class MidtransOrderNotificationController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | FAILED / EXPIRED
+            | DENY
             |--------------------------------------------------------------------------
+            |
+            | Pembayaran ditolak oleh Midtrans.
+            |
             */
 
-            if (
-                in_array(
-                    $transactionStatus,
-                    [
-                        'deny',
-                        'cancel',
-                        'expire',
-                    ],
-                    true
-                )
-            ) {
+            if ($transactionStatus === 'deny') {
 
                 $order->update([
-                    'status' => 'cancelled',
+                    'payment_status' =>
+                        'failed',
+
+                    'payment_provider' =>
+                        'midtrans:' .
+                        $midtransOrderId,
                 ]);
 
 
                 Log::info(
-                    'PEMBAYARAN ORDER GAGAL / EXPIRED',
+                    'PEMBAYARAN ORDER DITOLAK.',
                     [
-
                         'order_id' =>
                             $order->id,
 
-                        'transaction_status' =>
-                            $transactionStatus,
+                        'midtrans_order_id' =>
+                            $midtransOrderId,
+
+                        'transaction_id' =>
+                            $transactionId,
                     ]
                 );
 
@@ -433,7 +474,7 @@ class MidtransOrderNotificationController extends Controller
                 return response()->json(
                     [
                         'message' =>
-                            'Payment not successful',
+                            'Payment denied',
                     ],
                     200
                 );
@@ -442,9 +483,119 @@ class MidtransOrderNotificationController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | OTHER STATUS
+            | EXPIRED
+            |--------------------------------------------------------------------------
+            |
+            | QRIS / transaksi sudah melewati batas waktu pembayaran.
+            |
+            */
+
+            if ($transactionStatus === 'expire') {
+
+                $order->update([
+                    'payment_status' =>
+                        'expired',
+
+                    'payment_provider' =>
+                        'midtrans:' .
+                        $midtransOrderId,
+                ]);
+
+
+                Log::info(
+                    'PEMBAYARAN ORDER EXPIRED.',
+                    [
+                        'order_id' =>
+                            $order->id,
+
+                        'midtrans_order_id' =>
+                            $midtransOrderId,
+
+                        'transaction_id' =>
+                            $transactionId,
+                    ]
+                );
+
+
+                return response()->json(
+                    [
+                        'message' =>
+                            'Payment expired',
+                    ],
+                    200
+                );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CANCEL
+            |--------------------------------------------------------------------------
+            |
+            | Transaksi dibatalkan.
+            |
+            */
+
+            if ($transactionStatus === 'cancel') {
+
+                $order->update([
+                    'payment_status' =>
+                        'failed',
+
+                    'status' =>
+                        'cancelled',
+
+                    'payment_provider' =>
+                        'midtrans:' .
+                        $midtransOrderId,
+                ]);
+
+
+                Log::info(
+                    'PEMBAYARAN ORDER DIBATALKAN.',
+                    [
+                        'order_id' =>
+                            $order->id,
+
+                        'midtrans_order_id' =>
+                            $midtransOrderId,
+
+                        'transaction_id' =>
+                            $transactionId,
+                    ]
+                );
+
+
+                return response()->json(
+                    [
+                        'message' =>
+                            'Payment cancelled',
+                    ],
+                    200
+                );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS LAIN
             |--------------------------------------------------------------------------
             */
+
+            Log::info(
+                'MIDTRANS ORDER STATUS LAIN.',
+                [
+                    'order_id' =>
+                        $order->id,
+
+                    'midtrans_order_id' =>
+                        $midtransOrderId,
+
+                    'transaction_status' =>
+                        $transactionStatus,
+                ]
+            );
+
 
             return response()->json(
                 [
@@ -456,10 +607,15 @@ class MidtransOrderNotificationController extends Controller
 
         } catch (Throwable $e) {
 
+            /*
+            |--------------------------------------------------------------------------
+            | ERROR HANDLING
+            |--------------------------------------------------------------------------
+            */
+
             Log::error(
                 'MIDTRANS ORDER NOTIFICATION ERROR',
                 [
-
                     'message' =>
                         $e->getMessage(),
 
@@ -468,6 +624,9 @@ class MidtransOrderNotificationController extends Controller
 
                     'line' =>
                         $e->getLine(),
+
+                    'trace' =>
+                        $e->getTraceAsString(),
                 ]
             );
 
