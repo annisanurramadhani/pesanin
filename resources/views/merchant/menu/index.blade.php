@@ -29,14 +29,6 @@
             <main class="flex-1 p-8">
                 <div class="space-y-8">
 
-                    {{-- Notifikasi Sukses --}}
-                    @if(session('success'))
-                        <div class="flex items-center gap-3 bg-emerald-50 border border-emerald-200/80 text-emerald-800 px-5 py-4 rounded-2xl text-sm font-bold shadow-sm">
-                            <i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>
-                            <span>{{ session('success') }}</span>
-                        </div>
-                    @endif
-
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-12">
 
                         {{-- Sidebar Forms --}}

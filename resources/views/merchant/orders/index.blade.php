@@ -175,7 +175,7 @@
                                     @if(Auth::user()->role === 'kasir')
                                         <div class="flex items-center justify-center gap-2">
                                             <!-- Tombol Print Struk -->
-                                            <a href="{{ route('merchant.orders.receipt', $order->id) }}" target="_blank"
+                                            <a href="{{ route('merchant.orders.receipt', encryptId($order->id)) }}" target="_blank"
                                                 class="w-8 h-8 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl flex items-center justify-center text-xs transition" title="Cetak Struk">
                                                 <i class="fa-solid fa-print"></i>
                                             </a>
@@ -192,16 +192,16 @@
                                                 </span>
                                             @else
                                                 <!-- Tombol Validasi Cepat Kasir -->
-                                                <form action="{{ route('merchant.orders.status', $order->id) }}" method="POST" class="inline-block">
+                                                <form action="{{ route('merchant.orders.status', encryptId($order->id)) }}" method="POST" class="inline-block">
                                                     @csrf
                                                     @method('PATCH')
-                                                    <input type="hidden" name="status" value="selesai">
+                                                    <input type="hidden" name="status" value="completed">
                                                     <button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition shadow-sm active:scale-95 flex items-center gap-1 cursor-pointer">
                                                         <i class="fa-solid fa-circle-check"></i> Selesaikan
                                                     </button>
                                                 </form>
 
-                                                <form action="{{ route('merchant.orders.status', $order->id) }}" method="POST" class="inline-block">
+                                                <form action="{{ route('merchant.orders.status', encryptId($order->id)) }}" method="POST" class="inline-block">
                                                     @csrf
                                                     @method('PATCH')
                                                     <input type="hidden" name="status" value="batal">
@@ -213,7 +213,7 @@
                                         </div>
                                     @else
                                         <!-- CETAK STRUK UNTUK OWNER -->
-                                        <a href="{{ route('merchant.orders.receipt', $order->id) }}" target="_blank"
+                                        <a href="{{ route('merchant.orders.receipt', encryptId($order->id)) }}" target="_blank"
                                             class="inline-flex items-center justify-center w-9 h-9 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition shadow-sm" title="Cetak Struk">
                                             <i class="fa-solid fa-print"></i>
                                         </a>

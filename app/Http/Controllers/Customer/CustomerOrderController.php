@@ -207,35 +207,66 @@ class CustomerOrderController extends Controller
     public function updateCart(Request $request, string $code)
     {
         $request->validate([
-            'menu_id'  => ['required', 'integer'],
+            'menu_id' => ['required', 'integer'],
             'quantity' => ['required', 'integer', 'min:0', 'max:50'],
         ]);
 
-    $qrCode = QrCode::where('code', $code)
-        ->where('status', 'active')
-        ->firstOrFail();
+        $qrCode = QrCode::where('code', $code)
+            ->where('status', 'active')
+            ->firstOrFail();
 
-    $menu = Menu::where('id', $request->menu_id)
-        ->where('merchant_id', $qrCode->merchant_id)
-        ->where('status', 'available')
-        ->firstOrFail();
+        $menu = Menu::where('id', $request->menu_id)
+            ->where('merchant_id', $qrCode->merchant_id)
+            ->where('status', 'available')
+            ->firstOrFail();
 
-    $cart = session()->get('cart', []);
+        $cart = session()->get('cart', []);
 
         if ($request->quantity <= 0) {
             unset($cart[$menu->id]);
         } else {
             if ($request->quantity > $menu->stock) {
-                return back()->with(
-                    'error',
-                    "Maaf, stok {$menu->name} hanya tersisa {$menu->stock}."
-                );
+                return response()->json([
+                    'success' => false,
+                    'message' => "Maaf, stok {$menu->name} hanya tersisa {$menu->stock}.",
+                ], 422);
             }
 
             $cart[$menu->id] = $request->quantity;
         }
 
-        $cart[$menu->id] = $request->quantity;
+        session()->put('cart', $cart);
+
+        $items = [];
+
+        foreach ($cart as $menuId => $quantity) {
+            $cartMenu = Menu::where('id', $menuId)
+                ->where('merchant_id', $qrCode->merchant_id)
+                ->where('status', 'available')
+                ->first();
+
+            if (!$cartMenu) {
+                continue;
+            }
+
+            $items[] = [
+                'menu_id' => $cartMenu->id,
+                'quantity' => $quantity,
+                'subtotal' => $cartMenu->price * $quantity,
+            ];
+        }
+
+        $total = collect($items)->sum('subtotal');
+
+        $currentItem = collect($items)->firstWhere('menu_id', $menu->id);
+
+        return response()->json([
+            'success' => true,
+            'quantity' => $currentItem['quantity'] ?? 0,
+            'subtotal' => $currentItem['subtotal'] ?? 0,
+            'total' => $total,
+            'removed' => !isset($cart[$menu->id]),
+        ]);
     }
 
     /**
