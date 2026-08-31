@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Payment;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\Subscription;
 use App\Notifications\SubscriptionInvoiceNotification;
 use Illuminate\Http\Request;
@@ -102,8 +103,388 @@ class MidtransNotificationController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Validasi Order ID
             |--------------------------------------------------------------------------
+            | ORDER CUSTOMER / QRIS
+            |--------------------------------------------------------------------------
+            |--------------------------------------------------------------------------
+            |
+            | Format Order ID:
+            |
+            | ORD-{order_id}-{timestamp}-{random}
+            |
+            */
+
+            if (
+                preg_match(
+                    '/^ORD-(\d+)-/',
+                    $orderId,
+                    $matches
+                )
+            ) {
+
+                $orderDatabaseId =
+                    (int) $matches[1];
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Cari Order
+                |--------------------------------------------------------------------------
+                */
+
+                $order = Order::find(
+                    $orderDatabaseId
+                );
+
+
+                if (!$order) {
+
+                    Log::warning(
+                        'Order Customer tidak ditemukan.',
+                        [
+
+                            'order_id' =>
+                                $orderId,
+
+                            'order_database_id' =>
+                                $orderDatabaseId,
+
+                        ]
+                    );
+
+                    return response()->json([
+                        'message' =>
+                            'Order not found',
+                    ], 404);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Pastikan Payment Provider Sesuai
+                |--------------------------------------------------------------------------
+                |
+                | Mencegah notification Midtrans untuk transaksi
+                | lain memproses order yang salah.
+                |
+                */
+
+                if (
+                    $order->payment_provider !==
+                    'midtrans:' . $orderId
+                ) {
+
+                    Log::warning(
+                        'Payment provider order tidak sesuai.',
+                        [
+
+                            'order_id' =>
+                                $order->id,
+
+                            'expected' =>
+                                'midtrans:' . $orderId,
+
+                            'actual' =>
+                                $order->payment_provider,
+
+                        ]
+                    );
+
+                    return response()->json([
+                        'message' =>
+                            'Invalid payment provider',
+                    ], 400);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Validasi Nominal
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    (float) $grossAmount !==
+                    (float) $order->total
+                ) {
+
+                    Log::warning(
+                        'Nominal pembayaran order tidak sesuai.',
+                        [
+
+                            'order_id' =>
+                                $order->id,
+
+                            'midtrans_order_id' =>
+                                $orderId,
+
+                            'expected' =>
+                                $order->total,
+
+                            'received' =>
+                                $grossAmount,
+
+                        ]
+                    );
+
+                    return response()->json([
+                        'message' =>
+                            'Invalid payment amount',
+                    ], 400);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | PAYMENT BERHASIL
+                |--------------------------------------------------------------------------
+                */
+
+                $paymentSuccess =
+                    $transactionStatus === 'settlement'
+                    ||
+                    (
+                        $transactionStatus === 'capture'
+                        &&
+                        $fraudStatus === 'accept'
+                    );
+
+
+                if ($paymentSuccess) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Idempotency
+                    |--------------------------------------------------------------------------
+                    |
+                    | Notification Midtrans dapat dikirim lebih dari sekali.
+                    |
+                    */
+
+                    if (
+                        $order->payment_status === 'paid'
+                    ) {
+
+                        Log::info(
+                            'PAYMENT ORDER SUDAH DIPROSES.',
+                            [
+
+                                'order_id' =>
+                                    $order->id,
+
+                                'midtrans_order_id' =>
+                                    $orderId,
+
+                            ]
+                        );
+
+                        return response()->json([
+                            'message' =>
+                                'Order payment already processed',
+                        ], 200);
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Update Order
+                    |--------------------------------------------------------------------------
+                    */
+
+                    DB::transaction(
+                        function () use (
+                            $order,
+                            $transactionId,
+                            $transactionStatus
+                        ) {
+
+                            $order->update([
+
+                                'payment_status' =>
+                                    'paid',
+
+                                'status' =>
+                                    'processing',
+
+                            ]);
+
+
+                            /*
+                            |----------------------------------------------------------
+                            | Log Berhasil
+                            |----------------------------------------------------------
+                            */
+
+                            Log::info(
+                                'PEMBAYARAN ORDER BERHASIL.',
+                                [
+
+                                    'order_id' =>
+                                        $order->id,
+
+                                    'order_number' =>
+                                        $order->order_number,
+
+                                    'transaction_id' =>
+                                        $transactionId,
+
+                                    'transaction_status' =>
+                                        $transactionStatus,
+
+                                ]
+                            );
+                        }
+                    );
+
+
+                    return response()->json([
+                        'message' =>
+                            'Order payment processed successfully',
+                    ], 200);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | PAYMENT PENDING
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $transactionStatus === 'pending'
+                ) {
+
+                    /*
+                    |------------------------------------------------------------------
+                    | Pastikan tetap pending
+                    |------------------------------------------------------------------
+                    */
+
+                    if (
+                        $order->payment_status !== 'paid'
+                    ) {
+
+                        $order->update([
+                            'payment_status' =>
+                                'pending',
+                        ]);
+                    }
+
+
+                    Log::info(
+                        'PAYMENT ORDER MASIH PENDING.',
+                        [
+
+                            'order_id' =>
+                                $order->id,
+
+                            'order_number' =>
+                                $order->order_number,
+
+                            'midtrans_order_id' =>
+                                $orderId,
+
+                        ]
+                    );
+
+
+                    return response()->json([
+                        'message' =>
+                            'Order payment pending',
+                    ], 200);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | PAYMENT GAGAL / EXPIRED
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    in_array(
+                        $transactionStatus,
+                        [
+                            'deny',
+                            'cancel',
+                            'expire',
+                        ]
+                    )
+                ) {
+
+                    /*
+                    |------------------------------------------------------------------
+                    | Jangan ubah payment yang sudah paid
+                    |------------------------------------------------------------------
+                    */
+
+                    if (
+                        $order->payment_status !== 'paid'
+                    ) {
+
+                        $order->update([
+
+                            'payment_status' =>
+                                $transactionStatus === 'expire'
+                                    ? 'expired'
+                                    : 'failed',
+
+                            'status' =>
+                                'cancelled',
+
+                        ]);
+                    }
+
+
+                    Log::info(
+                        'PAYMENT ORDER GAGAL / EXPIRED.',
+                        [
+
+                            'order_id' =>
+                                $order->id,
+
+                            'order_number' =>
+                                $order->order_number,
+
+                            'midtrans_order_id' =>
+                                $orderId,
+
+                            'transaction_status' =>
+                                $transactionStatus,
+
+                        ]
+                    );
+
+
+                    return response()->json([
+                        'message' =>
+                            'Order payment not successful',
+                    ], 200);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Status Lain
+                |--------------------------------------------------------------------------
+                */
+
+                return response()->json([
+                    'message' =>
+                        'Order notification received',
+                ], 200);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            |--------------------------------------------------------------------------
+            | SUBSCRIPTION
+            |--------------------------------------------------------------------------
+            |--------------------------------------------------------------------------
+            |
+            | BAGIAN INI TETAP MENGGUNAKAN FLOW SUBSCRIPTION YANG SUDAH ADA.
+            |
             */
 
             if (

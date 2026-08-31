@@ -188,7 +188,7 @@ Route::prefix('m/{code}')
 
 Route::post(
     '/payment/midtrans/order/notification',
-    [MidtransOrderNotificationController::class, 'handle']
+    [MidtransNotificationController::class, 'handle']
 )->name('payment.midtrans.order.notification');
 
 

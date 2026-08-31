@@ -781,4 +781,83 @@ class CustomerOrderController extends Controller
             )
         );
     }
+
+
+/**
+ * Mengecek status pembayaran order.
+ *
+ * Digunakan oleh polling pada halaman order success.
+ */
+public function payment(string $code, string $orderNumber)
+{
+    /*
+    |--------------------------------------------------------------------------
+    | DEKRIPSI ORDER NUMBER
+    |--------------------------------------------------------------------------
+    */
+
+    try {
+        $decryptedOrderNumber = Crypt::decryptString($orderNumber);
+    } catch (\Exception $e) {
+        $decryptedOrderNumber = $orderNumber;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | QR CODE
+    |--------------------------------------------------------------------------
+    */
+
+    $qrCode = QrCode::where('code', $code)
+        ->where('status', 'active')
+        ->firstOrFail();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CARI ORDER
+    |--------------------------------------------------------------------------
+    */
+
+    $order = Order::where(
+            'order_number',
+            $decryptedOrderNumber
+        )
+        ->where(
+            'merchant_id',
+            $qrCode->merchant_id
+        )
+        ->firstOrFail();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESPONSE STATUS PEMBAYARAN
+    |--------------------------------------------------------------------------
+    */
+
+    return response()->json([
+        'success' => true,
+
+        'payment_status' => $order->payment_status,
+
+        'status' => $order->status,
+
+        'is_paid' =>
+            $order->payment_status === 'paid',
+
+        'is_failed' =>
+            in_array(
+                $order->payment_status,
+                [
+                    'failed',
+                    'expired',
+                ]
+            ),
+
+        'is_pending' =>
+            $order->payment_status === 'pending',
+    ]);
+}
 }
