@@ -11,49 +11,42 @@
             </p>
         </div>
 
-        @if(Auth::user()->role !== 'kasir')
-            <!-- FORM FILTER KHUSUS OWNER -->
-            <form method="GET" action="{{ route('merchant.orders.index') }}" class="flex items-center gap-2 bg-slate-900 p-2 rounded-2xl shadow-lg border border-slate-800">
-                <div class="pl-2 pr-1 text-amber-400 text-xs font-extrabold flex items-center gap-1.5">
-                    <i class="fa-solid fa-sliders"></i>
-                    <span class="hidden sm:inline text-slate-300">Filter:</span>
-                </div>
-
-                <select name="filter_type" id="filterTypeSelect" onchange="switchFilterMode(this.value)"
-                    class="bg-slate-800 text-amber-400 text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer">
-                    <option value="day" {{ ($filterType ?? 'day') === 'day' ? 'selected' : '' }}>📅 Per Hari</option>
-                    <option value="month" {{ ($filterType ?? '') === 'month' ? 'selected' : '' }}>🗓️ Per Bulan</option>
-                    <option value="year" {{ ($filterType ?? '') === 'year' ? 'selected' : '' }}>📊 Per Tahun</option>
-                </select>
-
-                <div id="inputDayWrapper" class="{{ ($filterType ?? 'day') === 'day' ? 'block' : 'hidden' }}">
-                    <input type="date" name="date" value="{{ $selectedDate ?? date('Y-m-d') }}" 
-                        class="bg-slate-800 text-white text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80 focus:outline-none">
-                </div>
-
-                <div id="inputMonthWrapper" class="{{ ($filterType ?? '') === 'month' ? 'block' : 'hidden' }}">
-                    <input type="month" name="month" value="{{ $selectedMonth ?? date('Y-m') }}" 
-                        class="bg-slate-800 text-white text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80 focus:outline-none">
-                </div>
-
-                <div id="inputYearWrapper" class="{{ ($filterType ?? '') === 'year' ? 'block' : 'hidden' }}">
-                    <select name="year" class="bg-slate-800 text-white text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80 focus:outline-none">
-                        @for($y = date('Y'); $y >= 2023; $y--)
-                            <option value="{{ $y }}" {{ ($selectedYear ?? date('Y')) == $y ? 'selected' : '' }}>{{ $y }}</option>
-                        @endfor
-                    </select>
-                </div>
-
-                <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer">
-                    Terapkan
-                </button>
-            </form>
-        @else
-            <!-- BADGE OPERASIONAL KHUSUS KASIR -->
-            <div class="px-4 py-2 bg-amber-500/10 border border-amber-500/30 text-amber-600 rounded-2xl text-xs font-extrabold flex items-center gap-2">
-                <i class="fa-solid fa-calendar-day"></i> Operasional Hari Ini ({{ date('d M Y') }})
+        <!-- FORM FILTER (Dapat diakses Owner & Kasir) -->
+        <form method="GET" action="{{ route('merchant.orders.index') }}" class="flex items-center gap-2 bg-slate-900 p-2 rounded-2xl shadow-lg border border-slate-800">
+            <div class="pl-2 pr-1 text-amber-400 text-xs font-extrabold flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders"></i>
+                <span class="hidden sm:inline text-slate-300">Filter:</span>
             </div>
-        @endif
+
+            <select name="filter_type" id="filterTypeSelect" onchange="switchFilterMode(this.value)"
+                class="bg-slate-800 text-amber-400 text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer">
+                <option value="day" {{ ($filterType ?? 'day') === 'day' ? 'selected' : '' }}>📅 Per Hari</option>
+                <option value="month" {{ ($filterType ?? '') === 'month' ? 'selected' : '' }}>🗓️ Per Bulan</option>
+                <option value="year" {{ ($filterType ?? '') === 'year' ? 'selected' : '' }}>📊 Per Tahun</option>
+            </select>
+
+            <div id="inputDayWrapper" class="{{ ($filterType ?? 'day') === 'day' ? 'block' : 'hidden' }}">
+                <input type="date" name="date" value="{{ $selectedDate ?? date('Y-m-d') }}" 
+                    class="bg-slate-800 text-white text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80 focus:outline-none">
+            </div>
+
+            <div id="inputMonthWrapper" class="{{ ($filterType ?? '') === 'month' ? 'block' : 'hidden' }}">
+                <input type="month" name="month" value="{{ $selectedMonth ?? date('Y-m-m') }}" 
+                    class="bg-slate-800 text-white text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80 focus:outline-none">
+            </div>
+
+            <div id="inputYearWrapper" class="{{ ($filterType ?? '') === 'year' ? 'block' : 'hidden' }}">
+                <select name="year" class="bg-slate-800 text-white text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80 focus:outline-none">
+                    @for($y = date('Y'); $y >= 2023; $y--)
+                        <option value="{{ $y }}" {{ ($selectedYear ?? date('Y')) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                    @endfor
+                </select>
+            </div>
+
+            <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer">
+                Terapkan
+            </button>
+        </form>
     </div>
 @endsection
 

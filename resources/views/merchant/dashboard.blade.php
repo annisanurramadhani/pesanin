@@ -377,7 +377,7 @@
 
                                         <i class="fa-solid fa-clock"></i>
 
-                                        Menunggu
+                                        Belum Dibayar
 
                                     </span>
 

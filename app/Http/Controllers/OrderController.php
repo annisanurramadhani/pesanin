@@ -26,25 +26,18 @@ class OrderController extends Controller
         $selectedYear  = $request->get('year', Carbon::now()->year);
         $labelPeriode  = Carbon::today()->format('d M Y');
 
-        // LOGIKA PERBEDAAN ROLE (KASIR VS OWNER)
-        if ($user->role === 'kasir') {
-            // KASIR: Hanya melihat pesanan HARI INI
-            $query->whereDate('created_at', Carbon::today());
-            $labelPeriode = 'Hari Ini (' . Carbon::today()->format('d M Y') . ')';
-        } else {
-            // OWNER: Filter fleksibel (Per Hari, Per Bulan, Per Tahun)
-            if ($filterType === 'day') {
-                $query->whereDate('created_at', $selectedDate);
-                $labelPeriode = Carbon::parse($selectedDate)->format('d M Y');
-            } elseif ($filterType === 'month') {
-                $carbonMonth = Carbon::parse($selectedMonth);
-                $query->whereYear('created_at', $carbonMonth->year)
-                      ->whereMonth('created_at', $carbonMonth->month);
-                $labelPeriode = $carbonMonth->format('F Y');
-            } elseif ($filterType === 'year') {
-                $query->whereYear('created_at', $selectedYear);
-                $labelPeriode = 'Tahun ' . $selectedYear;
-            }
+        // LOGIKA FILTER DITERAPKAN KE SEMUA ROLE OWNER DAN KASIR
+        if ($filterType === 'day') {
+            $query->whereDate('created_at', $selectedDate);
+            $labelPeriode = Carbon::parse($selectedDate)->format('d M Y');
+        } elseif ($filterType === 'month') {
+            $carbonMonth = Carbon::parse($selectedMonth);
+            $query->whereYear('created_at', $carbonMonth->year)
+                ->whereMonth('created_at', $carbonMonth->month);
+            $labelPeriode = $carbonMonth->format('F Y');
+        } elseif ($filterType === 'year') {
+            $query->whereYear('created_at', $selectedYear);
+            $labelPeriode = 'Tahun ' . $selectedYear;
         }
 
         $orders = $query->orderBy('created_at', 'desc')->get();
