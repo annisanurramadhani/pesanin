@@ -402,188 +402,263 @@
             ====================================================== --}}
             @if ($order->payment_method === 'qris')
 
-                <div
-                    class="mt-5 rounded-2xl
-                    bg-gradient-to-br from-blue-50 to-indigo-50
-                    border border-blue-100 p-5">
+                
 
-                    <div class="text-center">
+                    {{-- =================================================
+                        INFORMASI PEMBAYARAN
+                    ================================================== --}}
+                    <div class="border-b border-slate-200 px-6 py-5">
 
-                        {{-- ICON --}}
-                        <div
-                            class="w-11 h-11 mx-auto rounded-xl bg-blue-100
-                            flex items-center justify-center">
+                        <div class="flex items-center justify-between">
 
-                            <i
-                                class="fa-solid fa-qrcode
-                                text-blue-600 text-lg">
-                            </i>
+                            <div>
 
-                        </div>
+                                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                                    Total Pembayaran
+                                </p>
 
-
-                        {{-- TITLE --}}
-                        <h3 class="text-sm font-bold text-slate-900 mt-3">
-
-                            Pembayaran QRIS
-
-                        </h3>
-
-
-                        {{-- DESCRIPTION --}}
-                        @if ($order->status === 'pending')
-
-                            <p class="text-xs text-slate-500 mt-1">
-
-                                Scan QRIS menggunakan aplikasi pembayaran
-                                kamu.
-
-                            </p>
-
-                        @else
-
-                            <p class="text-xs text-slate-500 mt-1">
-
-                                Pembayaran QRIS telah berhasil.
-
-                            </p>
-
-                        @endif
-
-
-                       {{-- =================================================
-    QR CODE
-================================================== --}}
-@if (
-    $order->status === 'pending' &&
-    !empty($payment['qr_code_url'])
-)
-
-    <img
-        src="{{ $payment['qr_code_url'] }}"
-        alt="QRIS Pembayaran"
-        class="mx-auto mt-5 h-64 w-64 object-contain"
-    >
-
-@elseif (
-    $order->status === 'pending' &&
-    empty($payment['qr_code_url'])
-)
-
-    <div
-        class="mt-5 rounded-xl
-        border border-red-100 bg-white p-5"
-    >
-
-        <i
-            class="fa-solid fa-triangle-exclamation
-            text-2xl text-red-500"
-        ></i>
-
-        <p class="mt-2 text-sm text-red-600">
-            QRIS tidak tersedia.
-        </p>
-
-    </div>
-
-@elseif ($order->status === 'processing')
-
-    <div
-        class="mt-5 rounded-2xl
-        border border-blue-100 bg-white p-6"
-    >
-
-        <div
-            class="mx-auto flex h-14 w-14 items-center
-            justify-center rounded-full bg-blue-100"
-        >
-            <i
-                class="fa-solid fa-check
-                text-xl text-blue-600"
-            ></i>
-        </div>
-
-        <p
-            class="mt-3 text-sm font-bold
-            text-blue-700"
-        >
-            Pembayaran Berhasil
-        </p>
-
-        <p
-            class="mt-1 text-xs text-slate-500"
-        >
-            Pesanan kamu sedang diproses.
-        </p>
-
-    </div>
-
-@endif
-                        {{-- =================================================
-                            TOTAL PAYMENT
-                        ================================================== --}}
-                        <div class="mt-5">
-
-                            <p class="text-xs text-slate-400">
-
-                                Total Pembayaran
-
-                            </p>
-
-                            <p
-                                class="text-2xl font-extrabold
-                                text-slate-900 mt-1">
-
-                                Rp {{ number_format($order->total, 0, ',', '.') }}
-
-                            </p>
-
-                        </div>
-
-
-                        {{-- =================================================
-                            PAYMENT STATUS
-                        ================================================== --}}
-                        @if ($order->status === 'pending')
-
-                            <div
-                                class="mt-4 inline-flex items-center gap-2
-                                px-3 py-1.5 rounded-full
-                                bg-amber-50 text-amber-700
-                                text-xs font-bold">
-
-                                <span
-                                    class="w-1.5 h-1.5 rounded-full
-                                    bg-amber-500">
-                                </span>
-
-                                Menunggu Pembayaran
+                                <p class="mt-1 text-3xl font-black text-slate-900">
+                                    Rp {{ number_format($order->total, 0, ',', '.') }}
+                                </p>
 
                             </div>
 
-                        @elseif ($order->status === 'processing')
-
                             <div
-                                class="mt-4 inline-flex items-center gap-2
-                                px-3 py-1.5 rounded-full
-                                bg-blue-50 text-blue-700
-                                text-xs font-bold">
+                                class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
 
-                                <span
-                                    class="w-1.5 h-1.5 rounded-full
-                                    bg-blue-500">
-                                </span>
-
-                                Pembayaran Berhasil
+                                <i class="fa-solid fa-wallet text-xl"></i>
 
                             </div>
 
-                        @endif
+                        </div>
+
+                    </div>
+
+
+                    {{-- =================================================
+                        QR CODE
+                    ================================================== --}}
+                    <div class="px-6 py-8">
+
+                        <div class="text-center">
+
+                            <p class="text-sm font-bold text-slate-700">
+                                Scan QR Code
+                            </p>
+
+                            <p class="mt-1 text-xs text-slate-400">
+                                Gunakan GoPay atau aplikasi pembayaran lain
+                                yang mendukung QRIS.
+                            </p>
+
+
+                            {{-- =================================================
+                                QR
+                            ================================================== --}}
+                            @if (
+                                $order->status === 'pending' &&
+                                !empty($payment['qr_code_url'])
+                            )
+
+                                <div
+                                    class="mx-auto mt-6 flex w-fit items-center justify-center rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                                    <img
+                                        src="{{ $payment['qr_code_url'] }}"
+                                        alt="QRIS Pembayaran"
+                                        class="h-64 w-64 object-contain"
+                                    >
+
+                                </div>
+
+                            @elseif (
+                                $order->status === 'pending' &&
+                                empty($payment['qr_code_url'])
+                            )
+
+                                <div
+                                    class="mt-6 rounded-xl border border-red-100 bg-white p-5">
+
+                                    <i
+                                        class="fa-solid fa-triangle-exclamation
+                                        text-2xl text-red-500">
+                                    </i>
+
+                                    <p class="mt-2 text-sm text-red-600">
+                                        QRIS tidak tersedia.
+                                    </p>
+
+                                </div>
+
+                            @elseif ($order->status === 'processing')
+
+                                <div
+                                    class="mt-6 rounded-2xl border border-blue-100 bg-white p-6">
+
+                                    <div
+                                        class="mx-auto flex h-14 w-14 items-center
+                                        justify-center rounded-full bg-blue-100">
+
+                                        <i
+                                            class="fa-solid fa-check
+                                            text-xl text-blue-600">
+                                        </i>
+
+                                    </div>
+
+                                    <p
+                                        class="mt-3 text-sm font-bold text-blue-700">
+
+                                        Pembayaran Berhasil
+
+                                    </p>
+
+                                    <p
+                                        class="mt-1 text-xs text-slate-500">
+
+                                        Pesanan kamu sedang diproses.
+
+                                    </p>
+
+                                </div>
+
+                            @endif
+
+
+                            {{-- =================================================
+                                STATUS
+                            ================================================== --}}
+                            @if ($order->status === 'pending')
+
+                                <div
+                                    class="mx-auto mt-6 flex max-w-sm items-center
+                                    justify-center gap-2 rounded-xl bg-amber-50
+                                    px-4 py-3 text-sm font-semibold text-amber-700">
+
+                                    <i class="fa-solid fa-clock"></i>
+
+                                    <span>
+                                        Menunggu pembayaran
+                                    </span>
+
+                                </div>
+
+                            @elseif ($order->status === 'processing')
+
+                                <div
+                                    class="mx-auto mt-6 flex max-w-sm items-center
+                                    justify-center gap-2 rounded-xl bg-blue-50
+                                    px-4 py-3 text-sm font-semibold text-blue-700">
+
+                                    <i class="fa-solid fa-check"></i>
+
+                                    <span>
+                                        Pembayaran berhasil
+                                    </span>
+
+                                </div>
+
+                            @elseif ($order->status === 'completed')
+
+                                <div
+                                    class="mx-auto mt-6 flex max-w-sm items-center
+                                    justify-center gap-2 rounded-xl bg-emerald-50
+                                    px-4 py-3 text-sm font-semibold text-emerald-700">
+
+                                    <i class="fa-solid fa-circle-check"></i>
+
+                                    <span>
+                                        Pembayaran berhasil
+                                    </span>
+
+                                </div>
+
+                            @endif
+
+
+                            {{-- =================================================
+                                INFORMASI / CARA PEMBAYARAN
+                            ================================================== --}}
+                            <div class="mt-7 rounded-2xl bg-slate-50 p-5 text-left">
+
+                                <div class="flex gap-3">
+
+                                    <i
+                                        class="fa-solid fa-circle-info
+                                        mt-0.5 text-amber-500">
+                                    </i>
+
+                                    <div>
+
+                                        <p class="text-sm font-bold text-slate-700">
+                                            Cara Pembayaran
+                                        </p>
+
+                                        <ol
+                                            class="mt-2 space-y-1 text-xs
+                                            leading-5 text-slate-500">
+
+                                            <li>
+                                                1. Buka aplikasi pembayaran yang mendukung QRIS.
+                                            </li>
+
+                                            <li>
+                                                2. Pilih menu Scan QR.
+                                            </li>
+
+                                            <li>
+                                                3. Scan QR Code di atas.
+                                            </li>
+
+                                            <li>
+                                                4. Periksa nominal pembayaran.
+                                            </li>
+
+                                            <li>
+                                                5. Konfirmasi pembayaran.
+                                            </li>
+
+                                        </ol>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- =================================================
+                                ORDER ID
+                            ================================================== --}}
+                            <div class="mt-5 text-center">
+
+                                <p class="text-xs text-slate-400">
+                                    ID Pesanan
+                                </p>
+
+                                <p class="mt-1 text-xs font-bold text-slate-600">
+                                    {{ $order->order_number }}
+                                </p>
+
+                            </div>
+
+
+                            {{-- =================================================
+                                STATUS CHECK INFO
+                            ================================================== --}}
+                            <div class="mt-5 text-center">
+
+                                <p class="text-xs text-slate-400">
+                                    Status pembayaran akan diperiksa otomatis.
+                                </p>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
                 </div>
-
 
             {{-- =====================================================
                 CASH PAYMENT
