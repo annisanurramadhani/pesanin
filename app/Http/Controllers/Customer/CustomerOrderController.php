@@ -531,7 +531,7 @@ class CustomerOrderController extends Controller
             $order->update([
                 'payment_status' => 'paid',
             ]);
-            
+
             session()->forget('cart');
 
             return redirect()
@@ -662,33 +662,19 @@ class CustomerOrderController extends Controller
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | AMBIL QR CODE URL
-        |--------------------------------------------------------------------------
-        */
-        $actions = collect($response->actions ?? []);
+|--------------------------------------------------------------------------
+| QR CODE URL
+|--------------------------------------------------------------------------
+*/
 
-        $qrCodeAction = $actions->firstWhere('name', 'generate-qr-code-v2');
+        $midtransBaseUrl = Config::$isProduction
+            ? 'https://api.midtrans.com'
+            : 'https://api.sandbox.midtrans.com';
 
-        if (!$qrCodeAction) {
-            $qrCodeAction = $actions->firstWhere('name', 'generate-qr-code');
-        }
-
-        $qrCodeUrl = $qrCodeAction->url ?? null;
-
-        if (empty($qrCodeUrl)) {
-            Log::error('Midtrans QR Code URL tidak ditemukan.', [
-                'order_id'       => $order->id,
-                'transaction_id' => $response->transaction_id,
-                'actions'        => json_encode($response->actions ?? []),
-            ]);
-
-            return back()->with(
-                'error',
-                'QR Code gagal dibuat oleh Midtrans.'
-            );
-        }
-
+        $qrCodeUrl = $midtransBaseUrl
+            . '/v2/qris/'
+            . $response->transaction_id
+            . '/qr-code';
         /*
         |--------------------------------------------------------------------------
         | UPDATE PAYMENT PROVIDER & SESSION
@@ -732,7 +718,7 @@ class CustomerOrderController extends Controller
         try {
             $decryptedOrderNumber = Crypt::decryptString($orderNumber);
         } catch (\Exception $e) {
-            $decryptedOrderNumber = $orderNumber; // Fallback jika tidak terenkripsi
+            $decryptedOrderNumber = $orderNumber;
         }
 
         $qrCode = QrCode::where('code', $code)
@@ -746,7 +732,44 @@ class CustomerOrderController extends Controller
             ->where('merchant_id', $merchant->id)
             ->firstOrFail();
 
-        $payment = session()->get('midtrans_order_' . $order->id);
+        /*
+    |--------------------------------------------------------------------------
+    | PAYMENT DATA
+    |--------------------------------------------------------------------------
+    */
+
+        $payment = session()->get(
+            'midtrans_order_' . $order->id
+        );
+
+        /*
+    |--------------------------------------------------------------------------
+    | GENERATE QR CODE URL
+    |--------------------------------------------------------------------------
+    |
+    | Jangan gunakan qr_code_url dari session karena
+    | URL tersebut bisa berupa merchants-app.sbx.midtrans.com.
+    |
+    | Gunakan transaction_id untuk membuat endpoint QRIS
+    | yang langsung menghasilkan QR hitam putih.
+    |
+    */
+
+        if (
+            $order->payment_method === 'qris'
+            && !empty($payment['transaction_id'])
+        ) {
+
+            $midtransBaseUrl = Config::$isProduction
+                ? 'https://api.midtrans.com'
+                : 'https://api.sandbox.midtrans.com';
+
+            $payment['qr_code_url'] =
+                $midtransBaseUrl
+                . '/v2/qris/'
+                . $payment['transaction_id']
+                . '/qr-code';
+        }
 
         return view(
             'customer.order-success',
