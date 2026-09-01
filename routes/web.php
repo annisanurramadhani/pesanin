@@ -176,9 +176,9 @@ Route::prefix('m/{code}')
 
 
         Route::get(
-            '/order/{orderNumber}/payment',
-            [CustomerOrderController::class, 'payment']
-        )->name('payment');
+    '/order/{orderNumber}/payment',
+    [CustomerOrderController::class, 'payment']
+)->name('order.payment');
     });
 
 
@@ -188,7 +188,7 @@ Route::prefix('m/{code}')
 
 Route::post(
     '/payment/midtrans/order/notification',
-    [MidtransOrderNotificationController::class, 'handle']
+    [MidtransNotificationController::class, 'handle']
 )->name('payment.midtrans.order.notification');
 
 
