@@ -96,13 +96,13 @@
                 <table class="w-full text-sm text-left">
                     <thead class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider bg-slate-50/80 border-b border-slate-100">
                         <tr>
-                            <th class="p-4 pl-6">No. Order & Meja</th>
+                            <th class="p-4 pl-6">No. Order</th>
                             <th class="p-4">Pelanggan</th>
-                            <th class="p-4">Menu Pesanan</th>
+                            <th class="p-4">Pesanan</th>
                             <th class="p-4">Metode Bayar</th>
-                            <th class="p-4">Total Harga</th>
-                            <th class="p-4 text-center">Waktu & Status</th>
-                            <th class="p-4 pr-6 text-center">Aksi / Status</th>
+                            <th class="p-4">Total</th>
+                            <th class="p-4 text-center">Diselesaikan</th>
+                            <th class="p-4 pr-6 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -169,7 +169,7 @@
                                     </span>
                                 </td>
 
-                                {{-- Waktu & Status --}}
+                                {{-- Waktu & Status (Diselesaikan) --}}
                                 <td class="p-4 text-center">
                                     <div class="flex flex-col items-center justify-center gap-1">
                                         @if(in_array($statusStr, ['selesai', 'completed']))

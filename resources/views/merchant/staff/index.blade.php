@@ -101,7 +101,7 @@
                                 <div>
                                     <label for="role"
                                         class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
-                                        Tugas / Role <span class="text-red-500">*</span>
+                                        Posisi <span class="text-red-500">*</span>
                                     </label>
 
                                     <select id="role" name="role"

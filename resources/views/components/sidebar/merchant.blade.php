@@ -73,7 +73,7 @@
                 >
                     <i class="fa-solid fa-cart-shopping w-5 shrink-0"></i>
                     <span class="sidebar-text whitespace-nowrap transition-all duration-200">
-                        Kelola Pesanan
+                        Riwayat Pesanan
                     </span>
                 </a>
             @endif
@@ -126,7 +126,7 @@
                 >
                     <i class="fa-solid fa-users-gear w-5 shrink-0"></i>
                     <span class="sidebar-text whitespace-nowrap transition-all duration-200">
-                        Kelola Staf Kafe
+                        Kelola Staf
                     </span>
                 </a>
 
