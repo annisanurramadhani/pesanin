@@ -6,24 +6,47 @@
 
         {{-- Header --}}
         <header class="border-b border-slate-200 bg-white">
+
             <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
 
-                <div>
-                    <h1 class="text-xl font-extrabold text-slate-900">
-                        PesanIn
-                    </h1>
+                {{-- Logo & Brand --}}
+                <div class="flex items-center gap-3">
 
-                    <p class="text-xs text-slate-500">
-                        Solusi digital untuk bisnis Anda
-                    </p>
+                    {{-- Logo PesanIn --}}
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
+                        <img
+                            src="{{ asset('assets/images/logo-regis.jpg') }}"
+                            alt="PesanIn"
+                            class="h-full w-full object-contain"
+                        >
+                    </div>
+
+                    {{-- Brand --}}
+                    <div>
+
+                        <h1 class="text-xl font-extrabold text-slate-900">
+                            PesanIn
+                        </h1>
+
+                        <p class="text-xs text-slate-500">
+                            Solusi digital untuk bisnis Anda
+                        </p>
+
+                    </div>
+
                 </div>
 
-                <a href="{{ route('login') }}"
-                    class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+
+                {{-- Login --}}
+                <a
+                    href="{{ route('login') }}"
+                    class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                >
                     Masuk
                 </a>
 
             </div>
+
         </header>
 
 
@@ -170,11 +193,8 @@
             ======================================================= --}}
             <footer class="border-t border-slate-200 pt-6 pb-8 text-center">
 
-                <p class="text-[11px] text-slate-400">
-                    Powered by
-                    <span class="font-extrabold text-slate-500">
-                        PesanIn
-                    </span>
+                <p class="text-xs text-slate-400">
+                    © {{ date('Y') }} PesanIn. Semua hak dilindungi.
                 </p>
             </footer>
 

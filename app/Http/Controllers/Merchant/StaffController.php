@@ -190,16 +190,16 @@ class StaffController extends Controller
     /**
      * Hapus staf.
      */
-    public function destroy(Request $request, User $user)
+    public function destroy(Request $request, string $encryptedId)
     {
-        if (
-            $user->merchant_id !== $request->user()->merchant_id ||
-            !in_array($user->role, ['kasir', 'dapur'])
-        ) {
-            abort(403);
-        }
+        $staffId = decryptId($encryptedId);
 
-        $user->delete();
+        $staff = User::where('id', $staffId)
+            ->where('merchant_id', $request->user()->merchant_id)
+            ->whereIn('role', ['kasir', 'dapur'])
+            ->firstOrFail();
+
+        $staff->delete();
 
         return back()->with(
             'success',

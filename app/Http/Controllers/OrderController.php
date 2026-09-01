@@ -70,7 +70,11 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-        'status' => 'required|string',
+            'status' => [
+                'required',
+                'string',
+                'in:pending,processing,completed,cancelled,batal,selesai',
+            ],
         ]);
 
         $orderId = decryptId($id);
@@ -79,12 +83,26 @@ class OrderController extends Controller
 
         $order = Order::findOrFail($orderId);
 
-        $order->status = $request->status;
+        // Sesuaikan status lama ke status ENUM database
+        $status = $request->status;
+
+        if ($status === 'batal') {
+            $status = 'cancelled';
+        }
+
+        if ($status === 'selesai') {
+            $status = 'completed';
+        }
+
+        $order->status = $status;
         $order->save();
 
-        return back()->with(
-            'success',
-            'Status pesanan #' . $order->order_number . ' berhasil diperbarui!');
+        return redirect()
+            ->route('merchant.orders.index')
+            ->with(
+                'success',
+                'Status pesanan #' . $order->order_number . ' berhasil diperbarui!'
+            );
     }
 
 

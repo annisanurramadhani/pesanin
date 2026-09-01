@@ -35,7 +35,7 @@ use Illuminate\Support\Facades\Route;
 // ==========================================================================
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('public_subscription.homepage');
 });
 
 
@@ -176,9 +176,9 @@ Route::prefix('m/{code}')
 
 
         Route::get(
-            '/order/{orderNumber}/payment',
-            [CustomerOrderController::class, 'payment']
-        )->name('payment');
+    '/order/{orderNumber}/payment',
+    [CustomerOrderController::class, 'payment']
+)->name('order.payment');
     });
 
 
