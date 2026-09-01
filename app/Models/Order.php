@@ -11,20 +11,22 @@ class Order extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'merchant_id',
-        'qr_code_id',
-        'order_number',
-        'customer_name',
-        'customer_phone',
-        'customer_email',
-        'subtotal',
-        'total',
-        'payment_method',
-        'payment_provider',
-        'payment_status',
-        'status',
-        'receipt_sent_at',
-    ];
+    'merchant_id',
+    'qr_code_id',
+    'order_number',
+    'customer_name',
+    'customer_phone',
+    'customer_email',
+    'subtotal',
+    'total',
+    'payment_method',
+    'bank',
+    'va_number',
+    'payment_provider',
+    'payment_status',
+    'status',
+    'receipt_sent_at',
+];
 
     protected $casts = [
         'subtotal' => 'decimal:2',

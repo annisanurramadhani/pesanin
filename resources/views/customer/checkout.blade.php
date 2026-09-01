@@ -390,6 +390,53 @@
 
                     </label>
 
+{{-- Transfer Bank --}}
+<label class="cursor-pointer">
+
+    <input
+        type="radio"
+        name="payment_method"
+        value="bank"
+        class="peer sr-only"
+        {{ old('payment_method') === 'bank' ? 'checked' : '' }}
+    >
+
+    <div
+        class="rounded-2xl border border-slate-200 p-4
+               transition
+               peer-checked:border-amber-400
+               peer-checked:bg-amber-50
+               hover:border-slate-300"
+    >
+
+        <div class="flex items-center gap-3">
+
+            <div
+                class="w-10 h-10 rounded-xl bg-blue-50
+                       text-blue-600
+                       flex items-center justify-center"
+            >
+                <i class="fa-solid fa-building-columns"></i>
+            </div>
+
+            <div>
+
+                <p class="text-sm font-bold text-slate-800">
+                    Transfer Bank
+                </p>
+
+                <p class="text-xs text-slate-400 mt-0.5">
+                    Bayar melalui Virtual Account
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</label>
+
 
                     {{-- QRIS --}}
                     <label class="cursor-pointer">
@@ -448,6 +495,55 @@
                 @enderror
 
             </div>
+
+            {{-- UNTUK PILIHAN BANK  --}}
+            <div
+    id="bank-selection"
+    class="hidden mt-4"
+>
+    <label
+        for="bank"
+        class="block text-sm font-semibold text-slate-700 mb-2"
+    >
+        Pilih Bank
+        <span class="text-red-500">*</span>
+    </label>
+
+    <select
+        id="bank"
+        name="bank"
+        class="w-full rounded-xl border border-slate-200
+               bg-slate-50 px-4 py-3
+               text-sm text-slate-800
+               outline-none transition
+               focus:border-amber-400
+               focus:bg-white
+               focus:ring-2 focus:ring-amber-100"
+    >
+        <option value="">Pilih bank</option>
+
+        @foreach ($banks as $value => $label)
+            <option
+                value="{{ $value }}"
+                {{ old('bank') === $value ? 'selected' : '' }}
+            >
+                {{ $label }}
+            </option>
+        @endforeach
+    </select>
+
+    @error('bank')
+        <p class="mt-1.5 text-xs text-red-500 font-medium">
+            <i class="fa-solid fa-circle-exclamation mr-1"></i>
+            {{ $message }}
+        </p>
+    @enderror
+</div>
+
+
+
+
+
 
 
             {{-- ========================================= --}}
@@ -568,3 +664,44 @@
 </div>
 
 @endsection
+
+
+
+{{-- JS SEMENTARA DISINI DULU NANTI PISAHKAN --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const paymentMethods = document.querySelectorAll(
+            'input[name="payment_method"]'
+        );
+
+        const bankSelection = document.getElementById('bank-selection');
+        const bankSelect = document.getElementById('bank');
+
+        function toggleBankSelection() {
+
+            const selected = document.querySelector(
+                'input[name="payment_method"]:checked'
+            );
+
+            if (selected && selected.value === 'bank') {
+
+                bankSelection.classList.remove('hidden');
+                bankSelect.required = true;
+
+            } else {
+
+                bankSelection.classList.add('hidden');
+                bankSelect.required = false;
+                bankSelect.value = '';
+
+            }
+        }
+
+        paymentMethods.forEach(function (radio) {
+            radio.addEventListener('change', toggleBankSelection);
+        });
+
+        toggleBankSelection();
+    });
+</script>

@@ -176,9 +176,9 @@ Route::prefix('m/{code}')
 
 
         Route::get(
-            '/order/{orderNumber}/payment',
-            [CustomerOrderController::class, 'payment']
-        )->name('payment');
+    '/order/{orderNumber}/payment',
+    [CustomerOrderController::class, 'payment']
+)->name('order.payment');
     });
 
 
