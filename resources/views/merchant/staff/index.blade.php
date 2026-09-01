@@ -48,7 +48,7 @@
                                 </div>
                             </div>
 
-                            <form action="{{ route('merchant.staff.store') }}" method="POST" class="space-y-5">
+                            <form action="{{ route('merchant.staff.store') }}" method="POST" class="space-y-5" autocomplete="off">
                                 @csrf
 
                                 {{-- Nama --}}
@@ -70,9 +70,14 @@
                                         Email Login <span class="text-red-500">*</span>
                                     </label>
 
-                                    <input type="email" id="email" name="email" value="{{ old('email') }}"
+                                    <input type="email"
+                                        id="email"
+                                        name="email"
+                                        value="{{ old('email', '') }}"
+                                        autocomplete="off"
                                         class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition placeholder:font-normal placeholder:text-slate-400"
-                                        placeholder="budi@kopipst.com" required>
+                                        placeholder="budi@kopipst.com"
+                                        required>
                                 </div>
 
                                 {{-- Password --}}
@@ -82,9 +87,14 @@
                                         Password <span class="text-red-500">*</span>
                                     </label>
 
-                                    <input type="password" id="password" name="password"
+                                    <input type="password"
+                                        id="password"
+                                        name="password"
+                                        value=""
+                                        autocomplete="new-password"
                                         class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition placeholder:font-normal placeholder:text-slate-400"
-                                        placeholder="Minimal 6 karakter" required>
+                                        placeholder="Minimal 6 karakter"
+                                        required>
                                 </div>
 
                                 {{-- Role --}}
@@ -240,8 +250,10 @@
                                                         </a>
 
                                                         {{-- Hapus --}}
-                                                        <form action="{{ route('merchant.staff.destroy', $staff->id) }}"
-                                                            method="POST" class="delete-staff-form inline"
+                                                        <form action="{{ route('merchant.staff.destroy', [
+                                                            'encryptedId' => encryptId($staff->id),]) }}"
+                                                            method="POST"
+                                                            class="delete-staff-form inline"
                                                             data-staff-name="{{ $staff->name }}">
                                                             @csrf
                                                             @method('DELETE')
