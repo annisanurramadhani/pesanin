@@ -1,104 +1,158 @@
 <aside
-    class="w-64 bg-[#111827] text-slate-300 flex flex-col justify-between shrink-0 min-h-screen border-r border-slate-800 shadow-2xl"
+    id="sidebar"
+    class="w-64 bg-[#111827] text-slate-300 flex flex-col justify-between shrink-0 min-h-screen border-r border-slate-800 shadow-2xl transition-all duration-300 ease-in-out"
 >
 
+    {{-- HEADER --}}
     <div>
 
-        <div class="px-6 py-6 flex items-center gap-3 border-b border-slate-800/80">
+        <div
+            class="px-5 py-5 flex items-center justify-between border-b border-slate-800/80"
+        >
 
+            {{-- LOGO PESANIN --}}
             <div
-                class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black text-lg shadow-lg shadow-amber-500/30"
+                id="sidebarLogo"
+                class="flex items-center gap-3 overflow-hidden transition-all duration-300"
             >
-                <i class="fa-solid fa-mug-hot"></i>
+                <div class="w-10 h-10 shrink-0 flex items-center justify-center">
+                    <img
+                        src="{{ asset('assets/images/menu-default.jpg') }}"
+                        alt="PesanIn"
+                        class="w-10 h-10 object-contain"
+                    >
+                </div>
+
+                <div
+                    id="sidebarBrand"
+                    class="whitespace-nowrap transition-all duration-300"
+                >
+                    <h1 class="font-bold text-white text-base tracking-wide">
+                        PesanIn
+                    </h1>
+
+                    <p class="text-[10px] text-slate-400 tracking-wider uppercase font-semibold">
+                        Merchant Dashboard
+                    </p>
+                </div>
             </div>
 
-            <div>
-
-                <h1 class="font-bold text-white text-base tracking-wide">
-                    Command Center
-                </h1>
-
-                <p class="text-[10px] text-slate-400 tracking-wider uppercase font-semibold">
-                    PesanIn Dashboard
-                </p>
-
-            </div>
+            {{-- HAMBURGER --}}
+            <button
+                type="button"
+                id="sidebarToggle"
+                class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200"
+                title="Toggle Sidebar"
+            >
+                <i
+                    id="sidebarToggleIcon"
+                    class="fa-solid fa-bars text-lg transition-transform duration-300"
+                ></i>
+            </button>
 
         </div>
 
+
+        {{-- NAVIGATION --}}
         <nav class="px-4 py-6 space-y-2">
 
+            {{-- DASHBOARD --}}
             @if (in_array(Auth::user()->role, ['owner', 'kasir']))
 
                 <a
                     href="{{ route('merchant.dashboard') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                    class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('merchant.dashboard')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                         : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}"
                 >
-                    <i class="fa-solid fa-chart-pie w-5"></i>
-                    <span>Dashboard</span>
+                    <i class="fa-solid fa-chart-pie w-5 shrink-0"></i>
+
+                    <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                        Dashboard
+                    </span>
                 </a>
 
             @endif
 
+
+            {{-- PESANAN --}}
             @if (in_array(Auth::user()->role, ['owner', 'kasir', 'dapur']))
 
                 <a
                     href="{{ route('merchant.orders.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                    class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('merchant.orders.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                         : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}"
                 >
-                    <i class="fa-solid fa-cart-shopping w-5"></i>
-                    <span>Kelola Pesanan</span>
+                    <i class="fa-solid fa-cart-shopping w-5 shrink-0"></i>
+
+                    <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                        Kelola Pesanan
+                    </span>
                 </a>
 
             @endif
 
+
+            {{-- PENGATURAN --}}
             @if (Auth::user()->role === 'owner')
 
-                <div class="pt-4 pb-1">
+                <div class="pt-4 pb-1 sidebar-section">
 
-                    <p class="px-4 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                    <p class="px-4 text-[10px] font-black uppercase tracking-wider text-slate-500 sidebar-text whitespace-nowrap">
                         Pengaturan Kafe
                     </p>
 
                 </div>
 
+
+                {{-- QR CODE --}}
                 <a
                     href="{{ route('merchant.qr.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                    class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('merchant.qr.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                         : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}"
                 >
-                    <i class="fa-solid fa-qrcode w-5"></i>
-                    <span>Kelola QR Code</span>
+                    <i class="fa-solid fa-qrcode w-5 shrink-0"></i>
+
+                    <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                        Kelola QR Code
+                    </span>
                 </a>
 
+
+                {{-- MENU --}}
                 <a
                     href="{{ route('merchant.menu.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                    class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('merchant.menu.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                         : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}"
                 >
-                    <i class="fa-solid fa-utensils w-5"></i>
-                    <span>Kelola Menu</span>
+                    <i class="fa-solid fa-utensils w-5 shrink-0"></i>
+
+                    <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                        Kelola Menu
+                    </span>
                 </a>
 
+
+                {{-- STAFF --}}
                 <a
                     href="{{ route('merchant.staff.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                    class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('merchant.staff.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                         : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}"
                 >
-                    <i class="fa-solid fa-users-gear w-5"></i>
-                    <span>Kelola Staf Kafe</span>
+                    <i class="fa-solid fa-users-gear w-5 shrink-0"></i>
+
+                    <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                        Kelola Staf Kafe
+                    </span>
                 </a>
 
             @endif
@@ -107,6 +161,8 @@
 
     </div>
 
+
+    {{-- USER PROFILE --}}
     <div class="p-4 border-t border-slate-800/80">
 
         <div
@@ -121,7 +177,7 @@
                     <i class="fa-solid fa-user"></i>
                 </div>
 
-                <div class="truncate">
+                <div class="truncate sidebar-user-info">
 
                     <p class="text-xs font-bold text-white truncate">
                         {{ Auth::user()->name }}
@@ -137,13 +193,15 @@
 
             </div>
 
+
+            {{-- LOGOUT --}}
             <form method="POST" action="{{ route('logout') }}">
 
                 @csrf
 
                 <button
                     type="submit"
-                    class="p-1.5 text-slate-400 hover:text-rose-400 transition"
+                    class="p-1.5 text-slate-400 hover:text-rose-400 transition shrink-0"
                     title="Logout"
                 >
                     <i class="fa-solid fa-right-from-bracket"></i>
@@ -156,3 +214,135 @@
     </div>
 
 </aside>
+
+
+{{-- SIDEBAR SCRIPT --}}
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('sidebarToggle');
+        const toggleIcon = document.getElementById('sidebarToggleIcon');
+
+        const sidebarBrand = document.getElementById('sidebarBrand');
+        const sidebarTexts = document.querySelectorAll('.sidebar-text');
+        const sidebarSections = document.querySelectorAll('.sidebar-section');
+        const sidebarUserInfo = document.querySelector('.sidebar-user-info');
+        const sidebarMenus = document.querySelectorAll('.sidebar-menu');
+
+        let collapsed = localStorage.getItem('pesanin_sidebar_collapsed') === 'true';
+
+
+        function updateSidebar() {
+
+            if (collapsed) {
+
+                // SIDEBAR KECIL
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-20');
+
+                // Sembunyikan teks
+                sidebarBrand.classList.add(
+                    'opacity-0',
+                    'w-0',
+                    'overflow-hidden'
+                );
+
+                sidebarTexts.forEach(function (text) {
+                    text.classList.add(
+                        'opacity-0',
+                        'w-0',
+                        'overflow-hidden'
+                    );
+                });
+
+                sidebarSections.forEach(function (section) {
+                    section.classList.add('hidden');
+                });
+
+                sidebarUserInfo.classList.add(
+                    'opacity-0',
+                    'w-0',
+                    'overflow-hidden'
+                );
+
+                // Menu jadi center
+                sidebarMenus.forEach(function (menu) {
+                    menu.classList.remove('gap-3');
+                    menu.classList.add('justify-center');
+
+                    menu.querySelector('i').classList.add('mx-auto');
+                });
+
+                // Icon hamburger menjadi X
+                toggleIcon.classList.remove('fa-bars');
+                toggleIcon.classList.add('fa-xmark');
+
+            } else {
+
+                // SIDEBAR NORMAL
+                sidebar.classList.remove('w-20');
+                sidebar.classList.add('w-64');
+
+                // Tampilkan teks
+                sidebarBrand.classList.remove(
+                    'opacity-0',
+                    'w-0',
+                    'overflow-hidden'
+                );
+
+                sidebarTexts.forEach(function (text) {
+                    text.classList.remove(
+                        'opacity-0',
+                        'w-0',
+                        'overflow-hidden'
+                    );
+                });
+
+                sidebarSections.forEach(function (section) {
+                    section.classList.remove('hidden');
+                });
+
+                sidebarUserInfo.classList.remove(
+                    'opacity-0',
+                    'w-0',
+                    'overflow-hidden'
+                );
+
+                // Menu normal
+                sidebarMenus.forEach(function (menu) {
+                    menu.classList.remove('justify-center');
+                    menu.classList.add('gap-3');
+
+                    menu.querySelector('i').classList.remove('mx-auto');
+                });
+
+                // Icon X menjadi hamburger
+                toggleIcon.classList.remove('fa-xmark');
+                toggleIcon.classList.add('fa-bars');
+            }
+        }
+
+
+        // Jalankan kondisi awal
+        updateSidebar();
+
+
+        // Toggle sidebar
+        toggle.addEventListener('click', function () {
+
+            collapsed = !collapsed;
+
+            localStorage.setItem(
+                'pesanin_sidebar_collapsed',
+                collapsed
+            );
+
+            updateSidebar();
+
+        });
+
+    });
+
+</script>

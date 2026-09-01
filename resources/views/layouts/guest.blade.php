@@ -37,8 +37,12 @@
 
             <div class="mb-7 text-center">
 
-                <div class="mx-auto mb-4 w-14 h-14 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center text-2xl shadow-lg shadow-amber-500/30">
-                    <i class="fa-solid fa-mug-hot"></i>
+                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-900/10 overflow-hidden">
+                    <img
+                        src="{{ asset('assets/images/logo-login.png') }}"
+                        alt="PesanIn"
+                        class="h-full w-full object-contain p-1"
+                    >
                 </div>
 
                 <h1 class="text-2xl font-extrabold text-[#111827] tracking-tight">
@@ -57,9 +61,15 @@
 
             </div>
 
-            <p class="mt-5 text-center text-xs text-slate-400 font-medium">
-                © {{ date('Y') }} PesanIn
-            </p>
+            {{-- ======================================================
+                FOOTER
+            ======================================================= --}}
+            <footer class="border-t border-slate-200 pt-8 pb-2 text-center">
+
+                <p class="text-xs text-slate-400">
+                    © {{ date('Y') }} PesanIn. Semua hak dilindungi.
+                </p>
+            </footer>
 
         </div>
 

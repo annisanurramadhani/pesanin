@@ -7,14 +7,28 @@
         <header class="border-b border-slate-200 bg-white">
             <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
 
-                <div>
-                    <h1 class="text-xl font-extrabold text-slate-900">
-                        PesanIn
-                    </h1>
+                <div class="flex items-center gap-3">
 
-                    <p class="text-xs text-slate-500">
-                        Solusi digital untuk bisnis Anda
-                    </p>
+                    {{-- Logo PesanIn --}}
+                    <div class="flex h-12 w-12 items-center justify-center">
+                        <img
+                            src="{{ asset('assets/images/logo-regis.jpg') }}"
+                            alt="PesanIn"
+                            class="h-12 w-12 rounded-xl object-cover"
+                        >
+                    </div>
+
+                    {{-- Brand --}}
+                    <div>
+                        <h1 class="text-xl font-extrabold text-slate-900">
+                            PesanIn
+                        </h1>
+
+                        <p class="text-xs text-slate-500">
+                            Solusi digital untuk bisnis Anda
+                        </p>
+                    </div>
+
                 </div>
 
                 <a href="{{ route('login') }}"
@@ -27,7 +41,7 @@
 
 
         {{-- Content --}}
-        <main class="px-6 pb-20 pt-14">
+        <main class="px-6 pb-8 pt-8">
 
             <div class="mx-auto max-w-2xl">
 
@@ -43,7 +57,7 @@
 
 
                 {{-- Heading --}}
-                <div class="mb-10">
+                <div class="mb-10 text-center">
 
                     <span
                         class="inline-flex rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-amber-600">
@@ -56,7 +70,7 @@
                         Buat Akun PesanIn
                     </h2>
 
-                    <p class="mt-3 max-w-xl text-sm leading-6 text-slate-500">
+                    <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
                         Daftarkan akun Anda untuk melanjutkan proses berlangganan PesanIn.
                     </p>
 
@@ -225,7 +239,7 @@
                                     <div
                                         class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
 
-                                        <i class="fa-solid fa-shield-halved"></i>
+                                        <i class="fa-solid fa-lock"></i>
 
                                     </div>
 
@@ -306,8 +320,17 @@
 
         </main>
 
-    </div>
+        {{-- ======================================================
+                FOOTER
+            ======================================================= --}}
+            <footer class="border-t border-slate-200 pt-6 pb-8 text-center">
 
+                <p class="text-xs text-slate-400">
+                    © {{ date('Y') }} PesanIn. Semua hak dilindungi.
+                </p>
+            </footer>
+
+    </div>
 
     {{-- Password Toggle --}}
     <script>
