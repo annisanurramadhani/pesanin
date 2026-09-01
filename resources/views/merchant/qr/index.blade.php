@@ -19,7 +19,7 @@
                         </h2>
 
                         <p class="text-xs font-medium text-slate-500 mt-1">
-                            Generate QR Code unik untuk ditempel pada meja kafe atau area pemesanan.
+                            Buat Kode QR unik untuk ditempel pada meja kafe atau area pemesanan.
                         </p>
                     </div>
 
@@ -55,7 +55,7 @@
                                     </h3>
 
                                     <p class="text-[11px] font-medium text-slate-400">
-                                        Generate link & QR meja
+                                        Buat tautan & Kode QR meja
                                     </p>
 
                                 </div>
@@ -72,7 +72,7 @@
                                     <label
                                         class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
 
-                                        Nama QR / Nomor Meja *
+                                        Nama *
 
                                     </label>
 
@@ -81,7 +81,7 @@
                                         name="name"
                                         value="{{ old('name') }}"
                                         class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition placeholder:font-normal placeholder:text-slate-400"
-                                        placeholder="Contoh: Meja 03, VIP Outdoor"
+                                        placeholder="Contoh: Meja 01"
                                         required>
 
                                     @error('name')
@@ -98,7 +98,7 @@
                                     <label
                                         class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
 
-                                        Jenis Area *
+                                        Jenis Pesanan *
 
                                     </label>
 
@@ -133,7 +133,7 @@
                                     <i class="fa-solid fa-plus"></i>
 
                                     <span>
-                                        Generate QR Code Sekarang
+                                        Buat Kode QR Sekarang
                                     </span>
 
                                 </button>
@@ -178,19 +178,15 @@
                                         <tr>
 
                                             <th class="p-4 pl-6">
-                                                Nama / Label Meja
+                                                Nama
                                             </th>
 
                                             <th class="p-4">
-                                                Jenis Area
+                                                Jenis Pesanan
                                             </th>
 
                                             <th class="p-4">
                                                 URL Pesanan
-                                            </th>
-
-                                            <th class="p-4">
-                                                Status
                                             </th>
 
                                             <th class="p-4 pr-6 text-center">
@@ -259,26 +255,12 @@
                                                         class="inline-flex items-center gap-2 text-xs font-bold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200/60 px-3.5 py-2 rounded-xl transition">
 
                                                         <span>
-                                                            Buka Link Pesanan
+                                                            Buka Tautan Pesanan
                                                         </span>
 
                                                         <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
 
                                                     </a>
-
-                                                </td>
-
-
-                                                <td class="p-4">
-
-                                                    <span
-                                                        class="px-3 py-1.5 text-xs bg-emerald-50 text-emerald-700 font-extrabold rounded-xl border border-emerald-200/80 inline-flex items-center gap-1.5">
-
-                                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-
-                                                        Aktif
-
-                                                    </span>
 
                                                 </td>
 
@@ -329,7 +311,7 @@
 
                                             <tr>
 
-                                                <td colspan="5" class="p-12 text-center">
+                                                <td colspan="4" class="p-12 text-center">
 
                                                     <div
                                                         class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-3 text-xl">

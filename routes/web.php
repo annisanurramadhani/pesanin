@@ -220,7 +220,6 @@ Route::get('/dashboard', function () {
     return redirect()->route(
         'merchant.dashboard'
     );
-
 })
     ->middleware('auth')
     ->name('dashboard');
@@ -329,6 +328,8 @@ Route::middleware([
             '/packages/{encryptedId}',
             [PackageController::class, 'destroy']
         )->name('packages.destroy');
+
+        Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('merchant.orders.destroy');
 
 
         // ==================================================================
@@ -540,9 +541,9 @@ Route::middleware('auth')
     });
 
 
-    // EMAIL VERIFICATION
-    Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
-        ->name('verification.verify');
+// EMAIL VERIFICATION
+Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
+    ->name('verification.verify');
 
 
 // ==========================================================================

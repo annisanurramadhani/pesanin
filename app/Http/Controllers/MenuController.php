@@ -62,7 +62,6 @@ class MenuController extends Controller
                 }),
             ],
             'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ], [
@@ -81,9 +80,8 @@ class MenuController extends Controller
             'name'         => trim($request->name),
             'slug'         => $slug,
             'price'        => $request->price,
-            'stock'        => $request->stock,
             'description'  => $request->description,
-            'is_available' => $request->stock > 0,
+            'is_available' => true, // Default langsung ready
             'image'        => $imagePath,
         ]);
 
@@ -118,7 +116,6 @@ class MenuController extends Controller
             'category_id' => 'required|exists:categories,id',
             'name'        => 'required|string|max:255',
             'price'       => 'required|numeric|min:0',
-            'stock'       => 'required|integer|min:0',
             'description' => 'nullable|string',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
@@ -128,9 +125,7 @@ class MenuController extends Controller
             'name'         => trim($request->name),
             'slug'         => Str::slug($request->name),
             'price'        => $request->price,
-            'stock'        => $request->stock,
             'description'  => $request->description,
-            'is_available' => $request->stock > 0,
         ];
 
         if ($request->hasFile('image')) {
@@ -173,8 +168,12 @@ class MenuController extends Controller
         }
 
         $menu = Menu::where('merchant_id', $request->user()->merchant_id)->findOrFail($id);
+
+        // Pastikan mengambil dari input request atau paksa jadi 'unavailable' jika tombol habis ditekan
+        $status = $request->input('status', 'available');
+
         $menu->update([
-            'is_available' => !$menu->is_available
+            'status' => $status
         ]);
 
         return back()->with('success', 'Status ketersediaan menu berhasil diubah!');

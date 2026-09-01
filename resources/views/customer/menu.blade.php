@@ -241,8 +241,8 @@
                                         class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                                     >
 
-                                    {{-- Stock Badge --}}
-                                    @if ($menu->stock > 0)
+                                    {{-- Status Badge --}}
+                                    @if ($menu->status == 'available')
 
                                         <div class="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-extrabold text-emerald-600 shadow-sm backdrop-blur">
 
@@ -310,51 +310,20 @@
                                         </div>
 
 
-                                        {{-- Add Cart --}}
-                                        @if ($menu->stock > 0)
-
-                                            <form
-                                                action="{{ route('customer.cart.add', $qrCode->code) }}"
-                                                method="POST"
-                                                class="add-to-cart-form"
-                                            >
+                                        {{-- Add Cart / Habis Button --}}
+                                        @if ($menu->status == 'available')
+                                            <form action="{{ route('customer.cart.add', $qrCode->code) }}" method="POST" class="add-to-cart-form">
                                                 @csrf
-
-                                                <input
-                                                    type="hidden"
-                                                    name="menu_id"
-                                                    value="{{ $menu->id }}"
-                                                >
-
-                                                <input
-                                                    type="hidden"
-                                                    name="quantity"
-                                                    value="1"
-                                                >
-
-                                                <button
-                                                    type="submit"
-                                                    class="add-to-cart-btn inline-flex items-center gap-2 rounded-xl bg-amber-500 px-3.5 py-2.5 text-xs font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-400 active:scale-95 sm:text-sm"
-                                                >
-                                                    <i class="fa-solid fa-plus text-[10px]"></i>
-                                                    Tambah
+                                                <input type="hidden" name="menu_id" value="{{ $menu->id }}">
+                                                <input type="hidden" name="quantity" value="1">
+                                                <button type="submit" class="add-to-cart-btn inline-flex items-center gap-2 rounded-xl bg-amber-500 px-3.5 py-2.5 text-xs font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-400 active:scale-95 sm:text-sm">
+                                                    <i class="fa-solid fa-plus text-[10px]"></i> Tambah
                                                 </button>
                                             </form>
-
                                         @else
-
-                                            <button
-                                                type="button"
-                                                disabled
-                                                class="inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-slate-100 px-3.5 py-2.5 text-xs font-extrabold text-slate-400 sm:text-sm"
-                                            >
-
-                                                <i class="fa-solid fa-ban text-[10px]"></i>
-
-                                                Habis
-
+                                            <button type="button" disabled class="inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-slate-100 px-3.5 py-2.5 text-xs font-extrabold text-slate-400 sm:text-sm">
+                                                <i class="fa-solid fa-ban text-[10px]"></i> Habis
                                             </button>
-
                                         @endif
 
                                     </div>
@@ -438,9 +407,11 @@
     </div>
 
 @endsection
+
 @push('scripts')
     @vite('resources/js/customer/menu.js')
 @endpush
+
 @push('styles')
     @vite('resources/css/customer/menu.css')
 @endpush
