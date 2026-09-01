@@ -12,7 +12,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h2 class="font-extrabold text-2xl text-slate-900 tracking-tight flex items-center gap-2">
-                            Kelola Akun Staff Kafe
+                            Kelola Akun Staff
                         </h2>
 
                         <p class="text-xs font-medium text-slate-500 mt-1">
@@ -76,7 +76,6 @@
                                         value="{{ old('email', '') }}"
                                         autocomplete="off"
                                         class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition placeholder:font-normal placeholder:text-slate-400"
-                                        placeholder="budi@gmail.com" required>
                                         placeholder="budi@kopipst.com"
                                         required>
                                 </div>
@@ -120,7 +119,7 @@
 
                                 {{-- Submit --}}
                                 <button type="submit"
-                                    class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-4 px-4 rounded-xl text-sm transition-all duration-200 shadow-lg shadow-amber-500/25 active:scale-[0.98] flex items-center justify-center gap-2">
+                                    class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-4 px-4 rounded-xl text-sm transition-all duration-200 shadow-lg shadow-amber-500/25 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
                                     <i class="fa-solid fa-plus font-extrabold"></i>
                                     <span>Simpan Akun Staf</span>
                                 </button>
@@ -236,7 +235,6 @@
                                                 </td>
 
                                                 {{-- Aksi --}}
-                                                {{-- Aksi --}}
                                                 <td class="p-4 pr-6 text-center">
                                                     <div class="flex items-center justify-center gap-2">
 
@@ -260,7 +258,7 @@
                                                             @method('DELETE')
 
                                                             <button type="submit"
-                                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl text-xs font-extrabold transition border border-rose-200"
+                                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl text-xs font-extrabold transition border border-rose-200 cursor-pointer"
                                                                 title="Hapus Staf">
                                                                 <i class="fa-solid fa-trash-can"></i>
                                                                 <span>Hapus</span>

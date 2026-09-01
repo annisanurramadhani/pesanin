@@ -96,27 +96,13 @@
                 <table class="w-full text-sm text-left">
                     <thead class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider bg-slate-50/80 border-b border-slate-100">
                         <tr>
-                            <th class="p-4 pl-6">No. Order</th>
-                            <th class="p-4">Pelanggan</th>
-                            <th class="p-4">Pesanan</th>
-                            <th class="p-4">Metode Bayar</th>
-                            <th class="p-4">Total</th>
-                            <th class="p-4 text-center">Diselesaikan</th>
-                            <th class="p-4 pr-6 text-center">Aksi</th>
                             <th class="p-4 pl-6">No. Order & Meja</th>
-                            @if(Auth::user()->role !== 'dapur')
-                                <th class="p-4">Pelanggan</th>
-                            @endif
-                            <th class="p-4">Menu</th>
-                            @if(Auth::user()->role !== 'dapur')
-                                <th class="p-4">Metode Bayar</th>
-                            @endif
+                            <th class="p-4">Pelanggan</th>
+                            <th class="p-4">Menu Pesanan</th>
+                            <th class="p-4">Metode Bayar</th>
                             <th class="p-4">Total Harga</th>
-                            @if(Auth::user()->role === 'kasir')
-                                <th class="p-4 pr-6 text-center">Aksi Cepat Kasir</th>
-                            @else
-                                <th class="p-4 pr-6 text-center">Status</th>
-                            @endif
+                            <th class="p-4 text-center">Waktu & Status</th>
+                            <th class="p-4 pr-6 text-center">Aksi / Status</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -130,14 +116,15 @@
                                 $statusStr = strtolower($order->status ?? '');
                             @endphp
                             <tr class="hover:bg-slate-50/60 transition">
-                                {{-- No. Order --}}
+                                
+                                {{-- No. Order & Meja --}}
                                 <td class="p-4 pl-6">
                                     <span class="font-black text-slate-900 block text-base">
-                                    @if(Auth::user()->role === 'dapur')
-                                        #{{ substr($order->order_number, -6) }}
-                                    @else
-                                        #{{ $order->order_number }}
-                                    @endif
+                                        @if(Auth::user()->role === 'dapur')
+                                            #{{ substr($order->order_number, -6) }}
+                                        @else
+                                            #{{ $order->order_number }}
+                                        @endif
                                     </span>
                                     <span class="inline-flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-md mt-1 border border-amber-200/60">
                                         <i class="fa-solid fa-location-dot"></i> {{ $order->qrCode->name ?? 'Meja General' }}
@@ -148,15 +135,8 @@
                                 <td class="p-4">
                                     <p class="font-extrabold text-slate-800">{{ $order->customer_name }}</p>
                                 </td>
-                                @if(Auth::user()->role !== 'dapur')
-                                    <td class="p-4">
-                                        <p class="font-extrabold text-slate-800">
-                                            {{ $order->customer_name }}
-                                        </p>
-                                    </td>
-                                @endif
 
-                                {{-- Pesanan --}}
+                                {{-- Pesanan / Menu --}}
                                 <td class="p-4">
                                     <div class="space-y-1">
                                         @foreach ($order->items as $item)
@@ -181,30 +161,15 @@
                                         </span>
                                     @endif
                                 </td>
-                                @if(Auth::user()->role !== 'dapur')
-                                    <td class="p-4">
-                                        @if($isCash)
-                                            <span class="px-3 py-1 text-xs bg-slate-100 text-slate-800 font-extrabold rounded-xl border border-slate-200/80 inline-flex items-center gap-1.5">
-                                                <i class="fa-solid fa-cash-register text-slate-500"></i>
-                                                Bayar Kasir
-                                            </span>
-                                        @else
-                                            <span class="px-3 py-1 text-xs bg-amber-50 text-amber-700 font-extrabold rounded-xl border border-amber-200/80 inline-flex items-center gap-1.5">
-                                                <i class="fa-solid fa-qrcode text-amber-600"></i>
-                                                QRIS
-                                            </span>
-                                        @endif
-                                    </td>
-                                @endif
 
-                                {{-- Total --}}
+                                {{-- Total Harga --}}
                                 <td class="p-4">
                                     <span class="font-black text-slate-900 text-base">
                                         Rp {{ number_format($grandTotal, 0, ',', '.') }}
                                     </span>
                                 </td>
 
-                                {{-- Diselesaikan --}}
+                                {{-- Waktu & Status --}}
                                 <td class="p-4 text-center">
                                     <div class="flex flex-col items-center justify-center gap-1">
                                         @if(in_array($statusStr, ['selesai', 'completed']))
@@ -226,7 +191,7 @@
                                     </div>
                                 </td>
 
-                                {{-- Aksi --}}
+                                {{-- Aksi / Status Tombol --}}
                                 <td class="p-4 pr-6 text-center">
                                     @if(Auth::user()->role === 'kasir')
                                         <div class="flex items-center justify-center gap-2">
@@ -245,11 +210,11 @@
                                                     </button>
                                                 </form>
 
-                                                <form action="{{ route('merchant.orders.status', encryptId($order->id)) }}" method="POST" class="inline-block">
+                                                <form action="{{ route('merchant.orders.status', encryptId($order->id)) }}" method="POST" class="cancel-food-form inline-block">
                                                     @csrf
                                                     @method('PATCH')
-                                                   <input type="hidden" name="status" value="cancelled">
-                                                    <button type="submit" onclick="return confirm('Batalkan pesanan ini?')" class="px-2.5 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl text-xs font-extrabold transition cursor-pointer" title="Batalkan">
+                                                    <input type="hidden" name="status" value="cancelled">
+                                                    <button type="submit" class="cancel-food-btn px-2.5 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl text-xs font-extrabold transition cursor-pointer border border-rose-200" title="Batalkan">
                                                         <i class="fa-solid fa-xmark"></i>
                                                     </button>
                                                 </form>
@@ -294,69 +259,9 @@
                                                 </form>
                                             </div>
                                         </div>
-                                        <!-- STATUS PESANAN UNTUK OWNER -->
-                                        @if(in_array($statusStr, ['selesai', 'completed']))
-                                            <span
-                                                class="px-3 py-1.5 bg-emerald-100 text-emerald-800 text-xs font-black rounded-xl border border-emerald-200 inline-flex items-center gap-1">
-                                                <i class="fa-solid fa-check"></i>
-                                                Selesai Dibuat
-                                            </span>
-
-                                        @elseif(in_array($statusStr, ['batal', 'cancelled']))
-                                            <span
-                                                class="px-3 py-1.5 bg-rose-100 text-rose-800 text-xs font-black rounded-xl border border-rose-200 inline-flex items-center gap-1">
-                                                <i class="fa-solid fa-xmark"></i>
-                                                Cancel Makanan
-                                            </span>
-
-                                        @else
-                                            <div class="flex items-center justify-center gap-2">
-
-                                                {{-- Selesai Dibuat --}}
-                                                <form
-                                                    action="{{ route('merchant.orders.status', encryptId($order->id)) }}"
-                                                    method="POST"
-                                                    class="inline-block">
-
-                                                    @csrf
-                                                    @method('PATCH')
-
-                                                    <input type="hidden" name="status" value="completed">
-
-                                                    <button type="submit"
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition shadow-sm active:scale-95"
-                                                        title="Selesai Dibuat">
-
-                                                        <i class="fa-solid fa-circle-check"></i>
-                                                        <span>Selesai Dibuat</span>
-
-                                                    </button>
-                                                </form>
-
-                                                {{-- Cancel Makanan --}}
-                                                <form
-                                                    action="{{ route('merchant.orders.status', encryptId($order->id)) }}"
-                                                    method="POST"
-                                                    class="cancel-food-form inline-block">
-
-                                                    @csrf
-                                                    @method('PATCH')
-
-                                                    <input type="hidden" name="status" value="cancelled">
-
-                                                    <button type="submit"
-                                                        class="cancel-food-btn inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl text-xs font-black transition border border-rose-200"
-                                                        title="Cancel Makanan">
-
-                                                        <i class="fa-solid fa-xmark"></i>
-                                                        <span>Cancel Makanan</span>
-                                                    </button>
-                                                </form>
-
-                                            </div>
-                                        @endif
                                     @endif
                                 </td>
+
                             </tr>
                         @empty
                             <tr>
@@ -388,40 +293,34 @@
         }
     </script>
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.cancel-food-form').forEach(function (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
 
-        document.querySelectorAll('.cancel-food-form').forEach(function (form) {
-
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Cancel Makanan?',
-                    text: 'Pesanan ini akan dibatalkan.',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Cancel',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#e11d48',
-                    cancelButtonColor: '#64748b',
-                    background: '#ffffff',
-                    color: '#111827',
-                    customClass: {
-                        popup: 'rounded-2xl',
-                        confirmButton: 'rounded-xl px-5 py-2.5 font-bold',
-                        cancelButton: 'rounded-xl px-5 py-2.5 font-bold'
-                    }
-                }).then(function (result) {
-
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
-
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cancel Makanan?',
+                        text: 'Pesanan ini akan dibatalkan.',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Cancel',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#e11d48',
+                        cancelButtonColor: '#64748b',
+                        background: '#ffffff',
+                        color: '#111827',
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            confirmButton: 'rounded-xl px-5 py-2.5 font-bold',
+                            cancelButton: 'rounded-xl px-5 py-2.5 font-bold'
+                        }
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
                 });
             });
-
         });
-
-    });
-</script>
+    </script>
 @endsection
