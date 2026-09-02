@@ -22,6 +22,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const originalContent = button.innerHTML;
 
+            // ================================================================
+            // UPDATE COUNT LANGSUNG - OPTIMISTIC UI
+            // ================================================================
+
+            const cartCount = document.getElementById('cartCount');
+
+            let previousCartCount = 0;
+
+            if (cartCount) {
+                previousCartCount = parseInt(cartCount.textContent, 10) || 0;
+
+                updateCartCount(previousCartCount + 1);
+            }
+
+
             // Loading
             button.disabled = true;
 
@@ -63,6 +78,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 button.innerHTML = originalContent;
 
+                // Update jumlah keranjang
+                if (typeof data.cart_count !== 'undefined') {
+
+                    updateCartCount(data.cart_count);
+
+                }
+
                 // Tampilkan notifikasi berhasil
                 showSuccessNotification(
                     data.message || 'Menu berhasil ditambahkan ke keranjang.'
@@ -71,6 +93,11 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (error) {
 
                 console.error(error);
+
+                // Kembalikan count jika AJAX gagal
+                if (cartCount) {
+                    updateCartCount(previousCartCount);
+                }
 
                 button.disabled = false;
 
@@ -248,4 +275,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
     };
 
+        /*
+    |--------------------------------------------------------------------------
+    | CART COUNT
+    |--------------------------------------------------------------------------
+    */
+
+    window.updateCartCount = function (count) {
+
+        const cartCount = document.getElementById('cartCount');
+
+        if (!cartCount) {
+            return;
+        }
+
+        count = parseInt(count, 10) || 0;
+
+        cartCount.textContent = count;
+
+        if (count > 0) {
+
+            cartCount.style.display = 'flex';
+
+        } else {
+
+            cartCount.style.display = 'none';
+
+        }
+
+    };
 });

@@ -34,13 +34,21 @@
                     {{-- Cart --}}
                     <a
                         href="{{ route('customer.cart', $qrCode->code) }}"
-                        class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-400 active:scale-95"
+                        class="relative inline-flex shrink-0 items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-400 active:scale-95"
                     >
+                        <span class="relative flex items-center justify-center">
 
-                        <i class="fa-solid fa-cart-shopping text-sm"></i>
+                            <i class="fa-solid fa-cart-shopping text-sm"></i>
 
-                        <span class="hidden sm:inline">
-                            Keranjang
+                            {{-- Cart Count --}}
+                            <span
+                                id="cartCount"
+                                class="absolute -right-2.5 -top-3 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-black leading-none text-white shadow-sm ring-2 ring-white"
+                                style="{{ array_sum(session('cart', [])) > 0 ? '' : 'display: none;' }}"
+                            >
+                                {{ array_sum(session('cart', [])) }}
+                            </span>
+
                         </span>
 
                     </a>
@@ -391,15 +399,11 @@
             {{-- ======================================================
                 FOOTER
             ======================================================= --}}
-            <footer class="border-t border-slate-200 pt-6 pb-8 text-center">
+            <footer class="border-t border-slate-200 pt-6 pb-4 text-center">
 
-                <p class="text-[11px] text-slate-400">
-                    Powered by
-                    <span class="font-extrabold text-slate-500">
-                        PesanIn
-                    </span>
+                <p class="text-xs text-slate-400">
+                    © {{ date('Y') }} PesanIn. Semua hak dilindungi.
                 </p>
-
             </footer>
 
         </main>

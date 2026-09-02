@@ -15,7 +15,7 @@
         <div class="pointer-events-none absolute -left-40 top-80 h-[350px] w-[350px] rounded-full bg-orange-50 blur-3xl"></div>
 
 
-        <div class="relative mx-auto max-w-7xl px-6 pb-20 pt-16 lg:px-8 lg:pb-28 lg:pt-24">
+        <div class="relative mx-auto max-w-7xl px-6 pb-20 pt-12 lg:px-8 lg:pb-28 lg:pt-20">
 
             <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
 
@@ -674,7 +674,7 @@
                 <div class="mt-8">
 
                     <a
-                        href="{{ route('register') }}"
+                        href="{{ route('public.subscription.index') }}"
                         class="inline-flex items-center gap-3 rounded-xl bg-amber-500 px-7 py-4 text-sm font-extrabold text-slate-950 shadow-xl shadow-amber-500/20 transition hover:bg-amber-400"
                     >
 
