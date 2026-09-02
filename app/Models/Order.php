@@ -24,6 +24,7 @@ class Order extends Model
     'va_number',
     'payment_provider',
     'payment_status',
+    'payment_expires_at',
     'status',
     'receipt_sent_at',
 ];
@@ -32,6 +33,7 @@ class Order extends Model
         'subtotal' => 'decimal:2',
         'total' => 'decimal:2',
         'receipt_sent_at' => 'datetime',
+        'payment_expires_at' => 'datetime',
     ];
 
     public function qrCode()
