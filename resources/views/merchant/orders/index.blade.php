@@ -97,11 +97,23 @@
                     <thead class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider bg-slate-50/80 border-b border-slate-100">
                         <tr>
                             <th class="p-4 pl-6">No. Order</th>
-                            <th class="p-4">Pelanggan</th>
+                            <th class="p-4">
+                                @if(Auth::user()->role !== 'dapur')
+                                    Pelanggan
+                                @endif
+                            </th>
                             <th class="p-4">Pesanan</th>
-                            <th class="p-4">Metode Bayar</th>
-                            <th class="p-4">Total</th>
-                            <th class="p-4 text-center">Diselesaikan</th>
+                            <th class="p-4">
+                                @if(Auth::user()->role !== 'dapur')
+                                    Metode Bayar
+                                @endif
+                            </th>
+                            @if(Auth::user()->role !== 'dapur')
+                                <th class="p-4">Total</th>
+                            @endif
+                            @if(Auth::user()->role !== 'dapur')
+                                <th class="p-4 text-center">Diselesaikan</th>
+                            @endif
                             <th class="p-4 pr-6 text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -133,43 +145,65 @@
 
                                 {{-- Pelanggan --}}
                                 <td class="p-4">
-                                    <p class="font-extrabold text-slate-800">{{ $order->customer_name }}</p>
+                                    @if(Auth::user()->role !== 'dapur')
+                                        <p class="font-extrabold text-slate-800">
+                                            {{ $order->customer_name }}
+                                        </p>
+                                    @endif
                                 </td>
 
                                 {{-- Pesanan / Menu --}}
                                 <td class="p-4">
                                     <div class="space-y-1">
                                         @foreach ($order->items as $item)
-                                            <div class="flex items-center gap-2 text-xs">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                                <span class="font-semibold text-slate-700">{{ $item->menu_name ?? $item->menu->name ?? 'Menu' }}</span>
-                                                <span class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[10px]">(x{{ $item->quantity }})</span>
-                                            </div>
+                                            @for($i = 0; $i < $item->quantity; $i++)
+                                                <div class="flex items-center gap-2 text-xs">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+
+                                                    <span class="font-semibold text-slate-700">
+                                                        {{ $item->menu_name ?? $item->menu->name ?? 'Menu' }}
+                                                    </span>
+
+                                                    <span class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[10px]">
+                                                        (x1)
+                                                    </span>
+                                                </div>
+                                            @endfor
                                         @endforeach
                                     </div>
                                 </td>
 
                                 {{-- Metode Bayar --}}
                                 <td class="p-4">
-                                    @if($isCash)
-                                        <span class="px-3 py-1 text-xs bg-slate-100 text-slate-800 font-extrabold rounded-xl border border-slate-200/80 inline-flex items-center gap-1.5">
-                                            <i class="fa-solid fa-cash-register text-slate-500"></i> Bayar Kasir
-                                        </span>
-                                    @else
-                                        <span class="px-3 py-1 text-xs bg-amber-50 text-amber-700 font-extrabold rounded-xl border border-amber-200/80 inline-flex items-center gap-1.5">
-                                            <i class="fa-solid fa-qrcode text-amber-600"></i> QRIS
-                                        </span>
+                                    @if(Auth::user()->role !== 'dapur')
+                                        @if($isCash)
+                                            <span class="px-3 py-1 text-xs bg-slate-100 text-slate-800 font-extrabold rounded-xl border border-slate-200/80 inline-flex items-center gap-1.5">
+                                                <i class="fa-solid fa-cash-register text-slate-500"></i> Bayar Kasir
+                                            </span>
+                                        @else
+                                            <span class="px-3 py-1 text-xs bg-amber-50 text-amber-700 font-extrabold rounded-xl border border-amber-200/80 inline-flex items-center gap-1.5">
+                                                <i class="fa-solid fa-qrcode text-amber-600"></i> QRIS
+                                            </span>
+                                        @endif
                                     @endif
                                 </td>
 
                                 {{-- Total Harga --}}
-                                <td class="p-4">
-                                    <span class="font-black text-slate-900 text-base">
-                                        Rp {{ number_format($grandTotal, 0, ',', '.') }}
-                                    </span>
-                                </td>
+
+                                @if(Auth::user()->role !== 'dapur')
+                                    <td class="p-4">
+
+                                        <span class="font-black text-slate-900 text-base">
+
+                                            Rp {{ number_format($grandTotal, 0, ',', '.') }}
+
+                                        </span>
+
+                                    </td>
+                                @endif
 
                                 {{-- Waktu & Status (Diselesaikan) --}}
+                                @if(Auth::user()->role !== 'dapur')
                                 <td class="p-4 text-center">
                                     <div class="flex flex-col items-center justify-center gap-1">
                                         @if(in_array($statusStr, ['selesai', 'completed']))
@@ -190,10 +224,72 @@
                                         </span>
                                     </div>
                                 </td>
+                                @endif
 
                                 {{-- Aksi / Status Tombol --}}
                                 <td class="p-4 pr-6 text-center">
-                                    @if(Auth::user()->role === 'kasir')
+                                    @if(Auth::user()->role === 'dapur')
+
+                                        {{-- KHUSUS DAPUR --}}
+                                        @if(in_array($order->status, ['pending', 'processing']))
+
+                                            <div class="flex items-center justify-center gap-2">
+
+                                                {{-- SELESAI DIBUAT --}}
+                                                <form action="{{ route('merchant.orders.status', encryptId($order->id)) }}"
+                                                    method="POST">
+                                                    @csrf
+                                                    @method('PATCH')
+
+                                                    <input type="hidden" name="status" value="completed">
+
+                                                    <button type="submit"
+                                                        class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition">
+                                                        <i class="fa-solid fa-check mr-1"></i>
+                                                        Selesai Dibuat
+                                                    </button>
+                                                </form>
+
+                                                {{-- CANCEL MAKANAN --}}
+                                                <form action="{{ route('merchant.orders.status', encryptId($order->id)) }}"
+                                                    method="POST"
+                                                    class="cancel-food-form">
+
+                                                    @csrf
+                                                    @method('PATCH')
+
+                                                    <input type="hidden" name="status" value="cancelled">
+
+                                                    <button type="submit"
+                                                        class="cancel-food-btn px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl text-xs font-black border border-rose-200 transition">
+                                                        <i class="fa-solid fa-xmark mr-1"></i>
+                                                        Cancel Makanan
+                                                    </button>
+                                                </form>
+
+                                            </div>
+
+                                        @else
+
+                                            {{-- SUDAH SELESAI / DIBATALKAN --}}
+                                            <span class="text-xs font-extrabold
+                                                {{ $order->status === 'completed'
+                                                    ? 'text-emerald-600'
+                                                    : 'text-rose-600' }}">
+
+                                                @if($order->status === 'completed')
+                                                    <i class="fa-solid fa-circle-check mr-1"></i>
+                                                    Selesai Dibuat
+                                                @elseif($order->status === 'cancelled')
+                                                    <i class="fa-solid fa-circle-xmark mr-1"></i>
+                                                    Makanan Dibatalkan
+                                                @endif
+
+                                            </span>
+
+                                        @endif
+
+                                    @elseif(Auth::user()->role === 'kasir')
                                         <div class="flex items-center justify-center gap-2">
                                             <a href="{{ route('merchant.orders.receipt', encryptId($order->id)) }}" target="_blank"
                                                 class="w-8 h-8 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl flex items-center justify-center text-xs transition" title="Cetak Struk">
@@ -206,7 +302,7 @@
                                                     @method('PATCH')
                                                     <input type="hidden" name="status" value="completed">
                                                     <button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition shadow-sm active:scale-95 flex items-center gap-1 cursor-pointer">
-                                                        <i class="fa-solid fa-circle-check"></i> Selesaikan
+                                                        <i class="fa-solid fa-circle-check"></i> Sudah Dibayar
                                                     </button>
                                                 </form>
 
@@ -265,7 +361,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="p-12 text-center">
+                                <td colspan="{{ Auth::user()->role === 'dapur' ? 5 : 7 }}" class="p-12 text-center">
                                     <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-3 text-xl">
                                         <i class="fa-solid fa-inbox"></i>
                                     </div>
