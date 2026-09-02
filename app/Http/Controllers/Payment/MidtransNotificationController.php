@@ -303,8 +303,8 @@ class MidtransNotificationController extends Controller
                                 'payment_status' =>
                                     'paid',
 
-                                'status' =>
-                                    'processing',
+                                // 'status' =>
+                                    // 'processing', //dimatikan karena status order tidak berubah saat pembayaran berhasil jadi nanti dapur yang rubah
 
                             ]);
 

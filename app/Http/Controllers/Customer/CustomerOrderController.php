@@ -1190,7 +1190,7 @@ class CustomerOrderController extends Controller
         ) {
             $order->update([
                 'payment_status' =>
-                'paid',
+                'pending',
             ]);
 
             session()->forget(

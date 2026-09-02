@@ -176,9 +176,9 @@ Route::prefix('m/{code}')
 
 
         Route::get(
-    '/order/{orderNumber}/payment',
-    [CustomerOrderController::class, 'payment']
-)->name('order.payment');
+            '/order/{orderNumber}/payment',
+            [CustomerOrderController::class, 'payment']
+        )->name('order.payment');
     });
 
 
@@ -630,15 +630,14 @@ Route::middleware('auth')
             });
 
 
-        // ==================================================================
-        // ORDERS
-        // ==================================================================
+        // ======================================================================
+        // ORDERS - VIEW
+        // ======================================================================
 
         Route::middleware([
             'role:owner,kasir,dapur',
             'subscription.active',
         ])->group(function () {
-
 
             Route::get(
                 '/orders',
@@ -662,7 +661,33 @@ Route::middleware('auth')
                 '/orders/{encryptedId}/receipt/email',
                 [OrderController::class, 'sendReceipt']
             )->name('orders.receipt.email');
+        });
 
+
+        // ======================================================================
+        // KASIR - PAYMENT
+        // ======================================================================
+
+        Route::middleware([
+            'role:owner,kasir',
+            'subscription.active',
+        ])->group(function () {
+
+            Route::patch(
+                '/orders/{encryptedId}/payment',
+                [OrderController::class, 'markAsPaid']
+            )->name('orders.payment');
+        });
+
+
+        // ======================================================================
+        // DAPUR - FOOD STATUS
+        // ======================================================================
+
+        Route::middleware([
+            'role:owner,dapur',
+            'subscription.active',
+        ])->group(function () {
 
             Route::patch(
                 '/orders/{encryptedId}/status',
