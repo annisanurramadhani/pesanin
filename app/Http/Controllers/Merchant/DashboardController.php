@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Merchant;
 
 use App\Http\Controllers\Controller;
-use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Package;
 use App\Models\PackageDuration;
@@ -27,18 +26,20 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $totalMenu = Menu::where(
-            'merchant_id',
-            $merchantId
-        )->count();
-
 
         $totalOrders = Order::where(
             'merchant_id',
             $merchantId
         )->count();
 
-
+        /*
+        |--------------------------------------------------------------------------
+        | PESANAN HARI INI
+        |--------------------------------------------------------------------------
+        |
+        | Hanya pesanan yang SUDAH SELESAI.
+        |
+        */
         $todayOrders = Order::where(
             'merchant_id',
             $merchantId
@@ -47,9 +48,54 @@ class DashboardController extends Controller
                 'created_at',
                 today()
             )
+            ->where(
+                'status',
+                'completed'
+            )
             ->count();
 
+        /*
+        |--------------------------------------------------------------------------
+        | PENDAPATAN HARI INI
+        |--------------------------------------------------------------------------
+        |
+        | Hanya pesanan:
+        | status         = completed
+        | payment_status = paid
+        |
+        */
+        $todayRevenueOrders = Order::where(
+            'merchant_id',
+            $merchantId
+        )
+            ->whereDate(
+                'created_at',
+                today()
+            )
+            ->where(
+                'status',
+                'completed'
+            )
+            ->where(
+                'payment_status',
+                'paid'
+            )
+            ->get();
 
+
+        $todayRevenue = $todayRevenueOrders->sum(function ($order) {
+            return (float) $order->total;
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | PESANAN TERBARU
+        |--------------------------------------------------------------------------
+        |
+        | Expired tidak ditampilkan.
+        | Cancelled dari Dapur tetap boleh tampil.
+        |
+        */
         $recentOrders = Order::with([
             'qrCode',
             'items.menu'
@@ -58,6 +104,10 @@ class DashboardController extends Controller
                 'merchant_id',
                 $merchantId
             )
+            ->where(function ($query) {
+                $query->whereNull('payment_status')
+                    ->orWhere('payment_status', '!=', 'expired');
+            })
             ->latest()
             ->take(5)
             ->get();
@@ -275,9 +325,9 @@ class DashboardController extends Controller
         return view(
             'merchant.dashboard',
             compact(
-                'totalMenu',
                 'totalOrders',
                 'todayOrders',
+                'todayRevenue',
                 'recentOrders',
                 'subscription',
                 'subscriptionExpired',

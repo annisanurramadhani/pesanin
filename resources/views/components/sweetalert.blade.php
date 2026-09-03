@@ -1,6 +1,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@if (session('success'))
+@if (session('success') && Auth::user()->role !== 'dapur')
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -22,7 +22,7 @@
 
 @endif
 
-@if (session('error'))
+@if (session('error') && Auth::user()->role !== 'dapur')
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

@@ -34,31 +34,7 @@
          STAT CARDS
     ================================================================ --}}
 
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-
-        {{-- Total Menu --}}
-        <div class="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">
-            <div class="absolute -bottom-4 -right-4 h-24 w-24 rounded-full bg-amber-500/10 transition duration-300 group-hover:scale-125"></div>
-
-            <div class="relative z-10 space-y-1">
-                <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                    Total Menu
-                </p>
-
-                <h3 class="text-4xl font-black tracking-tight text-slate-900">
-                    {{ $totalMenu ?? 0 }}
-                </h3>
-
-                <p class="pt-1 text-xs font-medium text-slate-500">
-                    Produk siap dipesan
-                </p>
-            </div>
-
-            <div class="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500 text-xl font-black text-slate-950 shadow-lg shadow-amber-500/20">
-                <i class="fa-solid fa-utensils"></i>
-            </div>
-        </div>
-
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 
         {{-- Pesanan Hari Ini --}}
         <div class="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">

@@ -79,6 +79,21 @@ class OrderController extends Controller
             |--------------------------------------------------------------------------
             | FILTER OWNER / KASIR
             |--------------------------------------------------------------------------
+            |
+            | Order dengan pembayaran expired tidak ditampilkan.
+            | Berlaku untuk Kasir dan Owner.
+            |
+            */
+
+            $query->where(function ($q) {
+                $q->whereNull('payment_status')
+                ->orWhere('payment_status', '!=', 'expired');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | FILTER OWNER / KASIR
+            |--------------------------------------------------------------------------
             */
 
             if ($filterType === 'day') {
@@ -139,7 +154,7 @@ class OrderController extends Controller
         if ($role === 'dapur') {
 
             $orders = $query
-                ->orderBy('created_at', 'asc')
+                ->orderBy('created_at', 'desc')
                 ->get();
 
         } else {
