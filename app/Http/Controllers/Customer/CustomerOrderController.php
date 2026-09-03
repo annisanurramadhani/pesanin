@@ -29,7 +29,7 @@ class CustomerOrderController extends Controller
     |
     */
 
-    private const PAYMENT_EXPIRY_TESTING = true;
+    private const PAYMENT_EXPIRY_TESTING = false;
 
     private const PAYMENT_EXPIRY_SECONDS = 10;
 

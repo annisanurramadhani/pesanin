@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+// use App\Models\MerchantSetting;
 
 class Merchant extends Model
 {
@@ -54,6 +55,11 @@ class Merchant extends Model
     {
         return $this->hasMany(Subscription::class);
     }
+
+    // public function settings()
+    // {
+    //     return $this->hasOne(MerchantSetting::class);
+    // }
 
     public function activeSubscription()
     {

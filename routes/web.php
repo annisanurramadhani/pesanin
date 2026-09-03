@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\EmailVerificationController;
 
 use App\Http\Controllers\Merchant\MerchantSetupController;
 use App\Http\Controllers\Merchant\DashboardController;
+use App\Http\Controllers\Merchant\MerchantSettingController;
 
 use App\Http\Controllers\PublicSubscription\PublicSubscriptionController;
 use App\Http\Controllers\Superadmin\PackageController;
@@ -828,6 +829,20 @@ Route::middleware('auth')
                 '/staff/{encryptedId}',
                 [StaffController::class, 'destroy']
             )->name('staff.destroy');
+
+            // ==================================================================
+            // PENGATURAN
+            // ==================================================================
+
+            Route::get(
+                '/settings',
+                [MerchantSettingController::class, 'index']
+            )->name('settings.index');
+
+            Route::put(
+                '/settings',
+                [MerchantSettingController::class, 'update']
+            )->name('settings.update');
         });
     });
 

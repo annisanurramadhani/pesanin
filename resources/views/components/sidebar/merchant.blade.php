@@ -11,16 +11,30 @@
             {{-- LOGO PESANIN --}}
             <div id="sidebarLogo" class="flex items-center gap-3 overflow-hidden transition-all duration-300">
                 <div class="w-10 h-10 shrink-0 flex items-center justify-center">
-                    <img
-                        src="{{ asset('assets/images/menu-default.jpg') }}"
-                        alt="PesanIn"
-                        class="w-10 h-10 object-contain"
-                    >
+
+                    @if (Auth::user()->merchant && Auth::user()->merchant->logo)
+
+                        <img
+                            src="{{ asset('storage/' . Auth::user()->merchant->logo) }}"
+                            alt="{{ Auth::user()->merchant->name }}"
+                            class="w-10 h-10 rounded-lg object-cover"
+                        >
+
+                    @else
+
+                        <img
+                            src="{{ asset('assets/images/menu-default.jpg') }}"
+                            alt="PesanIn"
+                            class="w-10 h-10 rounded-lg object-cover"
+                        >
+
+                    @endif
+
                 </div>
 
                 <div id="sidebarBrand" class="whitespace-nowrap transition-all duration-300">
                     <h1 class="font-bold text-white text-base tracking-wide">
-                        PesanIn
+                        {{ Auth::user()->merchant->name ?? 'PesanIn' }}
                     </h1>
 
                     <p class="text-[10px] text-slate-400 tracking-wider uppercase font-semibold">
@@ -127,6 +141,21 @@
                     <i class="fa-solid fa-users-gear w-5 shrink-0"></i>
                     <span class="sidebar-text whitespace-nowrap transition-all duration-200">
                         Kelola Staf
+                    </span>
+                </a>
+
+                {{-- PENGATURAN --}}
+                <a
+                    href="{{ route('merchant.settings.index') }}"
+                    class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                    {{ request()->routeIs('merchant.settings.*')
+                        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}"
+                >
+                    <i class="fa-solid fa-gear w-5 shrink-0"></i>
+
+                    <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                        Pengaturan
                     </span>
                 </a>
 
