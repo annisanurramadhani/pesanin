@@ -409,13 +409,11 @@
         </main>
 
     </div>
+{{-- =========================================================
+    JAVASCRIPT
+========================================================== --}}
+<script src="{{ asset('js/customer/menu.js') }}"></script>
 
+{{-- CSS --}}
+<link rel="stylesheet" href="{{ asset('css/customer/menu.css') }}">
 @endsection
-
-@push('scripts')
-    @vite('resources/js/customer/menu.js')
-@endpush
-
-@push('styles')
-    @vite('resources/css/customer/menu.css')
-@endpush

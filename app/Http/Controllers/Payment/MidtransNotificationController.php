@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Payment;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderReceiptMail;
 use App\Models\Order;
 use App\Models\Subscription;
 use App\Notifications\SubscriptionInvoiceNotification;
@@ -83,19 +85,19 @@ class MidtransNotificationController extends Controller
                 [
 
                     'order_id' =>
-                        $orderId,
+                    $orderId,
 
                     'transaction_status' =>
-                        $transactionStatus,
+                    $transactionStatus,
 
                     'fraud_status' =>
-                        $fraudStatus,
+                    $fraudStatus,
 
                     'gross_amount' =>
-                        $grossAmount,
+                    $grossAmount,
 
                     'transaction_id' =>
-                        $transactionId,
+                    $transactionId,
 
                 ]
             );
@@ -144,17 +146,17 @@ class MidtransNotificationController extends Controller
                         [
 
                             'order_id' =>
-                                $orderId,
+                            $orderId,
 
                             'order_database_id' =>
-                                $orderDatabaseId,
+                            $orderDatabaseId,
 
                         ]
                     );
 
                     return response()->json([
                         'message' =>
-                            'Order not found',
+                        'Order not found',
                     ], 404);
                 }
 
@@ -179,20 +181,20 @@ class MidtransNotificationController extends Controller
                         [
 
                             'order_id' =>
-                                $order->id,
+                            $order->id,
 
                             'expected' =>
-                                'midtrans:' . $orderId,
+                            'midtrans:' . $orderId,
 
                             'actual' =>
-                                $order->payment_provider,
+                            $order->payment_provider,
 
                         ]
                     );
 
                     return response()->json([
                         'message' =>
-                            'Invalid payment provider',
+                        'Invalid payment provider',
                     ], 400);
                 }
 
@@ -213,23 +215,23 @@ class MidtransNotificationController extends Controller
                         [
 
                             'order_id' =>
-                                $order->id,
+                            $order->id,
 
                             'midtrans_order_id' =>
-                                $orderId,
+                            $orderId,
 
                             'expected' =>
-                                $order->total,
+                            $order->total,
 
                             'received' =>
-                                $grossAmount,
+                            $grossAmount,
 
                         ]
                     );
 
                     return response()->json([
                         'message' =>
-                            'Invalid payment amount',
+                        'Invalid payment amount',
                     ], 400);
                 }
 
@@ -254,10 +256,11 @@ class MidtransNotificationController extends Controller
 
                     /*
                     |--------------------------------------------------------------------------
-                    | Idempotency
+                    | PAYMENT CUSTOMER SUDAH PERNAH DIPROSES
                     |--------------------------------------------------------------------------
                     |
-                    | Notification Midtrans dapat dikirim lebih dari sekali.
+                    | Jangan memproses pembayaran ulang.
+                    | Tetapi jika email belum terkirim, tetap coba kirim struk.
                     |
                     */
 
@@ -270,24 +273,127 @@ class MidtransNotificationController extends Controller
                             [
 
                                 'order_id' =>
-                                    $order->id,
+                                $order->id,
 
                                 'midtrans_order_id' =>
-                                    $orderId,
+                                $orderId,
 
                             ]
                         );
 
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | KIRIM ULANG STRUK JIKA BELUM TERKIRIM
+                        |--------------------------------------------------------------------------
+                        |
+                        | Kondisi:
+                        |
+                        | customer_email ada
+                        | receipt_sent_at masih NULL
+                        |
+                        */
+
+                        if (
+                            !empty($order->customer_email)
+                            &&
+                            is_null($order->receipt_sent_at)
+                        ) {
+
+                            try {
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Load relasi yang digunakan Blade email
+                                |--------------------------------------------------------------------------
+                                */
+
+                                $order->load([
+                                    'merchant',
+                                    'qrCode',
+                                    'items',
+                                ]);
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Kirim Email Struk
+                                |--------------------------------------------------------------------------
+                                */
+
+                                Mail::to(
+                                    $order->customer_email
+                                )->send(
+                                    new OrderReceiptMail($order)
+                                );
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Tandai Struk Sudah Terkirim
+                                |--------------------------------------------------------------------------
+                                */
+
+                                $order->update([
+                                    'receipt_sent_at' => now(),
+                                ]);
+
+
+                                Log::info(
+                                    'STRUK CUSTOMER BERHASIL DIKIRIM.',
+                                    [
+
+                                        'order_id' =>
+                                        $order->id,
+
+                                        'order_number' =>
+                                        $order->order_number,
+
+                                        'email' =>
+                                        $order->customer_email,
+
+                                    ]
+                                );
+                            } catch (Throwable $e) {
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Email gagal tidak membatalkan pembayaran
+                                |--------------------------------------------------------------------------
+                                */
+
+                                Log::error(
+                                    'GAGAL MENGIRIM STRUK CUSTOMER.',
+                                    [
+
+                                        'order_id' =>
+                                        $order->id,
+
+                                        'order_number' =>
+                                        $order->order_number,
+
+                                        'email' =>
+                                        $order->customer_email,
+
+                                        'message' =>
+                                        $e->getMessage(),
+
+                                    ]
+                                );
+                            }
+                        }
+
+
                         return response()->json([
                             'message' =>
-                                'Order payment already processed',
+                            'Order payment already processed',
                         ], 200);
                     }
 
 
                     /*
                     |--------------------------------------------------------------------------
-                    | Update Order
+                    | UPDATE PAYMENT STATUS
                     |--------------------------------------------------------------------------
                     */
 
@@ -301,10 +407,10 @@ class MidtransNotificationController extends Controller
                             $order->update([
 
                                 'payment_status' =>
-                                    'paid',
+                                'paid',
 
-                                // 'status' =>
-                                    // 'processing', //dimatikan karena status order tidak berubah saat pembayaran berhasil jadi nanti dapur yang rubah
+                                // Status order sengaja TIDAK diubah.
+                                // Nanti dapur yang mengubah status.
 
                             ]);
 
@@ -320,16 +426,16 @@ class MidtransNotificationController extends Controller
                                 [
 
                                     'order_id' =>
-                                        $order->id,
+                                    $order->id,
 
                                     'order_number' =>
-                                        $order->order_number,
+                                    $order->order_number,
 
                                     'transaction_id' =>
-                                        $transactionId,
+                                    $transactionId,
 
                                     'transaction_status' =>
-                                        $transactionStatus,
+                                    $transactionStatus,
 
                                 ]
                             );
@@ -337,12 +443,150 @@ class MidtransNotificationController extends Controller
                     );
 
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | KIRIM STRUK CUSTOMER
+                    |--------------------------------------------------------------------------
+                    |
+                    | Email customer nullable.
+                    |
+                    | Jika email diisi:
+                    |     → kirim struk
+                    |
+                    | Jika email kosong:
+                    |     → tidak kirim apa-apa
+                    |
+                    | receipt_sent_at digunakan agar email tidak terkirim dua kali.
+                    |
+                    */
+
+                    if (
+                        !empty($order->customer_email)
+                        &&
+                        is_null($order->receipt_sent_at)
+                    ) {
+
+                        try {
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Load relasi untuk Blade email
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $order->load([
+                                'merchant',
+                                'qrCode',
+                                'items',
+                            ]);
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Kirim Email
+                            |--------------------------------------------------------------------------
+                            */
+
+                            Mail::to(
+                                $order->customer_email
+                            )->send(
+                                new OrderReceiptMail($order)
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Tandai Sudah Terkirim
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $order->update([
+                                'receipt_sent_at' => now(),
+                            ]);
+
+
+                            Log::info(
+                                'STRUK CUSTOMER BERHASIL DIKIRIM.',
+                                [
+
+                                    'order_id' =>
+                                    $order->id,
+
+                                    'order_number' =>
+                                    $order->order_number,
+
+                                    'email' =>
+                                    $order->customer_email,
+
+                                ]
+                            );
+                        } catch (Throwable $e) {
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Email gagal tidak menggagalkan pembayaran
+                            |--------------------------------------------------------------------------
+                            */
+
+                            Log::error(
+                                'GAGAL MENGIRIM STRUK CUSTOMER.',
+                                [
+
+                                    'order_id' =>
+                                    $order->id,
+
+                                    'order_number' =>
+                                    $order->order_number,
+
+                                    'email' =>
+                                    $order->customer_email,
+
+                                    'message' =>
+                                    $e->getMessage(),
+
+                                ]
+                            );
+                        }
+                    } else {
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Email kosong / sudah pernah dikirim
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Log::info(
+                            'STRUK CUSTOMER TIDAK DIKIRIM.',
+                            [
+
+                                'order_id' =>
+                                $order->id,
+
+                                'order_number' =>
+                                $order->order_number,
+
+                                'customer_email' =>
+                                $order->customer_email,
+
+                                'receipt_sent_at' =>
+                                $order->receipt_sent_at,
+
+                            ]
+                        );
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | RESPONSE
+                    |--------------------------------------------------------------------------
+                    */
+
                     return response()->json([
                         'message' =>
-                            'Order payment processed successfully',
+                        'Order payment processed successfully',
                     ], 200);
                 }
-
 
                 /*
                 |--------------------------------------------------------------------------
@@ -366,7 +610,7 @@ class MidtransNotificationController extends Controller
 
                         $order->update([
                             'payment_status' =>
-                                'pending',
+                            'pending',
                         ]);
                     }
 
@@ -376,13 +620,13 @@ class MidtransNotificationController extends Controller
                         [
 
                             'order_id' =>
-                                $order->id,
+                            $order->id,
 
                             'order_number' =>
-                                $order->order_number,
+                            $order->order_number,
 
                             'midtrans_order_id' =>
-                                $orderId,
+                            $orderId,
 
                         ]
                     );
@@ -390,7 +634,7 @@ class MidtransNotificationController extends Controller
 
                     return response()->json([
                         'message' =>
-                            'Order payment pending',
+                        'Order payment pending',
                     ], 200);
                 }
 
@@ -425,12 +669,12 @@ class MidtransNotificationController extends Controller
                         $order->update([
 
                             'payment_status' =>
-                                $transactionStatus === 'expire'
-                                    ? 'expired'
-                                    : 'failed',
+                            $transactionStatus === 'expire'
+                                ? 'expired'
+                                : 'failed',
 
                             'status' =>
-                                'cancelled',
+                            'cancelled',
 
                         ]);
                     }
@@ -441,16 +685,16 @@ class MidtransNotificationController extends Controller
                         [
 
                             'order_id' =>
-                                $order->id,
+                            $order->id,
 
                             'order_number' =>
-                                $order->order_number,
+                            $order->order_number,
 
                             'midtrans_order_id' =>
-                                $orderId,
+                            $orderId,
 
                             'transaction_status' =>
-                                $transactionStatus,
+                            $transactionStatus,
 
                         ]
                     );
@@ -458,7 +702,7 @@ class MidtransNotificationController extends Controller
 
                     return response()->json([
                         'message' =>
-                            'Order payment not successful',
+                        'Order payment not successful',
                     ], 200);
                 }
 
@@ -471,7 +715,7 @@ class MidtransNotificationController extends Controller
 
                 return response()->json([
                     'message' =>
-                        'Order notification received',
+                    'Order notification received',
                 ], 200);
             }
 
@@ -499,13 +743,13 @@ class MidtransNotificationController extends Controller
                     'Format Order ID Midtrans tidak valid.',
                     [
                         'order_id' =>
-                            $orderId,
+                        $orderId,
                     ]
                 );
 
                 return response()->json([
                     'message' =>
-                        'Invalid order ID',
+                    'Invalid order ID',
                 ], 400);
             }
 
@@ -531,11 +775,11 @@ class MidtransNotificationController extends Controller
                     'packageDuration.package',
                     'merchant.users',
                 ])
-                    ->where(
-                        'id',
-                        $subscriptionId
-                    )
-                    ->first();
+                ->where(
+                    'id',
+                    $subscriptionId
+                )
+                ->first();
 
 
             if (!$subscription) {
@@ -545,17 +789,17 @@ class MidtransNotificationController extends Controller
                     [
 
                         'subscription_id' =>
-                            $subscriptionId,
+                        $subscriptionId,
 
                         'order_id' =>
-                            $orderId,
+                        $orderId,
 
                     ]
                 );
 
                 return response()->json([
                     'message' =>
-                        'Subscription not found',
+                    'Subscription not found',
                 ], 404);
             }
 
@@ -575,7 +819,7 @@ class MidtransNotificationController extends Controller
 
                 return response()->json([
                     'message' =>
-                        'Subscription already active',
+                    'Subscription already active',
                 ], 200);
             }
 
@@ -596,20 +840,20 @@ class MidtransNotificationController extends Controller
                     [
 
                         'subscription_id' =>
-                            $subscription->id,
+                        $subscription->id,
 
                         'expected' =>
-                            $subscription->price,
+                        $subscription->price,
 
                         'received' =>
-                            $grossAmount,
+                        $grossAmount,
 
                     ]
                 );
 
                 return response()->json([
                     'message' =>
-                        'Invalid payment amount',
+                    'Invalid payment amount',
                 ], 400);
             }
 
@@ -697,19 +941,19 @@ class MidtransNotificationController extends Controller
                         $subscription->update([
 
                             'invoice_number' =>
-                                $orderId,
+                            $orderId,
 
                             'start_date' =>
-                                $startDate->toDateString(),
+                            $startDate->toDateString(),
 
                             'end_date' =>
-                                $endDate->toDateString(),
+                            $endDate->toDateString(),
 
                             'paid_at' =>
-                                now(),
+                            now(),
 
                             'status' =>
-                                'active',
+                            'active',
 
                         ]);
 
@@ -725,19 +969,19 @@ class MidtransNotificationController extends Controller
                             [
 
                                 'subscription_id' =>
-                                    $subscription->id,
+                                $subscription->id,
 
                                 'order_id' =>
-                                    $orderId,
+                                $orderId,
 
                                 'transaction_id' =>
-                                    $transactionId,
+                                $transactionId,
 
                                 'start_date' =>
-                                    $startDate->toDateString(),
+                                $startDate->toDateString(),
 
                                 'end_date' =>
-                                    $endDate->toDateString(),
+                                $endDate->toDateString(),
 
                             ]
                         );
@@ -769,14 +1013,14 @@ class MidtransNotificationController extends Controller
 
                     $user =
                         $subscription
-                            ->merchant
-                            ->users()
-                            ->where(
-                                'status',
-                                'active'
-                            )
-                            ->orderBy('id')
-                            ->first();
+                        ->merchant
+                        ->users()
+                        ->where(
+                            'status',
+                            'active'
+                        )
+                        ->orderBy('id')
+                        ->first();
 
 
                     if ($user) {
@@ -795,17 +1039,16 @@ class MidtransNotificationController extends Controller
                                 [
 
                                     'subscription_id' =>
-                                        $subscription->id,
+                                    $subscription->id,
 
                                     'invoice_number' =>
-                                        $subscription->invoice_number,
+                                    $subscription->invoice_number,
 
                                     'email' =>
-                                        $user->email,
+                                    $user->email,
 
                                 ]
                             );
-
                         } catch (Throwable $e) {
 
                             /*
@@ -819,16 +1062,16 @@ class MidtransNotificationController extends Controller
                                 [
 
                                     'subscription_id' =>
-                                        $subscription->id,
+                                    $subscription->id,
 
                                     'invoice_number' =>
-                                        $subscription->invoice_number,
+                                    $subscription->invoice_number,
 
                                     'email' =>
-                                        $user->email,
+                                    $user->email,
 
                                     'message' =>
-                                        $e->getMessage(),
+                                    $e->getMessage(),
 
                                 ]
                             );
@@ -840,10 +1083,10 @@ class MidtransNotificationController extends Controller
                             [
 
                                 'subscription_id' =>
-                                    $subscription->id,
+                                $subscription->id,
 
                                 'merchant_id' =>
-                                    $subscription->merchant_id,
+                                $subscription->merchant_id,
 
                             ]
                         );
@@ -859,7 +1102,7 @@ class MidtransNotificationController extends Controller
 
                 return response()->json([
                     'message' =>
-                        'Payment processed successfully',
+                    'Payment processed successfully',
                 ], 200);
             }
 
@@ -879,17 +1122,17 @@ class MidtransNotificationController extends Controller
                     [
 
                         'subscription_id' =>
-                            $subscription->id,
+                        $subscription->id,
 
                         'order_id' =>
-                            $orderId,
+                        $orderId,
 
                     ]
                 );
 
                 return response()->json([
                     'message' =>
-                        'Payment pending',
+                    'Payment pending',
                 ], 200);
             }
 
@@ -916,20 +1159,20 @@ class MidtransNotificationController extends Controller
                     [
 
                         'subscription_id' =>
-                            $subscription->id,
+                        $subscription->id,
 
                         'order_id' =>
-                            $orderId,
+                        $orderId,
 
                         'transaction_status' =>
-                            $transactionStatus,
+                        $transactionStatus,
 
                     ]
                 );
 
                 return response()->json([
                     'message' =>
-                        'Payment not successful',
+                    'Payment not successful',
                 ], 200);
             }
 
@@ -942,10 +1185,8 @@ class MidtransNotificationController extends Controller
 
             return response()->json([
                 'message' =>
-                    'Notification received',
+                'Notification received',
             ], 200);
-
-
         } catch (Throwable $e) {
 
             Log::error(
@@ -953,23 +1194,23 @@ class MidtransNotificationController extends Controller
                 [
 
                     'message' =>
-                        $e->getMessage(),
+                    $e->getMessage(),
 
                     'file' =>
-                        $e->getFile(),
+                    $e->getFile(),
 
                     'line' =>
-                        $e->getLine(),
+                    $e->getLine(),
 
                     'trace' =>
-                        $e->getTraceAsString(),
+                    $e->getTraceAsString(),
 
                 ]
             );
 
             return response()->json([
                 'message' =>
-                    'Internal server error',
+                'Internal server error',
             ], 500);
         }
     }

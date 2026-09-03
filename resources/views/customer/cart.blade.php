@@ -1,5 +1,8 @@
 @extends('layouts.customer')
 
+@section('disableSweetAlert')
+@endsection
+
 @section('content')
 
     <div class="min-h-screen">
@@ -42,7 +45,8 @@
             @if (session('success'))
 
                 <div
-                    class="mb-5 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5">
+                    id="cartSuccessNotification"
+                    class="mb-5 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 opacity-100 translate-y-0 transition-all duration-300">
 
                     <div
                         class="w-8 h-8 shrink-0 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
@@ -476,4 +480,44 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+{{-- =========================================================
+    AUTO HIDE SUCCESS NOTIFICATION
+========================================================= --}}
+@if (session('success'))
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const notification = document.getElementById(
+                'cartSuccessNotification'
+            );
+
+            if (!notification) {
+                return;
+            }
+
+            setTimeout(function () {
+
+                notification.classList.remove(
+                    'opacity-100',
+                    'translate-y-0'
+                );
+
+                notification.classList.add(
+                    'opacity-0',
+                    'translate-y-2'
+                );
+
+                setTimeout(function () {
+                    notification.remove();
+                }, 300);
+
+            }, 1000);
+
+        });
+    </script>
+
+@endif
+
 @endsection
