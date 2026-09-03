@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         window.location.reload();
 
                     },
-                    1500
+                    1000
                 );
 
                 return;
@@ -482,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const paymentStatusInterval =
         setInterval(
             checkPaymentStatus,
-            5000
+            1000
         );
 
 
