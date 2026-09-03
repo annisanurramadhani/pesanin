@@ -622,24 +622,27 @@
                                             =================================================== --}}
                                             @if ($isCash && $paymentStatus === 'pending')
 
-                                                <form
-                                                    action="{{ route('merchant.orders.payment', encryptId($order->id)) }}"
-                                                    method="POST">
+                                                <button
+                                                    type="button"
+                                                    onclick="openCashPaymentModal(
+                                                        '{{ encryptId($order->id) }}',
+                                                        {{ (float) $grandTotal }},
+                                                        '{{ $order->order_number }}'
+                                                    )"
+                                                    class="px-3 py-2
+                                                        rounded-xl
+                                                        bg-emerald-100
+                                                        hover:bg-emerald-200
+                                                        border border-emerald-200
+                                                        text-emerald-700
+                                                        text-xs
+                                                        font-extrabold
+                                                        transition">
 
-                                                    @csrf
-                                                    @method('PATCH')
+                                                    <i class="fa-solid fa-circle-check mr-1"></i>
+                                                    Sudah Dibayar
 
-                                                    <button type="submit"
-                                                        class="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-xl text-xs font-extrabold transition cursor-pointer border border-emerald-200"
-                                                        title="Konfirmasi Pembayaran">
-
-                                                        <i class="fa-solid fa-circle-check mr-1"></i>
-
-                                                        Sudah Dibayar
-
-                                                    </button>
-
-                                                </form>
+                                                </button>
 
                                             @endif
 
@@ -799,6 +802,607 @@
 
     </div>
 
+    {{-- =========================================================
+    MODAL PEMBAYARAN KASIR
+========================================================= --}}
+
+<div
+    id="cashPaymentModal"
+    class="fixed inset-0 z-[9999] hidden items-center justify-center
+           bg-slate-950/50 backdrop-blur-sm px-4">
+
+    <div
+        class="w-full max-w-md
+               overflow-hidden
+               rounded-2xl
+               border border-slate-200
+               bg-white
+               shadow-2xl">
+
+        {{-- HEADER --}}
+        <div
+            class="flex items-center justify-between
+                   border-b border-slate-100
+                   px-6 py-4">
+
+            <div>
+
+                <h3
+                    class="text-lg font-black text-slate-900">
+
+                    Pembayaran Kasir
+
+                </h3>
+
+                <p
+                    id="cashPaymentOrder"
+                    class="mt-1 text-xs font-medium text-slate-400">
+
+                    -
+
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                onclick="closeCashPaymentModal()"
+                class="flex h-9 w-9 items-center justify-center
+                       rounded-xl
+                       bg-slate-100
+                       text-slate-500
+                       transition
+                       hover:bg-slate-200">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+        {{-- BODY --}}
+        <div class="space-y-5 p-6">
+
+            {{-- 1. TOTAL TAGIHAN --}}
+            <div
+                class="rounded-2xl
+                       border border-slate-200
+                       bg-slate-50
+                       p-4">
+
+                <p
+                    class="text-[11px]
+                           font-extrabold
+                           uppercase
+                           tracking-wider
+                           text-slate-400">
+
+                    Total Tagihan
+
+                </p>
+
+                <div
+                    id="cashPaymentTotal"
+                    class="mt-1
+                           text-2xl
+                           font-black
+                           text-slate-900">
+
+                    Rp 0
+
+                </div>
+
+            </div>
+
+
+            {{-- 2. NOMINAL UANG PELANGGAN --}}
+            <div>
+
+                <label
+                    for="cashReceivedInput"
+                    class="mb-2 block
+                           text-xs
+                           font-extrabold
+                           text-slate-700">
+
+                    Nominal Uang Pelanggan
+
+                </label>
+
+                <div class="relative">
+
+                    <span
+                        class="absolute
+                               left-4
+                               top-1/2
+                               -translate-y-1/2
+                               text-sm
+                               font-black
+                               text-slate-400">
+
+                        Rp
+
+                    </span>
+
+                    <input
+                        type="number"
+                        id="cashReceivedInput"
+                        min="0"
+                        step="100"
+                        placeholder="Masukkan uang pelanggan"
+                        class="w-full
+                               rounded-xl
+                               border border-slate-200
+                               bg-white
+                               py-3
+                               pl-11
+                               pr-4
+                               text-sm
+                               font-bold
+                               text-slate-900
+                               outline-none
+                               transition
+                               focus:border-emerald-500
+                               focus:ring-4
+                               focus:ring-emerald-500/10">
+
+                </div>
+
+                <p
+                    id="cashPaymentError"
+                    class="mt-2 hidden
+                           text-xs
+                           font-bold
+                           text-red-600">
+
+                </p>
+
+            </div>
+
+
+            {{-- 3. KEMBALIAN --}}
+            <div
+                class="rounded-2xl
+                       border border-emerald-100
+                       bg-emerald-50
+                       p-4">
+
+                <div
+                    class="flex items-center justify-between">
+
+                    <span
+                        class="text-xs
+                               font-extrabold
+                               text-emerald-700">
+
+                        Kembalian
+
+                    </span>
+
+                    <span
+                        id="cashPaymentChange"
+                        class="text-xl
+                               font-black
+                               text-emerald-700">
+
+                        Rp 0
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- FOOTER --}}
+        <div
+            class="flex items-center justify-end
+                   gap-2
+                   border-t border-slate-100
+                   bg-slate-50/50
+                   px-6 py-4">
+
+            <button
+                type="button"
+                onclick="closeCashPaymentModal()"
+                class="rounded-xl
+                       bg-slate-100
+                       px-4 py-2.5
+                       text-xs
+                       font-extrabold
+                       text-slate-600
+                       transition
+                       hover:bg-slate-200">
+
+                Batal
+
+            </button>
+
+
+            {{-- 4. KONFIRMASI --}}
+            <form
+                id="cashPaymentForm"
+                method="POST">
+
+                @csrf
+                @method('PATCH')
+
+                <input
+                    type="hidden"
+                    name="cash_received"
+                    id="cashReceivedHidden">
+
+                <button
+                    type="submit"
+                    id="cashPaymentSubmit"
+                    disabled
+                    class="rounded-xl
+                           bg-emerald-600
+                           px-4 py-2.5
+                           text-xs
+                           font-black
+                           text-white
+                           transition
+                           hover:bg-emerald-500
+                           disabled:cursor-not-allowed
+                           disabled:bg-slate-200
+                           disabled:text-slate-400">
+
+                    <i class="fa-solid fa-check mr-1"></i>
+
+                    Konfirmasi Pembayaran
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let cashPaymentTotal = 0;
+
+
+/*
+|--------------------------------------------------------------------------
+| FORMAT RUPIAH
+|--------------------------------------------------------------------------
+*/
+
+function formatRupiah(value) {
+
+    return 'Rp ' + Number(value).toLocaleString(
+        'id-ID'
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| BUKA MODAL
+|--------------------------------------------------------------------------
+*/
+
+function openCashPaymentModal(
+    encryptedId,
+    total,
+    orderNumber
+) {
+
+    cashPaymentTotal = Number(total);
+
+
+    const modal =
+        document.getElementById(
+            'cashPaymentModal'
+        );
+
+    const form =
+        document.getElementById(
+            'cashPaymentForm'
+        );
+
+    const input =
+        document.getElementById(
+            'cashReceivedInput'
+        );
+
+
+    /*
+    |----------------------------------------------------------------------
+    | SET ACTION FORM
+    |----------------------------------------------------------------------
+    */
+
+    form.action =
+        "{{ url('/merchant/orders') }}/"
+        + encryptedId
+        + "/payment";
+
+
+    /*
+    |----------------------------------------------------------------------
+    | TAMPILKAN DATA
+    |----------------------------------------------------------------------
+    */
+
+    document.getElementById(
+        'cashPaymentOrder'
+    ).textContent =
+        '#' + orderNumber;
+
+
+    document.getElementById(
+        'cashPaymentTotal'
+    ).textContent =
+        formatRupiah(
+            cashPaymentTotal
+        );
+
+
+    /*
+    |----------------------------------------------------------------------
+    | RESET
+    |----------------------------------------------------------------------
+    */
+
+    input.value = '';
+
+    document.getElementById(
+        'cashReceivedHidden'
+    ).value = '';
+
+
+    document.getElementById(
+        'cashPaymentChange'
+    ).textContent =
+        'Rp 0';
+
+
+    document.getElementById(
+        'cashPaymentError'
+    ).textContent = '';
+
+
+    document.getElementById(
+        'cashPaymentError'
+    ).classList.add(
+        'hidden'
+    );
+
+
+    document.getElementById(
+        'cashPaymentSubmit'
+    ).disabled = true;
+
+
+    /*
+    |----------------------------------------------------------------------
+    | TAMPILKAN MODAL
+    |----------------------------------------------------------------------
+    */
+
+    modal.classList.remove(
+        'hidden'
+    );
+
+    modal.classList.add(
+        'flex'
+    );
+
+
+    setTimeout(() => {
+
+        input.focus();
+
+    }, 100);
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| TUTUP MODAL
+|--------------------------------------------------------------------------
+*/
+
+function closeCashPaymentModal() {
+
+    const modal =
+        document.getElementById(
+            'cashPaymentModal'
+        );
+
+
+    modal.classList.add(
+        'hidden'
+    );
+
+    modal.classList.remove(
+        'flex'
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| HITUNG KEMBALIAN
+|--------------------------------------------------------------------------
+*/
+
+document
+    .getElementById(
+        'cashReceivedInput'
+    )
+    .addEventListener(
+        'input',
+        function () {
+
+            const received =
+                Number(
+                    this.value
+                ) || 0;
+
+
+            const change =
+                received -
+                cashPaymentTotal;
+
+
+            const changeElement =
+                document.getElementById(
+                    'cashPaymentChange'
+                );
+
+            const errorElement =
+                document.getElementById(
+                    'cashPaymentError'
+                );
+
+            const submitButton =
+                document.getElementById(
+                    'cashPaymentSubmit'
+                );
+
+            const hiddenInput =
+                document.getElementById(
+                    'cashReceivedHidden'
+                );
+
+
+            /*
+            |------------------------------------------------------------------
+            | SIMPAN NILAI
+            |------------------------------------------------------------------
+            */
+
+            hiddenInput.value =
+                received;
+
+
+            /*
+            |------------------------------------------------------------------
+            | BELUM DIISI
+            |------------------------------------------------------------------
+            */
+
+            if (
+                received <= 0
+            ) {
+
+                changeElement.textContent =
+                    'Rp 0';
+
+                errorElement.textContent =
+                    '';
+
+                errorElement.classList.add(
+                    'hidden'
+                );
+
+                submitButton.disabled =
+                    true;
+
+                return;
+
+            }
+
+
+            /*
+            |------------------------------------------------------------------
+            | UANG KURANG
+            |------------------------------------------------------------------
+            */
+
+            if (
+                received < cashPaymentTotal
+            ) {
+
+                changeElement.textContent =
+                    'Rp 0';
+
+
+                errorElement.textContent =
+                    'Uang pelanggan kurang '
+                    + formatRupiah(
+                        cashPaymentTotal -
+                        received
+                    );
+
+
+                errorElement.classList.remove(
+                    'hidden'
+                );
+
+
+                submitButton.disabled =
+                    true;
+
+                return;
+
+            }
+
+
+            /*
+            |------------------------------------------------------------------
+            | UANG CUKUP / LEBIH
+            |------------------------------------------------------------------
+            */
+
+            errorElement.classList.add(
+                'hidden'
+            );
+
+
+            changeElement.textContent =
+                formatRupiah(
+                    change
+                );
+
+
+            submitButton.disabled =
+                false;
+
+        }
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| KLIK DI LUAR MODAL
+|--------------------------------------------------------------------------
+*/
+
+document
+    .getElementById(
+        'cashPaymentModal'
+    )
+    .addEventListener(
+        'click',
+        function (event) {
+
+            if (
+                event.target === this
+            ) {
+
+                closeCashPaymentModal();
+
+            }
+
+        }
+    );
+
+</script>
 
     {{-- ==============================================================
         FILTER SCRIPT
