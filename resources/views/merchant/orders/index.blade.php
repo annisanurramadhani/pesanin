@@ -14,58 +14,170 @@
             </p>
         </div>
 
-        <!-- FORM FILTER (Dapat diakses Owner & Kasir) -->
-        <form method="GET" action="{{ route('merchant.orders.index') }}"
-            class="flex items-center gap-2 bg-slate-900 p-2 rounded-2xl shadow-lg border border-slate-800">
+        {{-- FORM FILTER --}}
+<div
+    x-data="{ filterOpen: true }"
+    class="flex items-center justify-end"
+>
 
-            <div class="pl-2 pr-1 text-amber-400 text-xs font-extrabold flex items-center gap-1.5">
-                <i class="fa-solid fa-sliders"></i>
-                <span class="hidden sm:inline text-slate-300">Filter:</span>
-            </div>
+    <form
+        method="GET"
+        action="{{ route('merchant.orders.index') }}"
+        class="flex items-center gap-2
+               bg-slate-900
+               p-2
+               rounded-2xl
+               shadow-lg
+               border border-slate-800
+               transition-all duration-300"
+    >
 
-            <select name="filter_type" id="filterTypeSelect" onchange="switchFilterMode(this.value)"
-                class="bg-slate-800 text-amber-400 text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer">
+        {{-- TOGGLE FILTER --}}
+        <button
+            type="button"
+            @click="filterOpen = !filterOpen"
+            class="pl-2 pr-1
+                   text-amber-400
+                   text-xs
+                   font-extrabold
+                   flex
+                   items-center
+                   gap-1.5
+                   cursor-pointer
+                   shrink-0"
+            title="Tampilkan/Sembunyikan filter"
+        >
+            <i class="fa-solid fa-sliders"></i>
 
-                <option value="day" {{ ($filterType ?? 'day') === 'day' ? 'selected' : '' }}>
+            <span
+                x-show="filterOpen"
+                x-transition
+                class="hidden sm:inline text-slate-300"
+            >
+                Filter:
+            </span>
+        </button>
+
+
+        {{-- ISI FILTER --}}
+        <div
+            x-show="filterOpen"
+            x-transition:enter="transition-all ease-out duration-300"
+            x-transition:enter-start="opacity-0 max-w-0"
+            x-transition:enter-end="opacity-100 max-w-[500px]"
+            x-transition:leave="transition-all ease-in duration-200"
+            x-transition:leave-start="opacity-100 max-w-[500px]"
+            x-transition:leave-end="opacity-0 max-w-0"
+            class="flex items-center gap-2 overflow-hidden"
+        >
+
+            {{-- JENIS FILTER --}}
+            <select
+                name="filter_type"
+                id="filterTypeSelect"
+                onchange="switchFilterMode(this.value)"
+                class="bg-slate-800
+                       text-amber-400
+                       text-xs
+                       font-bold
+                       rounded-xl
+                       px-3 py-2
+                       border border-slate-700/80
+                       focus:outline-none
+                       focus:ring-2
+                       focus:ring-amber-500
+                       cursor-pointer
+                       shrink-0"
+            >
+
+                <option
+                    value="day"
+                    {{ ($filterType ?? 'day') === 'day' ? 'selected' : '' }}
+                >
                     📅 Per Hari
                 </option>
 
-                <option value="month" {{ ($filterType ?? '') === 'month' ? 'selected' : '' }}>
+                <option
+                    value="month"
+                    {{ ($filterType ?? '') === 'month' ? 'selected' : '' }}
+                >
                     🗓️ Per Bulan
                 </option>
 
-                <option value="year" {{ ($filterType ?? '') === 'year' ? 'selected' : '' }}>
+                <option
+                    value="year"
+                    {{ ($filterType ?? '') === 'year' ? 'selected' : '' }}
+                >
                     📊 Per Tahun
                 </option>
+
             </select>
 
-            <div id="inputDayWrapper"
-                class="{{ ($filterType ?? 'day') === 'day' ? 'block' : 'hidden' }}">
 
-                <input type="date"
+            {{-- FILTER HARI --}}
+            <div
+                id="inputDayWrapper"
+                class="{{ ($filterType ?? 'day') === 'day' ? 'block' : 'hidden' }}"
+            >
+                <input
+                    type="date"
                     name="date"
                     value="{{ $selectedDate ?? date('Y-m-d') }}"
-                    class="bg-slate-800 text-white text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80">
+                    class="bg-slate-800
+                           text-white
+                           text-xs
+                           font-bold
+                           rounded-xl
+                           px-3 py-2
+                           border border-slate-700/80
+                           shrink-0"
+                >
             </div>
 
-            <div id="inputMonthWrapper"
-                class="{{ ($filterType ?? '') === 'month' ? 'block' : 'hidden' }}">
 
-                <input type="month"
+            {{-- FILTER BULAN --}}
+            <div
+                id="inputMonthWrapper"
+                class="{{ ($filterType ?? '') === 'month' ? 'block' : 'hidden' }}"
+            >
+                <input
+                    type="month"
                     name="month"
                     value="{{ $selectedMonth ?? date('Y-m') }}"
-                    class="bg-slate-800 text-white text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80">
+                    class="bg-slate-800
+                           text-white
+                           text-xs
+                           font-bold
+                           rounded-xl
+                           px-3 py-2
+                           border border-slate-700/80
+                           shrink-0"
+                >
             </div>
 
-            <div id="inputYearWrapper"
-                class="{{ ($filterType ?? '') === 'year' ? 'block' : 'hidden' }}">
 
-                <select name="year"
-                    class="bg-slate-800 text-white text-xs font-bold rounded-xl px-3 py-2 border border-slate-700/80">
+            {{-- FILTER TAHUN --}}
+            <div
+                id="inputYearWrapper"
+                class="{{ ($filterType ?? '') === 'year' ? 'block' : 'hidden' }}"
+            >
+                <select
+                    name="year"
+                    class="bg-slate-800
+                           text-white
+                           text-xs
+                           font-bold
+                           rounded-xl
+                           px-3 py-2
+                           border border-slate-700/80
+                           shrink-0"
+                >
 
                     @for ($y = date('Y'); $y >= 2023; $y--)
-                        <option value="{{ $y }}"
-                            {{ ($selectedYear ?? date('Y')) == $y ? 'selected' : '' }}>
+                        <option
+                            value="{{ $y }}"
+                            {{ ($selectedYear ?? date('Y')) == $y ? 'selected' : '' }}
+                        >
                             {{ $y }}
                         </option>
                     @endfor
@@ -73,11 +185,29 @@
                 </select>
             </div>
 
-            <button type="submit"
-                class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer">
+
+            {{-- TERAPKAN --}}
+            <button
+                type="submit"
+                class="bg-amber-500
+                       hover:bg-amber-400
+                       text-slate-950
+                       px-4 py-2
+                       rounded-xl
+                       text-xs
+                       font-black
+                       transition
+                       cursor-pointer
+                       shrink-0"
+            >
                 Terapkan
             </button>
-        </form>
+
+        </div>
+
+    </form>
+
+</div>
     </div>
 @endsection
 
@@ -85,55 +215,6 @@
 @section('content')
 
     <div class="space-y-6">
-
-        @if (Auth::user()->role === 'owner')
-
-            <!-- REKAP PENDAPATAN (KHUSUS OWNER) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
-
-                    <div class="w-12 h-12 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center text-xl font-bold">
-                        <i class="fa-solid fa-receipt"></i>
-                    </div>
-
-                    <div>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                            Total Pesanan
-                        </span>
-
-                        <span class="text-2xl font-black text-slate-900">
-                            {{ $totalOrders }} Order
-                        </span>
-                    </div>
-
-                </div>
-
-
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
-
-                    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-600 rounded-2xl flex items-center justify-center text-xl font-bold">
-                        <i class="fa-solid fa-wallet"></i>
-                    </div>
-
-                    <div>
-
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                            Total Pendapatan ({{ $labelPeriode ?? 'Hari Ini' }})
-                        </span>
-
-                        <span class="text-2xl font-black text-emerald-600">
-                            Rp {{ number_format($totalRevenue, 0, ',', '.') }}
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        @endif
-
 
         <!-- TABEL PESANAN -->
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
