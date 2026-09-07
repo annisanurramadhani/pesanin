@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\User;
 
 class Order extends Model
 {
@@ -13,6 +14,7 @@ class Order extends Model
     protected $fillable = [
     'merchant_id',
     'qr_code_id',
+    'cashier_id',
     'order_number',
     'customer_name',
     'customer_phone',
@@ -48,6 +50,11 @@ class Order extends Model
     public function merchant()
     {
         return $this->belongsTo(Merchant::class);
+    }
+
+    public function cashier()
+    {
+        return $this->belongsTo(User::class, 'cashier_id');
     }
 
     public function items()

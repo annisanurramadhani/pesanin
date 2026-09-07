@@ -34,6 +34,7 @@ class MerchantSettingController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string'],
             // 'description' => ['nullable', 'string'],
+            'cs_phone' => ['nullable', 'string', 'max:20'],
 
             'logo' => [
                 'nullable',
@@ -82,6 +83,14 @@ class MerchantSettingController extends Controller
             | UPDATE MERCHANT SETTINGS
             |--------------------------------------------------------------------------
             */
+            $merchant->settings()->updateOrCreate(
+                [
+                    'merchant_id' => $merchant->id,
+                ],
+                [
+                    'cs_phone' => $validated['cs_phone'] ?? null,
+                ]
+            );
 
             // $merchant->settings()->updateOrCreate(
             //     ['merchant_id' => $merchant->id],

@@ -145,6 +145,19 @@
                     </span>
                 </div>
 
+                {{-- Kasir --}}
+                @if ($order->cashier)
+                    <div class="flex justify-between gap-4">
+                        <span class="text-slate-500">
+                            Kasir
+                        </span>
+
+                        <span class="text-right font-bold text-slate-700">
+                            {{ $order->cashier->name }}
+                        </span>
+                    </div>
+                @endif
+
             </div>
 
 
@@ -270,6 +283,28 @@
                 <p class="mt-1 text-[9px] text-slate-400">
                     Pesanan diproses melalui PesanIn
                 </p>
+
+                 @if ($order->merchant?->settings?->cs_phone)
+
+                    <div class="mt-4 border-t border-dashed border-slate-300 pt-3">
+
+                        <p class="text-[9px] leading-relaxed text-slate-500">
+                            Jika terdapat kendala, kekurangan, atau hal lain
+                            terkait pesanan Anda, silakan hubungi Customer
+                            Service melalui nomor yang tertera di bawah ini.
+                        </p>
+
+                        <p class="mt-2 text-[10px] font-semibold text-slate-800">
+                            Customer Service
+                        </p>
+
+                        <p class="mt-0.5 text-[10px] font-medium text-slate-400">
+                            {{ $order->merchant->settings->cs_phone }}
+                        </p>
+
+                    </div>
+
+                @endif
 
             </div>
 

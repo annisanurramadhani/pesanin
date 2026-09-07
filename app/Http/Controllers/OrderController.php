@@ -286,6 +286,7 @@ class OrderController extends Controller
 
         $order->update([
             'payment_status' => 'paid',
+            'cashier_id' => Auth::id(),
         ]);
 
 

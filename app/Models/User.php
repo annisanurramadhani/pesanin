@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Notifications\VerifyEmailNotification;
 use App\Notifications\ResetPasswordNotification;
+use App\Models\Order;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -63,6 +64,15 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsTo(Merchant::class);
     }
+
+    /**
+     * Relasi ke model Order (jika user adalah kasir).
+     */
+    public function cashierOrders()
+    {
+        return $this->hasMany(Order::class, 'cashier_id');
+    }
+    
     public function sendEmailVerificationNotification(): void
     {
         $this->notify(new VerifyEmailNotification());

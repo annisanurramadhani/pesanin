@@ -206,6 +206,29 @@
 
                 </div>
 
+                {{-- Nomor CS --}}
+                <div>
+                    <label
+                        for="cs_phone"
+                        class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2"
+                    >
+                        Nomor CS
+                    </label>
+
+                    <input
+                        type="text"
+                        name="cs_phone"
+                        id="cs_phone"
+                        value="{{ old('cs_phone', optional($merchant->settings)->cs_phone) }}"
+                        placeholder="Contoh: 081234567890"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                    >
+
+                    <p class="text-[11px] text-slate-400 mt-2">
+                        Nomor ini akan ditampilkan pada struk pelanggan.
+                    </p>
+                </div>
+
 
                 {{-- =================================================
                     ALAMAT
