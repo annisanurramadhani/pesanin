@@ -151,6 +151,15 @@ Route::prefix('m/{code}')
             [CustomerOrderController::class, 'updateCart']
         )->name('cart.update');
 
+        Route::post(
+            '/cart/voucher',
+            [CustomerOrderController::class, 'applyVoucher']
+        )->name('cart.voucher');
+
+        Route::delete(
+            '/cart/voucher',
+            [CustomerOrderController::class, 'removeVoucher']
+        )->name('cart.voucher.remove');
 
         Route::delete(
             '/cart/{menuId}',

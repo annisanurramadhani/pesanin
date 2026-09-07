@@ -27,6 +27,9 @@ class Order extends Model
     'payment_expires_at',
     'status',
     'receipt_sent_at',
+    'voucher_id',
+    'voucher_code',
+    'discount',
 ];
 
     protected $casts = [
@@ -34,6 +37,7 @@ class Order extends Model
         'total' => 'decimal:2',
         'receipt_sent_at' => 'datetime',
         'payment_expires_at' => 'datetime',
+        'discount' => 'decimal:2',
     ];
 
     public function qrCode()
@@ -49,5 +53,12 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function voucher()
+    {
+        return $this->belongsTo(
+            Voucher::class
+        );
     }
 }

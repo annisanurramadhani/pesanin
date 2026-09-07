@@ -298,6 +298,148 @@
                 </div>
 
 
+                {{-- Voucher --}}
+                <div class="mt-6">
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+
+                        <div class="p-5 sm:p-6">
+
+                            <div class="flex items-center gap-2 mb-4">
+
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-ticket text-xs"></i>
+                                </div>
+
+                                <div>
+                                    <h2 class="text-sm font-extrabold text-slate-900">
+                                        Kode Voucher
+                                    </h2>
+
+                                    <p class="text-[11px] text-slate-400 mt-0.5">
+                                        Punya kode voucher? Masukkan di sini.
+                                    </p>
+                                </div>
+
+                            </div>
+
+
+                            @if (
+                                is_array($cartVoucher ?? null)
+                                &&
+                                !empty($cartVoucher['code'])
+                            )
+
+                                {{-- Voucher Aktif --}}
+                                <div
+                                    class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+
+                                    <div class="flex items-center justify-between gap-3">
+
+                                        <div class="min-w-0">
+
+                                            <div class="flex items-center gap-2">
+
+                                                <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+
+                                                <p class="text-sm font-extrabold text-emerald-800">
+                                                    {{ $cartVoucher['code'] }}
+                                                </p>
+
+                                            </div>
+
+                                            <p class="text-xs text-emerald-700 mt-1">
+                                                Voucher berhasil diterapkan.
+                                            </p>
+
+                                        </div>
+
+                                        <div class="flex items-center gap-3 shrink-0">
+
+                                        <div class="text-right">
+
+                                            <p class="text-[10px] text-emerald-600 font-medium">
+                                                Diskon
+                                            </p>
+
+                                            <p class="text-sm font-extrabold text-emerald-700">
+                                                -Rp {{ number_format($discount, 0, ',', '.') }}
+                                            </p>
+
+                                        </div>
+
+                                        {{-- Tombol Hapus Voucher --}}
+                                        <form
+                                            action="{{ route('customer.cart.voucher.remove', $qrCode->code) }}"
+                                            method="POST">
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                title="Hapus voucher"
+                                                aria-label="Hapus voucher"
+                                                class="w-8 h-8 rounded-lg bg-white border border-emerald-200 text-emerald-600 hover:bg-red-50 hover:border-red-200 hover:text-red-500 flex items-center justify-center transition">
+
+                                                <i class="fa-solid fa-xmark text-sm"></i>
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </div>
+
+                            @else
+
+                                {{-- Input Voucher --}}
+                                <form
+                                    id="voucherForm"
+                                    action="{{ route('customer.cart.voucher', $qrCode->code) }}"
+                                    method="POST"
+                                    class="flex gap-2">
+
+                                    @csrf
+
+                                    <div class="relative flex-1">
+
+                                        <i
+                                            class="fa-solid fa-ticket absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
+                                        </i>
+
+                                        <input
+                                            type="text"
+                                            name="voucher_code"
+                                            id="voucherCode"
+                                            maxlength="50"
+                                            autocomplete="off"
+                                            placeholder="Masukkan kode voucher"
+                                            class="w-full h-11 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-400 transition uppercase">
+
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        id="voucherButton"
+                                        class="h-11 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-extrabold transition shadow-sm">
+
+                                        <span id="voucherButtonText">
+                                            OK
+                                        </span>
+
+                                    </button>
+
+                                </form>
+
+                            @endif
+
+                        </div>
+
+                    </div>
+                </div>
+
                 {{-- Summary --}}
                 <div class="mt-6">
 
@@ -322,6 +464,7 @@
 
                             <div class="space-y-3">
 
+                                {{-- Jumlah Item --}}
                                 <div class="flex items-center justify-between text-sm">
 
                                     <span class="text-slate-500">
@@ -335,9 +478,54 @@
                                 </div>
 
 
+                                {{-- Subtotal --}}
+                                <div class="flex items-center justify-between text-sm">
+
+                                    <span class="text-slate-500">
+                                        Subtotal
+                                    </span>
+
+                                    <span id="cart-subtotal"
+                                        class="font-semibold text-slate-700">
+                                        Rp {{ number_format($total + $discount, 0, ',', '.') }}
+                                    </span>
+
+                                </div>
+
+
+                                {{-- Voucher --}}
+                                @if ($discount > 0)
+
+                                    <div class="flex items-center justify-between text-sm">
+
+                                        <span class="text-emerald-600">
+                                            Voucher
+                                            @if (
+                                                is_array($cartVoucher ?? null)
+                                                &&
+                                                !empty($cartVoucher['code'])
+                                            )
+                                                <span class="font-bold">
+                                                    ({{ $cartVoucher['code'] }})
+                                                </span>
+                                            @endif
+                                        </span>
+
+                                        <span
+                                            id="cart-discount"
+                                            class="font-bold text-emerald-600">
+                                            -Rp {{ number_format($discount, 0, ',', '.') }}
+                                        </span>
+
+                                    </div>
+
+                                @endif
+
+
                                 <div class="border-t border-dashed border-slate-200"></div>
 
 
+                                {{-- Total --}}
                                 <div class="flex items-center justify-between">
 
                                     <span class="text-sm font-bold text-slate-700">
@@ -438,13 +626,102 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 quantityInput.value = data.quantity;
-                quantityText.textContent = data.quantity;
+
+                quantityText.textContent =
+                    data.quantity;
+
 
                 subtotalElement.textContent =
-                    'Rp ' + new Intl.NumberFormat('id-ID').format(data.subtotal);
+                    'Rp ' +
+                    new Intl.NumberFormat('id-ID')
+                        .format(data.subtotal);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | UPDATE TOTAL
+                |--------------------------------------------------------------------------
+                */
 
                 document.querySelector('#cart-total').textContent =
-                    'Rp ' + new Intl.NumberFormat('id-ID').format(data.total);
+                    'Rp ' +
+                    new Intl.NumberFormat('id-ID')
+                        .format(data.total);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | UPDATE RINGKASAN SUBTOTAL
+                |--------------------------------------------------------------------------
+                */
+
+                const cartSubtotal =
+                    document.querySelector('#cart-subtotal');
+
+                if (cartSubtotal) {
+
+                    cartSubtotal.textContent =
+                        'Rp ' +
+                        new Intl.NumberFormat('id-ID')
+                            .format(data.cart_subtotal);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | UPDATE DISCOUNT
+                |--------------------------------------------------------------------------
+                */
+
+                const cartDiscount =
+                    document.querySelector('#cart-discount');
+
+                if (cartDiscount) {
+
+                    if (data.discount > 0) {
+
+                        cartDiscount.textContent =
+                            '-Rp ' +
+                            new Intl.NumberFormat('id-ID')
+                                .format(data.discount);
+
+                    } else {
+
+                        cartDiscount.textContent =
+                            '-Rp 0';
+                    }
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | VOUCHER DILEPAS
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    data.voucher_removed
+                ) {
+
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Voucher Dilepas',
+                        text: data.voucher_message,
+                        confirmButtonText: 'Mengerti',
+                        confirmButtonColor: '#111827',
+                        background: '#ffffff',
+                        color: '#111827',
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            confirmButton:
+                                'rounded-xl px-5 py-2.5 font-bold'
+                        }
+                    }).then(function () {
+
+                        window.location.reload();
+
+                    });
+                }
 
             } catch (error) {
                 console.error(error);
@@ -478,6 +755,179 @@ document.addEventListener('DOMContentLoaded', function () {
             updateQuantity(quantity + 1);
         });
     });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const voucherForm =
+        document.getElementById('voucherForm');
+
+    if (!voucherForm) {
+        return;
+    }
+
+    const voucherInput =
+        document.getElementById('voucherCode');
+
+    const voucherButton =
+        document.getElementById('voucherButton');
+
+    const voucherButtonText =
+        document.getElementById('voucherButtonText');
+
+
+    voucherForm.addEventListener('submit', async function (event) {
+
+        event.preventDefault();
+
+
+        const voucherCode =
+            voucherInput.value.trim();
+
+
+        if (!voucherCode) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Kode Voucher Kosong',
+                text: 'Silakan masukkan kode voucher terlebih dahulu.',
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#f59e0b',
+                background: '#ffffff',
+                color: '#111827',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-5 py-2.5 font-bold'
+                }
+            });
+
+            return;
+        }
+
+
+        voucherButton.disabled = true;
+
+        voucherButtonText.innerHTML =
+            '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+
+        const formData =
+            new FormData(voucherForm);
+
+
+        try {
+
+            const response =
+                await fetch(
+                    voucherForm.action,
+                    {
+                        method: 'POST',
+
+                        headers: {
+                            'Accept':
+                                'application/json',
+
+                            'X-Requested-With':
+                                'XMLHttpRequest'
+                        },
+
+                        body:
+                            formData
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!data.success) {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Voucher Tidak Bisa Digunakan',
+                    text: data.message,
+                    confirmButtonText: 'Mengerti',
+                    confirmButtonColor: '#f59e0b',
+                    background: '#ffffff',
+                    color: '#111827',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-5 py-2.5 font-bold'
+                    }
+                });
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | VOUCHER BERHASIL
+            |--------------------------------------------------------------------------
+            */
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Voucher Berhasil!',
+                text:
+                    data.voucher_code +
+                    ' berhasil digunakan.',
+                confirmButtonText: 'Lanjut',
+                confirmButtonColor: '#111827',
+                background: '#ffffff',
+                color: '#111827',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-5 py-2.5 font-bold'
+                }
+            }).then(function () {
+
+                /*
+                |--------------------------------------------------------------------------
+                | REFRESH CART
+                |--------------------------------------------------------------------------
+                |
+                | Supaya tampilan voucher dan ringkasan
+                | mengambil data terbaru dari session.
+                |--------------------------------------------------------------------------
+                */
+
+                window.location.reload();
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi Kesalahan',
+                text:
+                    'Gagal menerapkan voucher. Silakan coba lagi.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#111827',
+                background: '#ffffff',
+                color: '#111827',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-5 py-2.5 font-bold'
+                }
+            });
+
+        } finally {
+
+            voucherButton.disabled = false;
+
+            voucherButtonText.textContent =
+                'OK';
+        }
+
+    });
+
 });
 </script>
 

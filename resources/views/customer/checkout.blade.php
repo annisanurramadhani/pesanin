@@ -612,21 +612,70 @@
                 </div>
 
 
-                <div class="border-t border-slate-100 mt-5 pt-5">
+                <div class="border-t border-slate-100 mt-5 pt-5 space-y-3">
+
+                {{-- Subtotal --}}
+                <div class="flex items-center justify-between">
+
+                    <span class="text-sm font-medium text-slate-500">
+                        Subtotal
+                    </span>
+
+                    <span class="text-sm font-semibold text-slate-700">
+                        Rp {{ number_format($subtotal, 0, ',', '.') }}
+                    </span>
+
+                </div>
+
+
+                {{-- Diskon Voucher --}}
+                @if ($discount > 0)
 
                     <div class="flex items-center justify-between">
 
-                        <span class="text-sm font-medium text-slate-500">
-                            Total Pembayaran
-                        </span>
+                        <div class="flex items-center gap-2">
 
-                        <span class="text-xl font-extrabold text-slate-900">
-                            Rp {{ number_format($total, 0, ',', '.') }}
+                            <span class="text-sm font-medium text-slate-500">
+                                Diskon
+                            </span>
+
+                            @if (!empty($cartVoucher['code']))
+
+                                <span
+                                    class="inline-flex items-center rounded-md
+                                        bg-emerald-50 px-2 py-0.5
+                                        text-[11px] font-bold text-emerald-600"
+                                >
+                                    {{ $cartVoucher['code'] }}
+                                </span>
+
+                            @endif
+
+                        </div>
+
+                        <span class="text-sm font-bold text-emerald-600">
+                            - Rp {{ number_format($discount, 0, ',', '.') }}
                         </span>
 
                     </div>
 
+                @endif
+
+
+                {{-- Total --}}
+                <div class="flex items-center justify-between pt-2">
+
+                    <span class="text-sm font-bold text-slate-700">
+                        Total Pembayaran
+                    </span>
+
+                    <span class="text-xl font-extrabold text-slate-900">
+                        Rp {{ number_format($total, 0, ',', '.') }}
+                    </span>
+
                 </div>
+
+            </div>
 
             </div>
 

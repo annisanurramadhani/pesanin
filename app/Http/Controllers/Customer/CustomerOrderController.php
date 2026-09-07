@@ -8,6 +8,7 @@ use App\Models\Menu;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\QrCode;
+use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -322,20 +323,508 @@ class CustomerOrderController extends Controller
         }
 
         $total =
-            collect($cartItems)
-            ->sum('subtotal');
+    collect($cartItems)
+    ->sum('subtotal');
 
-        return view(
-            'customer.cart',
-            compact(
-                'qrCode',
-                'merchant',
-                'cartItems',
-                'total'
-            )
-        );
+    /*
+    |--------------------------------------------------------------------------
+    | VOUCHER
+    |--------------------------------------------------------------------------
+    */
+
+    $cartVoucher = session()->get(
+        'cart_voucher'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DISCOUNT
+    |--------------------------------------------------------------------------
+    */
+
+    $discount = 0;
+
+    if (
+        is_array($cartVoucher)
+        &&
+        !empty($cartVoucher['discount'])
+    ) {
+        $discount =
+            (float) $cartVoucher['discount'];
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | TOTAL SETELAH DISKON
+    |--------------------------------------------------------------------------
+    */
+
+    $total =
+        max(
+            0,
+            $total - $discount
+        );
+
+
+    return view(
+        'customer.cart',
+        compact(
+            'qrCode',
+            'merchant',
+            'cartItems',
+            'total',
+            'cartVoucher',
+            'discount'
+        )
+    );
+    }
+
+    /**
+     * =========================================================
+     * APPLY VOUCHER
+     * =========================================================
+     */
+    public function applyVoucher(
+        Request $request,
+        string $code
+    ) {
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI KODE
+        |--------------------------------------------------------------------------
+        */
+
+        $request->validate([
+            'voucher_code' => [
+                'required',
+                'string',
+                'max:50',
+            ],
+        ], [
+            'voucher_code.required' =>
+                'Kode voucher wajib diisi.',
+
+            'voucher_code.max' =>
+                'Kode voucher maksimal 50 karakter.',
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | QR CODE
+        |--------------------------------------------------------------------------
+        */
+
+        $qrCode = QrCode::where(
+            'code',
+            $code
+        )
+            ->where(
+                'status',
+                'active'
+            )
+            ->firstOrFail();
+
+
+        $merchant = $qrCode->merchant;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CART
+        |--------------------------------------------------------------------------
+        */
+
+        $cart = session()->get(
+            'cart',
+            []
+        );
+
+
+        if (empty($cart)) {
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'Keranjang masih kosong.',
+            ], 422);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | NORMALISASI KODE
+        |--------------------------------------------------------------------------
+        |
+        | HEMAT10
+        | hemat10
+        | HeMaT10
+        |
+        | semuanya akan dianggap sama.
+        |--------------------------------------------------------------------------
+        */
+
+        $voucherCode = strtoupper(
+            trim(
+                $request->voucher_code
+            )
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CARI VOUCHER
+        |--------------------------------------------------------------------------
+        */
+
+        $voucher = Voucher::where(
+            'merchant_id',
+            $merchant->id
+        )
+            ->where(
+                'code',
+                $voucherCode
+            )
+            ->where(
+                'status',
+                'active'
+            )
+            ->first();
+
+
+        if (!$voucher) {
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'Kode voucher tidak ditemukan atau tidak tersedia.',
+            ], 422);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK TANGGAL MULAI
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $voucher->starts_at
+            &&
+            now()->lt(
+                $voucher->starts_at
+            )
+        ) {
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'Voucher belum mulai berlaku.',
+            ], 422);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK TANGGAL EXPIRED
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $voucher->expires_at
+            &&
+            now()->gt(
+                $voucher->expires_at
+            )
+        ) {
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'Voucher sudah kedaluwarsa.',
+            ], 422);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK BATAS PENGGUNAAN
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !is_null($voucher->usage_limit)
+            &&
+            $voucher->used_count >=
+            $voucher->usage_limit
+        ) {
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'Voucher sudah mencapai batas penggunaan.',
+            ], 422);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AMBIL MENU DALAM CART
+        |--------------------------------------------------------------------------
+        */
+
+        $menus = Menu::whereIn(
+            'id',
+            array_keys($cart)
+        )
+            ->where(
+                'merchant_id',
+                $merchant->id
+            )
+            ->where(
+                'status',
+                'available'
+            )
+            ->get()
+            ->keyBy('id');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HITUNG SUBTOTAL
+        |--------------------------------------------------------------------------
+        */
+
+        $subtotal = 0;
+
+        foreach (
+            $cart as $menuId => $quantity
+        ) {
+
+            if (
+                !isset(
+                    $menus[$menuId]
+                )
+            ) {
+                continue;
+            }
+
+            $menu = $menus[$menuId];
+
+            $subtotal +=
+                $menu->price * $quantity;
+        }
+
+
+        if (
+            $subtotal <= 0
+        ) {
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'Total pesanan tidak valid.',
+            ], 422);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK MINIMAL PEMBELIAN
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $subtotal <
+            $voucher->min_order_amount
+        ) {
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'Minimal pembelian untuk voucher ini adalah Rp ' .
+                    number_format(
+                        $voucher->min_order_amount,
+                        0,
+                        ',',
+                        '.'
+                    ) . '.',
+            ], 422);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HITUNG DISKON
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $voucher->type === 'percentage'
+        ) {
+
+            $discount =
+                $subtotal *
+                (
+                    $voucher->value / 100
+                );
+
+        } else {
+
+            $discount =
+                $voucher->value;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BATASI DISKON MAKSIMAL
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !is_null(
+                $voucher->max_discount_amount
+            )
+        ) {
+
+            $discount = min(
+                $discount,
+                $voucher->max_discount_amount
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DISKON TIDAK BOLEH MELEBIHI SUBTOTAL
+        |--------------------------------------------------------------------------
+        */
+
+        $discount = min(
+            $discount,
+            $subtotal
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL SETELAH DISKON
+        |--------------------------------------------------------------------------
+        */
+
+        $total =
+            $subtotal -
+            $discount;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN VOUCHER KE SESSION
+        |--------------------------------------------------------------------------
+        */
+
+        session()->put(
+            'cart_voucher',
+            [
+                'id' =>
+                    $voucher->id,
+
+                'code' =>
+                    $voucher->code,
+
+                'discount' =>
+                    $discount,
+            ]
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE
+        |--------------------------------------------------------------------------
+        */
+
+        return response()->json([
+            'success' => true,
+
+            'message' =>
+                'Voucher berhasil digunakan.',
+
+            'voucher_code' =>
+                $voucher->code,
+
+            'discount' =>
+                $discount,
+
+            'subtotal' =>
+                $subtotal,
+
+            'total' =>
+                $total,
+
+            'expires_at' =>
+                $voucher->expires_at
+                    ? $voucher->expires_at
+                        ->format('d F Y H:i')
+                    : null,
+        ]);
+    }
+
+    /**
+ * =========================================================
+ * REMOVE VOUCHER
+ * =========================================================
+ */
+public function removeVoucher(
+    string $code
+) {
+    /*
+    |--------------------------------------------------------------------------
+    | CEK QR CODE
+    |--------------------------------------------------------------------------
+    */
+
+    $qrCode = QrCode::where(
+        'code',
+        $code
+    )
+        ->where(
+            'status',
+            'active'
+        )
+        ->firstOrFail();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | HAPUS VOUCHER DARI SESSION
+    |--------------------------------------------------------------------------
+    */
+
+    session()->forget(
+        'cart_voucher'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | KEMBALI KE CART
+    |--------------------------------------------------------------------------
+    */
+
+    return redirect()
+        ->route(
+            'customer.cart',
+            $code
+        )
+        ->with(
+            'success',
+            'Voucher berhasil dihapus.'
+        );
+}
 
     /**
      * =========================================================
@@ -452,9 +941,65 @@ class CustomerOrderController extends Controller
             ];
         }
 
-        $total =
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL SUBTOTAL
+        |--------------------------------------------------------------------------
+        */
+
+        $subtotal =
             collect($items)
             ->sum('subtotal');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VOUCHER
+        |--------------------------------------------------------------------------
+        */
+
+        $cartVoucher = session()->get(
+            'cart_voucher'
+        );
+
+        $discount = 0;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GUNAKAN DISKON YANG SUDAH TERSIMPAN
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            is_array($cartVoucher)
+            &&
+            isset($cartVoucher['discount'])
+        ) {
+
+            $discount =
+                (float) $cartVoucher['discount'];
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL AKHIR
+        |--------------------------------------------------------------------------
+        */
+
+        $total =
+            max(
+                0,
+                $subtotal - $discount
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CURRENT ITEM
+        |--------------------------------------------------------------------------
+        */
 
         $currentItem =
             collect($items)
@@ -463,25 +1008,50 @@ class CustomerOrderController extends Controller
                 $menu->id
             );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE
+        |--------------------------------------------------------------------------
+        */
+
         return response()->json([
+
             'success' =>
-            true,
+                true,
 
             'quantity' =>
-            $currentItem['quantity']
-                ?? 0,
+                $currentItem['quantity']
+                    ?? 0,
 
             'subtotal' =>
-            $currentItem['subtotal']
-                ?? 0,
+                $currentItem['subtotal']
+                    ?? 0,
+
+            'cart_subtotal' =>
+                $subtotal,
+
+            'discount' =>
+                $discount,
 
             'total' =>
-            $total,
+                $total,
+
+            'voucher_removed' =>
+                false,
+
+            'voucher_message' =>
+                null,
+
+            'voucher_code' =>
+                is_array($cartVoucher)
+                    ? ($cartVoucher['code'] ?? null)
+                    : null,
 
             'removed' =>
-            !isset(
-                $cart[$menu->id]
-            ),
+                !isset(
+                    $cart[$menu->id]
+                ),
         ]);
     }
 
@@ -766,14 +1336,167 @@ class CustomerOrderController extends Controller
 
 
         /*
+|--------------------------------------------------------------------------
+| SUBTOTAL
+|--------------------------------------------------------------------------
+*/
+
+$subtotal =
+    collect($cartItems)
+    ->sum('subtotal');
+
+
+/*
+|--------------------------------------------------------------------------
+| VALIDASI ULANG VOUCHER
+|--------------------------------------------------------------------------
+*/
+
+$cartVoucher = session()->get('cart_voucher');
+
+$voucherId = null;
+$voucherCode = null;
+$discount = 0;
+
+if (
+    is_array($cartVoucher)
+    &&
+    isset($cartVoucher['id'])
+    &&
+    isset($cartVoucher['code'])
+    &&
+    isset($cartVoucher['discount'])
+) {
+
+    $voucher = Voucher::query()
+        ->where('id', $cartVoucher['id'])
+        ->where('merchant_id', $merchant->id)
+        ->where('code', $cartVoucher['code'])
+        ->where('status', 'active')
+        ->first();
+
+    /*
     |--------------------------------------------------------------------------
-    | TOTAL
+    | VOUCHER TIDAK DITEMUKAN / SUDAH TIDAK AKTIF
     |--------------------------------------------------------------------------
     */
 
-        $total =
-            collect($cartItems)
-            ->sum('subtotal');
+    if (!$voucher) {
+
+        session()->forget('cart_voucher');
+
+        return redirect()
+            ->route('customer.cart', $code)
+            ->with(
+                'error',
+                'Voucher sudah tidak tersedia atau tidak aktif.'
+            );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CEK MASA BERLAKU
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        $voucher->starts_at &&
+        now()->lt($voucher->starts_at)
+    ) {
+
+        session()->forget('cart_voucher');
+
+        return redirect()
+            ->route('customer.cart', $code)
+            ->with(
+                'error',
+                'Voucher belum mulai berlaku.'
+            );
+    }
+
+    if (
+        $voucher->expires_at &&
+        now()->gt($voucher->expires_at)
+    ) {
+
+        session()->forget('cart_voucher');
+
+        return redirect()
+            ->route('customer.cart', $code)
+            ->with(
+                'error',
+                'Voucher sudah kedaluwarsa.'
+            );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CEK BATAS PENGGUNAAN
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        !is_null($voucher->usage_limit)
+        &&
+        $voucher->used_count >= $voucher->usage_limit
+    ) {
+
+        session()->forget('cart_voucher');
+
+        return redirect()
+            ->route('customer.cart', $code)
+            ->with(
+                'error',
+                'Voucher sudah mencapai batas penggunaan.'
+            );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CEK MINIMUM PEMBELIAN
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        $subtotal < (float) $voucher->min_order_amount
+    ) {
+
+        session()->forget('cart_voucher');
+
+        return redirect()
+            ->route('customer.cart', $code)
+            ->with(
+                'error',
+                'Minimum pembelian untuk voucher ini belum terpenuhi.'
+            );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | GUNAKAN DISKON YANG SUDAH TERSIMPAN DI SESSION
+    |--------------------------------------------------------------------------
+    */
+
+    $voucherId = $voucher->id;
+    $voucherCode = $voucher->code;
+
+    $discount = min(
+        (float) $cartVoucher['discount'],
+        $subtotal
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| TOTAL AKHIR
+|--------------------------------------------------------------------------
+*/
+
+$total = max(
+    0,
+    $subtotal - $discount
+);
+
 
 
         /*
@@ -814,6 +1537,9 @@ class CustomerOrderController extends Controller
                 'qrCode',
                 'merchant',
                 'cartItems',
+                'subtotal',
+                'discount',
+                'cartVoucher',
                 'total',
                 'banks'
             )
@@ -945,6 +1671,8 @@ class CustomerOrderController extends Controller
                 []
             );
 
+        
+
         if (
             empty($cart)
         ) {
@@ -1046,6 +1774,128 @@ class CustomerOrderController extends Controller
                 );
         }
 
+        /*
+|--------------------------------------------------------------------------
+| VALIDASI ULANG VOUCHER
+|--------------------------------------------------------------------------
+*/
+
+$cartVoucher = session()->get('cart_voucher');
+
+$voucherId = null;
+$voucherCode = null;
+$discount = 0;
+
+if (
+    is_array($cartVoucher)
+    &&
+    isset($cartVoucher['id'])
+    &&
+    isset($cartVoucher['code'])
+    &&
+    isset($cartVoucher['discount'])
+) {
+
+    $voucher = Voucher::query()
+        ->where('id', $cartVoucher['id'])
+        ->where('merchant_id', $merchant->id)
+        ->where('code', $cartVoucher['code'])
+        ->where('status', 'active')
+        ->first();
+
+    if (!$voucher) {
+
+        session()->forget('cart_voucher');
+
+        return redirect()
+            ->route('customer.cart', $code)
+            ->with(
+                'error',
+                'Voucher sudah tidak tersedia atau tidak aktif.'
+            );
+    }
+
+    if (
+        $voucher->starts_at &&
+        now()->lt($voucher->starts_at)
+    ) {
+
+        session()->forget('cart_voucher');
+
+        return redirect()
+            ->route('customer.cart', $code)
+            ->with(
+                'error',
+                'Voucher belum mulai berlaku.'
+            );
+    }
+
+    if (
+        $voucher->expires_at &&
+        now()->gt($voucher->expires_at)
+    ) {
+
+        session()->forget('cart_voucher');
+
+        return redirect()
+            ->route('customer.cart', $code)
+            ->with(
+                'error',
+                'Voucher sudah kedaluwarsa.'
+            );
+    }
+
+    if (
+        !is_null($voucher->usage_limit)
+        &&
+        $voucher->used_count >= $voucher->usage_limit
+    ) {
+
+        session()->forget('cart_voucher');
+
+        return redirect()
+            ->route('customer.cart', $code)
+            ->with(
+                'error',
+                'Voucher sudah mencapai batas penggunaan.'
+            );
+    }
+
+    if (
+        $subtotal < (float) $voucher->min_order_amount
+    ) {
+
+        session()->forget('cart_voucher');
+
+        return redirect()
+            ->route('customer.cart', $code)
+            ->with(
+                'error',
+                'Minimum pembelian untuk voucher ini belum terpenuhi.'
+            );
+    }
+
+    $voucherId = $voucher->id;
+    $voucherCode = $voucher->code;
+
+    // Gunakan nominal diskon yang sudah tersimpan di session.
+    $discount = min(
+        (float) $cartVoucher['discount'],
+        $subtotal
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| TOTAL AKHIR
+|--------------------------------------------------------------------------
+*/
+
+$total = max(
+    0,
+    $subtotal - $discount
+);
+
 
         /*
         |--------------------------------------------------------------------------
@@ -1076,7 +1926,11 @@ class CustomerOrderController extends Controller
                 $cart,
                 $menus,
                 $subtotal,
-                $orderNumber
+                $orderNumber,
+                $voucherId,
+                $voucherCode,
+                $discount,
+                $total
             ) {
                 $order = Order::create([
 
@@ -1102,11 +1956,11 @@ class CustomerOrderController extends Controller
                     $validated['customer_email']
                         ?? null,
 
-                    'subtotal' =>
-                    $subtotal,
-
-                    'total' =>
-                    $subtotal,
+                    'subtotal' => $subtotal,
+                    'voucher_id' => $voucherId,
+                    'voucher_code' => $voucherCode,
+                    'discount' => $discount,
+                    'total' => $total,
 
                     'payment_method' =>
                     $validated['payment_method'],
