@@ -699,10 +699,35 @@ Route::middleware('auth')
             'subscription.active',
         ])->group(function () {
 
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS ORDER LAMA
+            |--------------------------------------------------------------------------
+            */
+
             Route::patch(
                 '/orders/{encryptedId}/status',
                 [OrderController::class, 'updateStatus']
             )->name('orders.status');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS SATU UNIT MENU
+            |--------------------------------------------------------------------------
+            |
+            | Contoh:
+            |
+            | Nasi Goreng 1 → completed
+            |
+            | Hanya unit tersebut yang berubah.
+            |
+            */
+
+            Route::patch(
+                '/orders/unit/{encryptedId}/status',
+                [OrderController::class, 'updateUnitStatus']
+            )->name('orders.unit.status');
         });
 
 

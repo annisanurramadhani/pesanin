@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\QrCode;
 use App\Models\Voucher;
+use App\Models\OrderItemUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -1998,7 +1999,7 @@ $total = max(
                     $menu =
                         $menus[$menuId];
 
-                    OrderItem::create([
+                    $orderItem =OrderItem::create([
 
                         'order_id' =>
                         $order->id,
@@ -2019,6 +2020,39 @@ $total = max(
                         $menu->price *
                             $quantity,
                     ]);
+                }
+
+                /*
+                    |--------------------------------------------------------------------------
+                    | BUAT UNIT MENU
+                    |--------------------------------------------------------------------------
+                    |
+                    | Contoh:
+                    | quantity = 2
+                    |
+                    | Nasi Goreng 1
+                    | Nasi Goreng 2
+                    |
+                    */
+
+                    for (
+                        $i = 1;
+                        $i <= $quantity;
+                        $i++
+                    ) {
+
+                        OrderItemUnit::create([
+
+                            'order_item_id' =>
+                            $orderItem->id,
+
+                            'unit_number' =>
+                            $i,
+
+                            'status' =>
+                            'pending',
+                        ]);
+                    }
                 }
 
                 return $order;

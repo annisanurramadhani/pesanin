@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderItemUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -17,7 +18,7 @@ class OrderController extends Controller
         $merchantId = $user->merchant_id ?? $user->id;
 
         $query = Order::where('merchant_id', $merchantId)
-            ->with(['qrCode', 'items.menu']);
+            ->with(['qrCode', 'items.menu', 'items.unit']);
 
         /*
         |--------------------------------------------------------------------------
@@ -378,6 +379,154 @@ class OrderController extends Controller
                 ' berhasil diperbarui!'
             );
     }
+
+    /*
+|--------------------------------------------------------------------------
+| DAPUR - UPDATE STATUS SATU UNIT MENU
+|--------------------------------------------------------------------------
+|
+| Contoh:
+|
+| Nasi Goreng 1 → completed
+|
+| Tidak akan mengubah:
+|
+| Nasi Goreng 2
+| Es Teh 1
+| Ayam Bakar 1
+|
+*/
+
+public function updateUnitStatus(
+    Request $request,
+    $id
+) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDASI STATUS
+    |--------------------------------------------------------------------------
+    */
+
+    $request->validate([
+        'status' => [
+            'required',
+            'string',
+            'in:pending,processing,completed,cancelled',
+        ],
+    ]);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | USER & MERCHANT
+    |--------------------------------------------------------------------------
+    */
+
+    $user = Auth::user();
+
+    $merchantId =
+        $user->merchant_id
+        ?? $user->id;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DECRYPT UNIT ID
+    |--------------------------------------------------------------------------
+    */
+
+    $unitId =
+        decryptId($id);
+
+    abort_unless(
+        $unitId,
+        404
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AMBIL UNIT
+    |--------------------------------------------------------------------------
+    |
+    | Sekaligus memastikan unit tersebut
+    | benar-benar milik merchant yang sedang login.
+    |
+    */
+
+    $unit = OrderItemUnit::where(
+        'id',
+        $unitId
+    )
+        ->whereHas(
+            'orderItem.order',
+            function ($query) use (
+                $merchantId
+            ) {
+                $query->where(
+                    'merchant_id',
+                    $merchantId
+                );
+            }
+        )
+        ->with([
+            'orderItem.order',
+        ])
+        ->firstOrFail();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PASTIKAN PEMBAYARAN SUDAH DIBAYAR
+    |--------------------------------------------------------------------------
+    */
+
+    $order =
+        $unit->orderItem->order;
+
+    if (
+        $order->payment_status !== 'paid'
+    ) {
+
+        return back()->with(
+            'error',
+            'Pesanan belum dibayar dan belum dapat diproses dapur.'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE STATUS UNIT
+    |--------------------------------------------------------------------------
+    */
+
+    $unit->update([
+        'status' =>
+        $request->status,
+    ]);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESPONSE
+    |--------------------------------------------------------------------------
+    */
+
+    return redirect()
+        ->route(
+            'merchant.orders.index'
+        )
+        ->with(
+            'success',
+            'Status ' .
+            $unit->orderItem->menu_name .
+            ' ' .
+            $unit->unit_number .
+            ' berhasil diperbarui.'
+        );
+}
 
 
     public function receipt($id)
