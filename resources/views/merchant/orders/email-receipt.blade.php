@@ -45,13 +45,22 @@
                                 width:64px;
                                 height:64px;
                                 margin:0 auto 15px;
-                                background:#f59e0b;
                                 border-radius:16px;
-                                line-height:64px;
-                                font-size:30px;
+                                overflow:hidden;
                             "
                         >
-                            ☕
+                            <img
+                                src="{{ $message->embed(public_path('assets/images/logo-regis.jpg')) }}"
+                                alt="PesanIn"
+                                width="64"
+                                height="64"
+                                style="
+                                    width:64px;
+                                    height:64px;
+                                    object-fit:cover;
+                                    display:block;
+                                "
+                            >
                         </div>
 
                         <h1
@@ -455,7 +464,6 @@
                                 text-align:center;
                             "
                         >
-
                             @if(strtolower($order->payment_method) === 'qris')
 
                                 <span
@@ -473,7 +481,24 @@
                                     QRIS
                                 </span>
 
-                            @else
+                            @elseif(strtolower($order->payment_method) === 'bank')
+
+                                <span
+                                    style="
+                                        display:inline-block;
+                                        padding:8px 15px;
+                                        background:#f1f5f9;
+                                        border:1px solid #e2e8f0;
+                                        border-radius:20px;
+                                        color:#475569;
+                                        font-size:11px;
+                                        font-weight:bold;
+                                    "
+                                >
+                                    Transfer Bank
+                                </span>
+
+                            @elseif(strtolower($order->payment_method) === 'cash')
 
                                 <span
                                     style="
@@ -491,9 +516,7 @@
                                 </span>
 
                             @endif
-
                         </div>
-
 
                         {{-- Closing --}}
                         <div
@@ -526,6 +549,65 @@
                             >
                                 Simpan email ini sebagai bukti transaksi Anda.
                             </p>
+
+                            <p
+                                style="
+                                    margin:3px 0 0;
+                                    color:#94a3b8;
+                                    font-size:11px;
+                                    line-height:1.6;
+                                "
+                            >
+                                Pesanan diproses melalui PesanIn.
+                            </p>
+
+                            @if ($order->merchant?->settings?->cs_phone)
+
+                                <div
+                                    style="
+                                        margin-top:10px;
+                                        padding-top:18px;
+                                    "
+                                >
+
+                                    <p
+                                        style="
+                                            margin:0;
+                                            color:#64748b;
+                                            font-size:11px;
+                                            line-height:1.6;
+                                        "
+                                    >
+                                        Jika terdapat kendala, kekurangan, atau hal lain
+                                        terkait pesanan Anda, silakan hubungi Customer
+                                        Service melalui nomor yang tertera di bawah ini.
+                                    </p>
+
+                                    <p
+                                        style="
+                                            margin:10px 0 0;
+                                            color:#111827;
+                                            font-size:11px;
+                                            font-weight:600;
+                                        "
+                                    >
+                                        Customer Service
+                                    </p>
+
+                                    <p
+                                        style="
+                                            margin:3px 0 0;
+                                            color:#94a3b8;
+                                            font-size:11px;
+                                            font-weight:400;
+                                        "
+                                    >
+                                        {{ $order->merchant->settings->cs_phone }}
+                                    </p>
+
+                                </div>
+
+                            @endif
 
                         </div>
 

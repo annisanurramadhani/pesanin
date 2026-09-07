@@ -13,6 +13,7 @@ class MerchantSetting extends Model
     protected $fillable = [
         'merchant_id',
         'description',
+        'cs_phone',
     ];
 
     protected $casts = [

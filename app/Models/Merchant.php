@@ -56,10 +56,10 @@ class Merchant extends Model
         return $this->hasMany(Subscription::class);
     }
 
-    // public function settings()
-    // {
-    //     return $this->hasOne(MerchantSetting::class);
-    // }
+    public function settings()
+    {
+        return $this->hasOne(MerchantSetting::class);
+    }
 
     public function activeSubscription()
     {
