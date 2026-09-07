@@ -1913,157 +1913,210 @@ $total = max(
             );
 
 
+  
+/*
+|--------------------------------------------------------------------------
+| CREATE ORDER
+|--------------------------------------------------------------------------
+*/
+
+$order = DB::transaction(
+    function () use (
+        $validated,
+        $qrCode,
+        $merchant,
+        $cart,
+        $menus,
+        $subtotal,
+        $orderNumber,
+        $voucherId,
+        $voucherCode,
+        $discount,
+        $total
+    ) {
+
         /*
         |--------------------------------------------------------------------------
-        | CREATE ORDER
+        | BUAT ORDER
         |--------------------------------------------------------------------------
         */
 
-        $order = DB::transaction(
-            function () use (
-                $validated,
-                $qrCode,
-                $merchant,
-                $cart,
-                $menus,
-                $subtotal,
+        $order = Order::create([
+
+            'merchant_id' =>
+                $merchant->id,
+
+            'qr_code_id' =>
+                $qrCode->id,
+
+            'order_number' =>
                 $orderNumber,
+
+            'customer_name' =>
+                strip_tags(
+                    $validated['customer_name']
+                ),
+
+            'customer_phone' =>
+                $validated['customer_phone']
+                    ?? null,
+
+            'customer_email' =>
+                $validated['customer_email']
+                    ?? null,
+
+            'subtotal' =>
+                $subtotal,
+
+            'voucher_id' =>
                 $voucherId,
+
+            'voucher_code' =>
                 $voucherCode,
+
+            'discount' =>
                 $discount,
-                $total
+
+            'total' =>
+                $total,
+
+            'payment_method' =>
+                $validated['payment_method'],
+
+            'bank' =>
+                $validated['payment_method'] === 'bank'
+                    ? $validated['bank']
+                    : null,
+
+            'va_number' =>
+                null,
+
+            'payment_provider' =>
+                null,
+
+            'payment_status' =>
+                'pending',
+
+            'status' =>
+                'pending',
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BUAT ORDER ITEM + UNIT
+        |--------------------------------------------------------------------------
+        */
+
+        foreach (
+            $cart as $menuId => $quantity
+        ) {
+
+            /*
+            |--------------------------------------------------------------
+            | Pastikan menu tersedia
+            |--------------------------------------------------------------
+            */
+
+            if (
+                !isset(
+                    $menus[$menuId]
+                )
             ) {
-                $order = Order::create([
+                continue;
+            }
 
-                    'merchant_id' =>
-                    $merchant->id,
 
-                    'qr_code_id' =>
-                    $qrCode->id,
+            $menu =
+                $menus[$menuId];
 
-                    'order_number' =>
-                    $orderNumber,
 
-                    'customer_name' =>
-                    strip_tags(
-                        $validated['customer_name']
-                    ),
+            /*
+            |--------------------------------------------------------------
+            | BUAT ORDER ITEM
+            |--------------------------------------------------------------
+            */
 
-                    'customer_phone' =>
-                    $validated['customer_phone']
-                        ?? null,
+            $orderItem =
+                OrderItem::create([
 
-                    'customer_email' =>
-                    $validated['customer_email']
-                        ?? null,
+                    'order_id' =>
+                        $order->id,
 
-                    'subtotal' => $subtotal,
-                    'voucher_id' => $voucherId,
-                    'voucher_code' => $voucherCode,
-                    'discount' => $discount,
-                    'total' => $total,
+                    'menu_id' =>
+                        $menu->id,
 
-                    'payment_method' =>
-                    $validated['payment_method'],
+                    'menu_name' =>
+                        $menu->name,
 
-                    'bank' =>
-                    $validated['payment_method'] === 'bank'
-                        ? $validated['bank']
-                        : null,
+                    'quantity' =>
+                        $quantity,
 
-                    'va_number' =>
-                    null,
+                    'price' =>
+                        $menu->price,
 
-                    'payment_provider' =>
-                    null,
-
-                    'payment_status' =>
-                    'pending',
-
-                    'status' =>
-                    'pending',
+                    'subtotal' =>
+                        $menu->price * $quantity,
                 ]);
 
 
-                foreach (
-                    $cart as $menuId => $quantity
-                ) {
-                    if (
-                        !isset(
-                            $menus[$menuId]
-                        )
-                    ) {
-                        continue;
-                    }
+            /*
+            |--------------------------------------------------------------
+            | BUAT UNIT MENU
+            |--------------------------------------------------------------
+            |
+            | quantity = 3
+            |
+            | Unit 1
+            | Unit 2
+            | Unit 3
+            |
+            */
 
-                    $menu =
-                        $menus[$menuId];
+            for (
+                $i = 1;
+                $i <= $quantity;
+                $i++
+            ) {
 
-                    $orderItem =OrderItem::create([
+                OrderItemUnit::create([
 
-                        'order_id' =>
-                        $order->id,
+                    'order_item_id' =>
+                        $orderItem->id,
 
-                        'menu_id' =>
-                        $menu->id,
+                    'unit_number' =>
+                        $i,
 
-                        'menu_name' =>
-                        $menu->name,
-
-                        'quantity' =>
-                        $quantity,
-
-                        'price' =>
-                        $menu->price,
-
-                        'subtotal' =>
-                        $menu->price *
-                            $quantity,
-                    ]);
-                }
-
-                /*
-                    |--------------------------------------------------------------------------
-                    | BUAT UNIT MENU
-                    |--------------------------------------------------------------------------
-                    |
-                    | Contoh:
-                    | quantity = 2
-                    |
-                    | Nasi Goreng 1
-                    | Nasi Goreng 2
-                    |
-                    */
-
-                    for (
-                        $i = 1;
-                        $i <= $quantity;
-                        $i++
-                    ) {
-
-                        OrderItemUnit::create([
-
-                            'order_item_id' =>
-                            $orderItem->id,
-
-                            'unit_number' =>
-                            $i,
-
-                            'status' =>
-                            'pending',
-                        ]);
-                    }
-                }
-
-                return $order;
+                    'status' =>
+                        'pending',
+                ]);
             }
-        );
+        }
 
 
-        $encryptedOrderNumber =
-            Crypt::encryptString(
-                $order->order_number
-            );
+        /*
+        |--------------------------------------------------------------------------
+        | KEMBALIKAN ORDER
+        |--------------------------------------------------------------------------
+        */
+
+        return $order;
+
+    }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| ENCRYPT ORDER NUMBER
+|--------------------------------------------------------------------------
+*/
+
+$encryptedOrderNumber =
+    Crypt::encryptString(
+        $order->order_number
+    );
+
 
 
         /*
