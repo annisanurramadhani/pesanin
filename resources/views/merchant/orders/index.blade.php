@@ -598,86 +598,175 @@
 
 
                                     {{-- ======================================================
-                                        KHUSUS DAPUR
-                                        LOGIKA TIDAK DIUBAH
-                                    ======================================================= --}}
-                                    @if (Auth::user()->role === 'dapur')
+    KHUSUS DAPUR
+    STATUS PER UNIT MENU
+======================================================= --}}
+@if (Auth::user()->role === 'dapur')
 
-                                        @if (in_array($order->status, ['pending', 'processing']))
+    <div class="space-y-3">
 
-                                            <div class="flex items-center justify-center gap-2">
+        @foreach ($order->items as $item)
 
-                                                {{-- SELESAI DIBUAT --}}
-                                                <form
-                                                    action="{{ route('merchant.orders.status', encryptId($order->id)) }}"
-                                                    method="POST">
+            @php
+                $units = \App\Models\OrderItemUnit::where(
+                    'order_item_id',
+                    $item->id
+                )
+                ->orderBy('unit_number')
+                ->get();
+            @endphp
 
-                                                    @csrf
-                                                    @method('PATCH')
+            @foreach ($units as $unit)
 
-                                                    <input type="hidden" name="status" value="completed">
+                <div class="flex items-center justify-center gap-2">
 
-                                                    <button type="submit"
-                                                        class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition">
-
-                                                        <i class="fa-solid fa-check mr-1"></i>
-
-                                                        Selesai Dibuat
-
-                                                    </button>
-
-                                                </form>
+                    {{-- NAMA MENU + NOMOR UNIT --}}
+                    <span class="text-xs font-bold text-slate-700 whitespace-nowrap">
+                        {{ $item->menu_name ?? ($item->menu->name ?? 'Menu') }}
+                        {{ $unit->unit_number }}
+                    </span>
 
 
-                                                {{-- CANCEL MAKANAN --}}
-                                                <form
-                                                    action="{{ route('merchant.orders.status', encryptId($order->id)) }}"
-                                                    method="POST"
-                                                    class="cancel-food-form">
+                    {{-- ==================================================
+                        PENDING / PROCESSING
+                    ================================================== --}}
+                    @if (in_array($unit->status, ['pending', 'processing']))
 
-                                                    @csrf
-                                                    @method('PATCH')
+                        {{-- ==============================================
+                            SELESAI
+                        =============================================== --}}
+                        <form
+                            action="{{ route(
+                                'merchant.orders.unit.status',
+                                encryptId($unit->id)
+                            ) }}"
+                            method="POST"
+                            class="inline-block"
+                        >
 
-                                                    <input type="hidden" name="status" value="cancelled">
+                            @csrf
+                            @method('PATCH')
 
-                                                    <button type="submit"
-                                                        class="cancel-food-btn px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl text-xs font-black border border-rose-200 transition">
+                            <input
+                                type="hidden"
+                                name="status"
+                                value="completed"
+                            >
 
-                                                        <i class="fa-solid fa-xmark mr-1"></i>
+                            <button
+                                type="submit"
+                                class="px-3 py-2
+                                       bg-emerald-600
+                                       hover:bg-emerald-500
+                                       text-white
+                                       rounded-xl
+                                       text-xs
+                                       font-black
+                                       transition
+                                       cursor-pointer
+                                       whitespace-nowrap"
+                            >
+                                <i class="fa-solid fa-check mr-1"></i>
+                                Selesai
+                            </button>
 
-                                                        Cancel Makanan
+                        </form>
 
-                                                    </button>
 
-                                                </form>
+                        {{-- ==============================================
+                            BAHAN HABIS
+                        =============================================== --}}
+                        <form
+                            action="{{ route(
+                                'merchant.orders.unit.status',
+                                encryptId($unit->id)
+                            ) }}"
+                            method="POST"
+                            class="cancel-food-form inline-block"
+                        >
 
-                                            </div>
+                            @csrf
+                            @method('PATCH')
 
-                                        @else
+                            <input
+                                type="hidden"
+                                name="status"
+                                value="cancelled"
+                            >
 
-                                            {{-- SUDAH SELESAI / DIBATALKAN --}}
-                                            <span class="text-xs font-extrabold
-                                                {{ $order->status === 'completed'
-                                                    ? 'text-emerald-600'
-                                                    : 'text-rose-600' }}">
+                            <button
+                                type="submit"
+                                class="cancel-food-btn
+                                       px-3 py-2
+                                       bg-rose-100
+                                       hover:bg-rose-200
+                                       text-rose-700
+                                       rounded-xl
+                                       text-xs
+                                       font-black
+                                       border
+                                       border-rose-200
+                                       transition
+                                       cursor-pointer
+                                       whitespace-nowrap"
+                            >
+                                <i class="fa-solid fa-box-open mr-1"></i>
+                                Bahan Habis
+                            </button>
 
-                                                @if ($order->status === 'completed')
+                        </form>
 
-                                                    <i class="fa-solid fa-circle-check mr-1"></i>
 
-                                                    Selesai Dibuat
+                    {{-- ==================================================
+                        SUDAH SELESAI
+                    ================================================== --}}
+                    @elseif ($unit->status === 'completed')
 
-                                                @elseif($order->status === 'cancelled')
+                        <span
+                            class="px-3 py-2
+                                   bg-emerald-50
+                                   text-emerald-700
+                                   rounded-xl
+                                   text-xs
+                                   font-black
+                                   border
+                                   border-emerald-200
+                                   whitespace-nowrap"
+                        >
+                            <i class="fa-solid fa-circle-check mr-1"></i>
+                            Selesai
+                        </span>
 
-                                                    <i class="fa-solid fa-circle-xmark mr-1"></i>
 
-                                                    Makanan Dibatalkan
+                    {{-- ==================================================
+                        BAHAN HABIS
+                    ================================================== --}}
+                    @elseif ($unit->status === 'cancelled')
 
-                                                @endif
+                        <span
+                            class="px-3 py-2
+                                   bg-rose-50
+                                   text-rose-700
+                                   rounded-xl
+                                   text-xs
+                                   font-black
+                                   border
+                                   border-rose-200
+                                   whitespace-nowrap"
+                        >
+                            <i class="fa-solid fa-box-open mr-1"></i>
+                            Bahan Habis
+                        </span>
 
-                                            </span>
+                    @endif
 
-                                        @endif
+                </div>
+
+            @endforeach
+
+        @endforeach
+
+    </div>
 
 
                                     {{-- ======================================================
