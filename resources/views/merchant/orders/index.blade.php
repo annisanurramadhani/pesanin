@@ -351,13 +351,13 @@
                                 =========================================================== --}}
                                 <td class="p-4">
 
-                                    <div class="space-y-1">
+                                    <div class="space-y-3">
 
                                         @foreach ($order->items as $item)
                                             @for ($i = 0; $i < $item->quantity; $i++)
-                                                <div class="flex items-center gap-2 text-xs">
+                                                <div class="h-[40px] flex items-center gap-2 text-xs">
 
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
 
                                                     <span class="font-semibold text-slate-700">
                                                         {{ $item->menu_name ?? ($item->menu->name ?? 'Menu') }}
@@ -674,22 +674,16 @@
                                                 @endphp
 
                                                 @foreach ($units as $unit)
-                                                    <div class="flex items-center justify-center gap-2">
-
-                                                        {{-- NAMA MENU + NOMOR UNIT --}}
-                                                        <span class="text-xs font-bold text-slate-700 whitespace-nowrap">
-                                                            {{ $item->menu_name ?? ($item->menu->name ?? 'Menu') }}
-                                                            {{ $unit->unit_number }}
-                                                        </span>
+                                                    <div class="h-[40px] flex items-center justify-center gap-2">
 
 
                                                         {{-- ==================================================
-                        PENDING / PROCESSING
-                    ================================================== --}}
+                                                            PENDING / PROCESSING
+                                                        ================================================== --}}
                                                         @if (in_array($unit->status, ['pending', 'processing']))
                                                             {{-- ==============================================
-                            SELESAI
-                        =============================================== --}}
+                                                                SELESAI
+                                                            =============================================== --}}
                                                             <form
                                                                 action="{{ route('merchant.orders.unit.status', encryptId($unit->id)) }}"
                                                                 method="POST" class="inline-block">
@@ -1711,252 +1705,248 @@
 
     {{-- SCRIPT MODAL DETAIL --}}
     <script>
-
-/*
-|--------------------------------------------------------------------------
-| BUKA MODAL DETAIL STATUS PESANAN
-|--------------------------------------------------------------------------
-*/
-
-function openOrderStatusModal(orderNumber, orderId) {
-
-    /*
-    |--------------------------------------------------------------------------
-    | CARI BARIS ORDER
-    |--------------------------------------------------------------------------
-    */
-
-    const row = document.querySelector(
-        `tr[data-order-id="${orderId}"]`
-    );
-
-
-    if (!row) {
-
-        console.error(
-            'Baris order tidak ditemukan:',
-            orderId
-        );
-
-        return;
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | AMBIL DATA UNIT
-    |--------------------------------------------------------------------------
-    */
-
-    let units = [];
-
-    try {
-
-        units = JSON.parse(
-            row.dataset.orderUnits || '[]'
-        );
-
-    } catch (error) {
-
-        console.error(
-            'Gagal membaca data unit:',
-            error
-        );
-
-        return;
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | ELEMENT MODAL
-    |--------------------------------------------------------------------------
-    */
-
-    const modal =
-        document.getElementById(
-            'orderStatusModal'
-        );
-
-    const orderNumberElement =
-        document.getElementById(
-            'orderStatusOrderNumber'
-        );
-
-    const list =
-        document.getElementById(
-            'orderStatusUnitList'
-        );
-
-    const summary =
-        document.getElementById(
-            'orderStatusSummary'
-        );
-
-
-    if (
-        !modal ||
-        !orderNumberElement ||
-        !list ||
-        !summary
-    ) {
-
-        console.error(
-            'Element modal status tidak ditemukan.'
-        );
-
-        return;
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | NOMOR ORDER
-    |--------------------------------------------------------------------------
-    */
-
-    orderNumberElement.textContent =
-        '#' + orderNumber;
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | RESET LIST
-    |--------------------------------------------------------------------------
-    */
-
-    list.innerHTML = '';
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | COUNTER
-    |--------------------------------------------------------------------------
-    */
-
-    let completed = 0;
-    let cancelled = 0;
-    let processing = 0;
-    let pending = 0;
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | RENDER SETIAP UNIT
-    |--------------------------------------------------------------------------
-    */
-
-    units.forEach(function(unit) {
-
-        let statusText = '';
-        let statusClass = '';
-        let icon = '';
-
-
         /*
-        |--------------------------------------------------------------------------
-        | SELESAI
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | BUKA MODAL DETAIL STATUS PESANAN
+    |--------------------------------------------------------------------------
+    */
 
-        if (unit.status === 'completed') {
+        function openOrderStatusModal(orderNumber, orderId) {
 
-            completed++;
+            /*
+            |--------------------------------------------------------------------------
+            | CARI BARIS ORDER
+            |--------------------------------------------------------------------------
+            */
 
-            statusText = 'Selesai';
-
-            statusClass =
-                'bg-emerald-100 text-emerald-700';
-
-            icon =
-                '<i class="fa-solid fa-check mr-1"></i>';
-
-        }
+            const row = document.querySelector(
+                `tr[data-order-id="${orderId}"]`
+            );
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | BAHAN HABIS
-        |--------------------------------------------------------------------------
-        */
+            if (!row) {
 
-        else if (unit.status === 'cancelled') {
+                console.error(
+                    'Baris order tidak ditemukan:',
+                    orderId
+                );
 
-            cancelled++;
+                return;
 
-            statusText = 'Bahan Habis';
-
-            statusClass =
-                'bg-rose-100 text-rose-700';
-
-            icon =
-                '<i class="fa-solid fa-box-open mr-1"></i>';
-
-        }
+            }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | DIPROSES
-        |--------------------------------------------------------------------------
-        */
+            /*
+            |--------------------------------------------------------------------------
+            | AMBIL DATA UNIT
+            |--------------------------------------------------------------------------
+            */
 
-        else if (unit.status === 'processing') {
+            let units = [];
 
-            processing++;
+            try {
 
-            statusText = 'Diproses';
+                units = JSON.parse(
+                    row.dataset.orderUnits || '[]'
+                );
 
-            statusClass =
-                'bg-blue-100 text-blue-700';
+            } catch (error) {
 
-            icon =
-                '<i class="fa-solid fa-fire mr-1"></i>';
+                console.error(
+                    'Gagal membaca data unit:',
+                    error
+                );
 
-        }
+                return;
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | MENUNGGU
-        |--------------------------------------------------------------------------
-        */
-
-        else {
-
-            pending++;
-
-            statusText = 'Menunggu';
-
-            statusClass =
-                'bg-amber-100 text-amber-700';
-
-            icon =
-                '<i class="fa-regular fa-clock mr-1"></i>';
-
-        }
+            }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | BUAT ELEMENT
-        |--------------------------------------------------------------------------
-        */
+            /*
+            |--------------------------------------------------------------------------
+            | ELEMENT MODAL
+            |--------------------------------------------------------------------------
+            */
 
-        const item =
-            document.createElement('div');
+            const modal =
+                document.getElementById(
+                    'orderStatusModal'
+                );
+
+            const orderNumberElement =
+                document.getElementById(
+                    'orderStatusOrderNumber'
+                );
+
+            const list =
+                document.getElementById(
+                    'orderStatusUnitList'
+                );
+
+            const summary =
+                document.getElementById(
+                    'orderStatusSummary'
+                );
 
 
-        item.className =
-            'flex items-center justify-between ' +
-            'gap-3 rounded-xl border ' +
-            'border-slate-100 bg-slate-50 p-3';
+            if (
+                !modal ||
+                !orderNumberElement ||
+                !list ||
+                !summary
+            ) {
+
+                console.error(
+                    'Element modal status tidak ditemukan.'
+                );
+
+                return;
+
+            }
 
 
-        item.innerHTML = `
+            /*
+            |--------------------------------------------------------------------------
+            | NOMOR ORDER
+            |--------------------------------------------------------------------------
+            */
+
+            orderNumberElement.textContent =
+                '#' + orderNumber;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | RESET LIST
+            |--------------------------------------------------------------------------
+            */
+
+            list.innerHTML = '';
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | COUNTER
+            |--------------------------------------------------------------------------
+            */
+
+            let completed = 0;
+            let cancelled = 0;
+            let processing = 0;
+            let pending = 0;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | RENDER SETIAP UNIT
+            |--------------------------------------------------------------------------
+            */
+
+            units.forEach(function(unit) {
+
+                let statusText = '';
+                let statusClass = '';
+                let icon = '';
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SELESAI
+                |--------------------------------------------------------------------------
+                */
+
+                if (unit.status === 'completed') {
+
+                    completed++;
+
+                    statusText = 'Selesai';
+
+                    statusClass =
+                        'bg-emerald-100 text-emerald-700';
+
+                    icon =
+                        '<i class="fa-solid fa-check mr-1"></i>';
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | BAHAN HABIS
+                |--------------------------------------------------------------------------
+                */
+                else if (unit.status === 'cancelled') {
+
+                    cancelled++;
+
+                    statusText = 'Bahan Habis';
+
+                    statusClass =
+                        'bg-rose-100 text-rose-700';
+
+                    icon =
+                        '<i class="fa-solid fa-box-open mr-1"></i>';
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | DIPROSES
+                |--------------------------------------------------------------------------
+                */
+                else if (unit.status === 'processing') {
+
+                    processing++;
+
+                    statusText = 'Diproses';
+
+                    statusClass =
+                        'bg-blue-100 text-blue-700';
+
+                    icon =
+                        '<i class="fa-solid fa-fire mr-1"></i>';
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | MENUNGGU
+                |--------------------------------------------------------------------------
+                */
+                else {
+
+                    pending++;
+
+                    statusText = 'Menunggu';
+
+                    statusClass =
+                        'bg-amber-100 text-amber-700';
+
+                    icon =
+                        '<i class="fa-regular fa-clock mr-1"></i>';
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | BUAT ELEMENT
+                |--------------------------------------------------------------------------
+                */
+
+                const item =
+                    document.createElement('div');
+
+
+                item.className =
+                    'flex items-center justify-between ' +
+                    'gap-3 rounded-xl border ' +
+                    'border-slate-100 bg-slate-50 p-3';
+
+
+                item.innerHTML = `
 
             <div class="flex items-center gap-3 min-w-0">
 
@@ -2013,168 +2003,167 @@ function openOrderStatusModal(orderNumber, orderId) {
         `;
 
 
-        list.appendChild(item);
+                list.appendChild(item);
 
-    });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | RINGKASAN
-    |--------------------------------------------------------------------------
-    */
-
-    const summaryParts = [];
+            });
 
 
-    if (completed > 0) {
+            /*
+            |--------------------------------------------------------------------------
+            | RINGKASAN
+            |--------------------------------------------------------------------------
+            */
 
-        summaryParts.push(
-            `${completed} selesai`
-        );
-
-    }
-
-
-    if (cancelled > 0) {
-
-        summaryParts.push(
-            `${cancelled} bahan habis`
-        );
-
-    }
+            const summaryParts = [];
 
 
-    if (processing > 0) {
+            if (completed > 0) {
 
-        summaryParts.push(
-            `${processing} diproses`
-        );
+                summaryParts.push(
+                    `${completed} selesai`
+                );
 
-    }
-
-
-    if (pending > 0) {
-
-        summaryParts.push(
-            `${pending} menunggu`
-        );
-
-    }
+            }
 
 
-    summary.textContent =
-        summaryParts.join(' • ');
+            if (cancelled > 0) {
+
+                summaryParts.push(
+                    `${cancelled} bahan habis`
+                );
+
+            }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | TAMPILKAN MODAL
-    |--------------------------------------------------------------------------
-    */
+            if (processing > 0) {
 
-    modal.classList.remove('hidden');
+                summaryParts.push(
+                    `${processing} diproses`
+                );
 
-    modal.classList.add('flex');
-
-}
+            }
 
 
-/*
-|--------------------------------------------------------------------------
-| TUTUP MODAL
-|--------------------------------------------------------------------------
-*/
+            if (pending > 0) {
 
-function closeOrderStatusModal() {
+                summaryParts.push(
+                    `${pending} menunggu`
+                );
 
-    const modal =
-        document.getElementById(
-            'orderStatusModal'
-        );
+            }
 
 
-    if (!modal) {
-        return;
-    }
+            summary.textContent =
+                summaryParts.join(' • ');
 
 
-    modal.classList.add('hidden');
+            /*
+            |--------------------------------------------------------------------------
+            | TAMPILKAN MODAL
+            |--------------------------------------------------------------------------
+            */
 
-    modal.classList.remove('flex');
+            modal.classList.remove('hidden');
 
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| ESCAPE HTML
-|--------------------------------------------------------------------------
-*/
-
-function escapeHtml(value) {
-
-    const div =
-        document.createElement('div');
-
-    div.textContent =
-        value ?? '';
-
-    return div.innerHTML;
-
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| KLIK DI LUAR MODAL
-|--------------------------------------------------------------------------
-*/
-
-document.addEventListener(
-    'click',
-    function(event) {
-
-        const modal =
-            document.getElementById(
-                'orderStatusModal'
-            );
-
-
-        if (
-            modal &&
-            event.target === modal
-        ) {
-
-            closeOrderStatusModal();
+            modal.classList.add('flex');
 
         }
 
-    }
-);
+
+        /*
+        |--------------------------------------------------------------------------
+        | TUTUP MODAL
+        |--------------------------------------------------------------------------
+        */
+
+        function closeOrderStatusModal() {
+
+            const modal =
+                document.getElementById(
+                    'orderStatusModal'
+                );
 
 
-/*
-|--------------------------------------------------------------------------
-| TOMBOL ESC
-|--------------------------------------------------------------------------
-*/
+            if (!modal) {
+                return;
+            }
 
-document.addEventListener(
-    'keydown',
-    function(event) {
 
-        if (
-            event.key === 'Escape'
-        ) {
+            modal.classList.add('hidden');
 
-            closeOrderStatusModal();
+            modal.classList.remove('flex');
 
         }
 
-    }
-);
 
-</script>
-   
+        /*
+        |--------------------------------------------------------------------------
+        | ESCAPE HTML
+        |--------------------------------------------------------------------------
+        */
+
+        function escapeHtml(value) {
+
+            const div =
+                document.createElement('div');
+
+            div.textContent =
+                value ?? '';
+
+            return div.innerHTML;
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | KLIK DI LUAR MODAL
+        |--------------------------------------------------------------------------
+        */
+
+        document.addEventListener(
+            'click',
+            function(event) {
+
+                const modal =
+                    document.getElementById(
+                        'orderStatusModal'
+                    );
+
+
+                if (
+                    modal &&
+                    event.target === modal
+                ) {
+
+                    closeOrderStatusModal();
+
+                }
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOMBOL ESC
+        |--------------------------------------------------------------------------
+        */
+
+        document.addEventListener(
+            'keydown',
+            function(event) {
+
+                if (
+                    event.key === 'Escape'
+                ) {
+
+                    closeOrderStatusModal();
+
+                }
+
+            }
+        );
+    </script>
+
 @endsection
