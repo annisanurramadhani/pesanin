@@ -414,13 +414,113 @@
                         </table>
 
 
-                        {{-- Total --}}
+                        {{-- Ringkasan Pembayaran --}}
+
                         <table
                             width="100%"
                             cellpadding="0"
                             cellspacing="0"
                             style="
                                 margin-top:20px;
+                                border-top:1px solid #e5e7eb;
+                            "
+                        >
+
+                            {{-- SUBTOTAL --}}
+                            <tr>
+
+                                <td
+                                    style="
+                                        padding:12px 0;
+                                        color:#64748b;
+                                        font-size:12px;
+                                    "
+                                >
+                                    Subtotal
+                                </td>
+
+                                <td
+                                    align="right"
+                                    style="
+                                        padding:12px 0;
+                                        color:#374151;
+                                        font-size:12px;
+                                        font-weight:bold;
+                                        white-space:nowrap;
+                                    "
+                                >
+                                    Rp {{ number_format($order->subtotal, 0, ',', '.') }}
+                                </td>
+
+                            </tr>
+
+
+                            {{-- DISKON --}}
+                            @if ($order->discount > 0)
+
+                                <tr>
+
+                                    <td
+                                        style="
+                                            padding:12px 0;
+                                            border-top:1px solid #f1f5f9;
+                                            color:#15803d;
+                                            font-size:12px;
+                                        "
+                                    >
+
+                                        <div style="
+                                            font-weight:bold;
+                                        ">
+                                            Diskon Voucher
+                                        </div>
+
+                                        @if (!empty($order->voucher_code))
+
+                                            <div style="
+                                                margin-top:3px;
+                                                color:#16a34a;
+                                                font-size:10px;
+                                            ">
+                                                Voucher:
+                                                <strong>
+                                                    {{ $order->voucher_code }}
+                                                </strong>
+                                            </div>
+
+                                        @endif
+
+                                    </td>
+
+                                    <td
+                                        align="right"
+                                        style="
+                                            padding:12px 0;
+                                            border-top:1px solid #f1f5f9;
+                                            color:#15803d;
+                                            font-size:12px;
+                                            font-weight:bold;
+                                            white-space:nowrap;
+                                        "
+                                    >
+                                        -Rp {{ number_format($order->discount, 0, ',', '.') }}
+                                    </td>
+
+                                </tr>
+
+                            @endif
+
+                        </table>
+
+
+                        {{-- TOTAL --}}
+
+                        <table
+                            width="100%"
+                            cellpadding="0"
+                            cellspacing="0"
+                            style="
+                                margin-top:10px;
                                 background:#111827;
                                 border-radius:12px;
                             "
