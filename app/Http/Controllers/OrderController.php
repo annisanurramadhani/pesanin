@@ -68,7 +68,7 @@ class OrderController extends Controller
 
         if ($role === 'dapur') {
 
-    /*
+            /*
     |--------------------------------------------------------------------------
     | DAPUR
     |--------------------------------------------------------------------------
@@ -86,26 +86,24 @@ class OrderController extends Controller
     |
     */
 
-    $query->where(
-        'payment_status',
-        'paid'
-    )
-    ->whereHas(
-        'items.unit',
-        function ($unitQuery) {
+            $query->where(
+                'payment_status',
+                'paid'
+            )
+                ->whereHas(
+                    'items.unit',
+                    function ($unitQuery) {
 
-            $unitQuery->whereIn(
-                'status',
-                [
-                    'pending',
-                    'processing',
-                ]
-            );
-
-        }
-    );
-
-} else {
+                        $unitQuery->whereIn(
+                            'status',
+                            [
+                                'pending',
+                                'processing',
+                            ]
+                        );
+                    }
+                );
+        } else {
 
             /*
             |--------------------------------------------------------------------------
@@ -119,7 +117,7 @@ class OrderController extends Controller
 
             $query->where(function ($q) {
                 $q->whereNull('payment_status')
-                ->orWhere('payment_status', '!=', 'expired');
+                    ->orWhere('payment_status', '!=', 'expired');
             });
 
             /*
@@ -138,7 +136,6 @@ class OrderController extends Controller
                 $labelPeriode = Carbon::parse(
                     $selectedDate
                 )->format('d M Y');
-
             } elseif ($filterType === 'month') {
 
                 $carbonMonth = Carbon::parse(
@@ -156,7 +153,6 @@ class OrderController extends Controller
                 $labelPeriode = $carbonMonth->format(
                     'F Y'
                 );
-
             } elseif ($filterType === 'year') {
 
                 $query->whereYear(
@@ -188,12 +184,145 @@ class OrderController extends Controller
             $orders = $query
                 ->orderBy('created_at', 'desc')
                 ->get();
-
         } else {
 
             $orders = $query
                 ->orderBy('created_at', 'desc')
                 ->get();
+        }
+
+
+        /*
+|--------------------------------------------------------------------------
+| STATUS AGREGAT ORDER
+|--------------------------------------------------------------------------
+|
+| Status kasir dihitung langsung dari OrderItemUnit.
+| Tidak bergantung pada relasi $item->unit.
+|
+*/
+
+        if ($role !== 'dapur') {
+
+            $orders->each(function ($order) {
+
+                /*
+        |--------------------------------------------------------------------------
+        | AMBIL SEMUA ORDER ITEM ID
+        |--------------------------------------------------------------------------
+        */
+
+                $orderItemIds = $order->items
+                    ->pluck('id');
+
+
+                /*
+        |--------------------------------------------------------------------------
+        | AMBIL SEMUA UNIT MENU
+        |--------------------------------------------------------------------------
+        */
+
+                $units = OrderItemUnit::whereIn(
+                    'order_item_id',
+                    $orderItemIds
+                )
+                    ->get();
+
+
+                /*
+        |--------------------------------------------------------------------------
+        | HITUNG STATUS
+        |--------------------------------------------------------------------------
+        */
+
+                $totalUnits =
+                    $units->count();
+
+                $completedUnits =
+                    $units
+                    ->where('status', 'completed')
+                    ->count();
+
+                $cancelledUnits =
+                    $units
+                    ->where('status', 'cancelled')
+                    ->count();
+
+                $processingUnits =
+                    $units
+                    ->where('status', 'processing')
+                    ->count();
+
+                $pendingUnits =
+                    $units
+                    ->where('status', 'pending')
+                    ->count();
+
+
+                /*
+        |--------------------------------------------------------------------------
+        | TENTUKAN STATUS ORDER
+        |--------------------------------------------------------------------------
+        */
+
+                if (
+                    $totalUnits > 0 &&
+                    $completedUnits === $totalUnits
+                ) {
+
+                    $order->display_status =
+                        'completed';
+                } elseif (
+                    $totalUnits > 0 &&
+                    $cancelledUnits === $totalUnits
+                ) {
+
+                    $order->display_status =
+                        'cancelled';
+                } elseif (
+                    $cancelledUnits > 0
+                ) {
+
+                    $order->display_status =
+                        'partial_problem';
+                } elseif (
+                    $processingUnits > 0
+                ) {
+
+                    $order->display_status =
+                        'processing';
+                } else {
+
+                    $order->display_status =
+                        'pending';
+                }
+
+
+                /*
+        |--------------------------------------------------------------------------
+        | SIMPAN RINGKASAN
+        |--------------------------------------------------------------------------
+        */
+
+                $order->status_summary = [
+
+                    'total' =>
+                    $totalUnits,
+
+                    'completed' =>
+                    $completedUnits,
+
+                    'cancelled' =>
+                    $cancelledUnits,
+
+                    'processing' =>
+                    $processingUnits,
+
+                    'pending' =>
+                    $pendingUnits,
+
+                ];
+            });
         }
 
 
@@ -327,8 +456,8 @@ class OrderController extends Controller
             ->with(
                 'success',
                 'Pembayaran pesanan #' .
-                $order->order_number .
-                ' berhasil dikonfirmasi.'
+                    $order->order_number .
+                    ' berhasil dikonfirmasi.'
             );
     }
 
@@ -406,8 +535,8 @@ class OrderController extends Controller
             ->with(
                 'success',
                 'Status pesanan #' .
-                $order->order_number .
-                ' berhasil diperbarui!'
+                    $order->order_number .
+                    ' berhasil diperbarui!'
             );
     }
 
@@ -428,55 +557,55 @@ class OrderController extends Controller
 |
 */
 
-public function updateUnitStatus(
-    Request $request,
-    $id
-) {
+    public function updateUnitStatus(
+        Request $request,
+        $id
+    ) {
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | VALIDASI STATUS
     |--------------------------------------------------------------------------
     */
 
-    $request->validate([
-        'status' => [
-            'required',
-            'string',
-            'in:pending,processing,completed,cancelled',
-        ],
-    ]);
+        $request->validate([
+            'status' => [
+                'required',
+                'string',
+                'in:pending,processing,completed,cancelled',
+            ],
+        ]);
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | USER & MERCHANT
     |--------------------------------------------------------------------------
     */
 
-    $user = Auth::user();
+        $user = Auth::user();
 
-    $merchantId =
-        $user->merchant_id
-        ?? $user->id;
+        $merchantId =
+            $user->merchant_id
+            ?? $user->id;
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | DECRYPT UNIT ID
     |--------------------------------------------------------------------------
     */
 
-    $unitId =
-        decryptId($id);
+        $unitId =
+            decryptId($id);
 
-    abort_unless(
-        $unitId,
-        404
-    );
+        abort_unless(
+            $unitId,
+            404
+        );
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | AMBIL UNIT
     |--------------------------------------------------------------------------
@@ -486,78 +615,78 @@ public function updateUnitStatus(
     |
     */
 
-    $unit = OrderItemUnit::where(
-        'id',
-        $unitId
-    )
-        ->whereHas(
-            'orderItem.order',
-            function ($query) use (
-                $merchantId
-            ) {
-                $query->where(
-                    'merchant_id',
-                    $merchantId
-                );
-            }
+        $unit = OrderItemUnit::where(
+            'id',
+            $unitId
         )
-        ->with([
-            'orderItem.order',
-        ])
-        ->firstOrFail();
+            ->whereHas(
+                'orderItem.order',
+                function ($query) use (
+                    $merchantId
+                ) {
+                    $query->where(
+                        'merchant_id',
+                        $merchantId
+                    );
+                }
+            )
+            ->with([
+                'orderItem.order',
+            ])
+            ->firstOrFail();
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | PASTIKAN PEMBAYARAN SUDAH DIBAYAR
     |--------------------------------------------------------------------------
     */
 
-    $order =
-        $unit->orderItem->order;
+        $order =
+            $unit->orderItem->order;
 
-    if (
-        $order->payment_status !== 'paid'
-    ) {
+        if (
+            $order->payment_status !== 'paid'
+        ) {
 
-        return back()->with(
-            'error',
-            'Pesanan belum dibayar dan belum dapat diproses dapur.'
-        );
-    }
+            return back()->with(
+                'error',
+                'Pesanan belum dibayar dan belum dapat diproses dapur.'
+            );
+        }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | UPDATE STATUS UNIT
     |--------------------------------------------------------------------------
     */
 
-    $unit->update([
-        'status' =>
-        $request->status,
-    ]);
+        $unit->update([
+            'status' =>
+            $request->status,
+        ]);
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | RESPONSE
     |--------------------------------------------------------------------------
     */
 
-    return redirect()
-        ->route(
-            'merchant.orders.index'
-        )
-        ->with(
-            'success',
-            'Status ' .
-            $unit->orderItem->menu_name .
-            ' ' .
-            $unit->unit_number .
-            ' berhasil diperbarui.'
-        );
-}
+        return redirect()
+            ->route(
+                'merchant.orders.index'
+            )
+            ->with(
+                'success',
+                'Status ' .
+                    $unit->orderItem->menu_name .
+                    ' ' .
+                    $unit->unit_number .
+                    ' berhasil diperbarui.'
+            );
+    }
 
 
     public function receipt($id)
