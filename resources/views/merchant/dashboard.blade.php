@@ -211,28 +211,177 @@
                                 </span>
                             </td>
 
-                            {{-- Diselesaikan --}}
-                            <td class="p-4 text-center">
-                                <div class="flex flex-col items-center justify-center gap-1">
-                                    @if(in_array($statusStr, ['selesai', 'completed']))
-                                        <span class="inline-flex items-center gap-1 rounded-lg border border-emerald-200/80 bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
-                                            <i class="fa-solid fa-check text-[10px]"></i> Selesai
-                                        </span>
-                                    @elseif(in_array($statusStr, ['batal', 'cancelled']))
-                                        <span class="inline-flex items-center gap-1 rounded-lg border border-rose-200/80 bg-rose-50 px-2.5 py-1 text-xs font-black text-rose-700">
-                                            <i class="fa-solid fa-xmark text-[10px]"></i> Dibatalkan
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1 rounded-lg border border-amber-200/80 bg-amber-50 px-2.5 py-1 text-xs font-black text-amber-700">
-                                            <i class="fa-regular fa-clock text-[10px]"></i> Diproses
-                                        </span>
-                                    @endif
+                            {{-- ==========================================================
+    STATUS PESANAN
+=========================================================== --}}
+<td class="p-4 text-center">
 
-                                    <span class="text-[11px] font-bold text-slate-500">
-                                        {{ $order->created_at->format('d/m/Y H:i') }} WIB
-                                    </span>
-                                </div>
-                            </td>
+    <div class="flex flex-col items-center justify-center gap-1">
+
+        {{-- ==================================================
+            SEMUA MENU SELESAI
+        =================================================== --}}
+        @if ($order->display_status === 'completed')
+
+            <span
+                class="inline-flex items-center gap-1
+                       rounded-lg
+                       border border-emerald-200/80
+                       bg-emerald-50
+                       px-2.5 py-1
+                       text-xs
+                       font-black
+                       text-emerald-700">
+
+                <i class="fa-solid fa-check text-[10px]"></i>
+
+                Selesai
+
+            </span>
+
+            <span class="text-[11px] font-bold text-emerald-600">
+
+                {{ $order->status_summary['completed'] }}
+                menu selesai
+
+            </span>
+
+
+        {{-- ==================================================
+            SEMUA MENU BAHAN HABIS
+        =================================================== --}}
+        @elseif ($order->display_status === 'cancelled')
+
+            <span
+                class="inline-flex items-center gap-1
+                       rounded-lg
+                       border border-rose-200/80
+                       bg-rose-50
+                       px-2.5 py-1
+                       text-xs
+                       font-black
+                       text-rose-700">
+
+                <i class="fa-solid fa-box-open text-[10px]"></i>
+
+                Bahan Habis
+
+            </span>
+
+            <span class="text-[11px] font-bold text-rose-600">
+
+                {{ $order->status_summary['cancelled'] }}
+                menu bahan habis
+
+            </span>
+
+
+        {{-- ==================================================
+            SEBAGIAN MENU BERMASALAH
+        =================================================== --}}
+        @elseif ($order->display_status === 'partial_problem')
+
+            <span
+                class="inline-flex items-center gap-1
+                       rounded-lg
+                       border border-orange-200/80
+                       bg-orange-50
+                       px-2.5 py-1
+                       text-xs
+                       font-black
+                       text-orange-700">
+
+                <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+
+                Sebagian Bermasalah
+
+            </span>
+
+            <span class="text-[11px] font-bold text-slate-500">
+
+                {{ $order->status_summary['completed'] }}
+                selesai
+
+                <span class="text-slate-300">•</span>
+
+                {{ $order->status_summary['cancelled'] }}
+                bahan habis
+
+            </span>
+
+
+        {{-- ==================================================
+            MASIH DIPROSES
+        =================================================== --}}
+        @elseif ($order->display_status === 'processing')
+
+            <span
+                class="inline-flex items-center gap-1
+                       rounded-lg
+                       border border-blue-200/80
+                       bg-blue-50
+                       px-2.5 py-1
+                       text-xs
+                       font-black
+                       text-blue-700">
+
+                <i class="fa-solid fa-fire text-[10px]"></i>
+
+                Diproses
+
+            </span>
+
+            <span class="text-[11px] font-bold text-blue-600">
+
+                {{ $order->status_summary['processing'] }}
+                sedang diproses
+
+            </span>
+
+
+        {{-- ==================================================
+            MENUNGGU
+        =================================================== --}}
+        @else
+
+            <span
+                class="inline-flex items-center gap-1
+                       rounded-lg
+                       border border-amber-200/80
+                       bg-amber-50
+                       px-2.5 py-1
+                       text-xs
+                       font-black
+                       text-amber-700">
+
+                <i class="fa-regular fa-clock text-[10px]"></i>
+
+                Menunggu
+
+            </span>
+
+            <span class="text-[11px] font-bold text-amber-600">
+
+                {{ $order->status_summary['pending'] }}
+                menunggu diproses
+
+            </span>
+
+        @endif
+
+
+        {{-- ==================================================
+            WAKTU ORDER
+        =================================================== --}}
+        <span class="text-[11px] font-bold text-slate-500">
+
+            {{ $order->created_at->format('d/m/Y H:i') }} WIB
+
+        </span>
+
+    </div>
+
+</td>
 
                             {{-- Aksi --}}
                             <td class="p-4 pr-6 text-center">

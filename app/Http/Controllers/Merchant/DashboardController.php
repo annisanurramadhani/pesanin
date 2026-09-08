@@ -107,7 +107,8 @@ class DashboardController extends Controller
 
         $recentOrders = Order::with([
             'qrCode',
-            'items.menu'
+            'items.menu',
+            'items.unit',
         ])
             ->where(
                 'merchant_id',
@@ -121,7 +122,166 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+            /*
+|--------------------------------------------------------------------------
+| PESANAN TERBARU DASHBOARD
+|--------------------------------------------------------------------------
+|
+| Yang ditampilkan:
+| - Selesai
+| - Diproses
+| - Menunggu
+| - Sebagian Bermasalah
+|
+| Yang TIDAK ditampilkan:
+| - Semua menu Bahan Habis
+| - Payment expired
+|
+| Status dihitung berdasarkan OrderItemUnit.
+|
+*/
 
+$recentOrders = Order::with([
+    'qrCode',
+    'items.menu',
+    'items.unit',
+])
+    ->where(
+        'merchant_id',
+        $merchantId
+    )
+    ->where(function ($query) {
+        $query->whereNull('payment_status')
+            ->orWhere('payment_status', '!=', 'expired');
+    })
+    ->latest()
+    ->get();
+
+
+/*
+|--------------------------------------------------------------------------
+| HITUNG STATUS SETIAP ORDER
+|--------------------------------------------------------------------------
+*/
+
+$recentOrders->each(function ($order) {
+
+    $orderItemIds = $order->items->pluck('id');
+
+    $units = \App\Models\OrderItemUnit::whereIn(
+        'order_item_id',
+        $orderItemIds
+    )->get();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | HITUNG JUMLAH STATUS UNIT
+    |--------------------------------------------------------------------------
+    */
+
+    $totalUnits = $units->count();
+
+    $completedUnits = $units
+        ->where('status', 'completed')
+        ->count();
+
+    $cancelledUnits = $units
+        ->where('status', 'cancelled')
+        ->count();
+
+    $processingUnits = $units
+        ->where('status', 'processing')
+        ->count();
+
+    $pendingUnits = $units
+        ->where('status', 'pending')
+        ->count();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TENTUKAN DISPLAY STATUS
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        $totalUnits > 0 &&
+        $completedUnits === $totalUnits
+    ) {
+
+        $order->display_status = 'completed';
+
+    } elseif (
+        $totalUnits > 0 &&
+        $cancelledUnits === $totalUnits
+    ) {
+
+        // Semua menu bahan habis
+        $order->display_status = 'cancelled';
+
+    } elseif (
+        $cancelledUnits > 0
+    ) {
+
+        // Ada sebagian menu yang bahan habis
+        $order->display_status = 'partial_problem';
+
+    } elseif (
+        $processingUnits > 0
+    ) {
+
+        $order->display_status = 'processing';
+
+    } else {
+
+        $order->display_status = 'pending';
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SIMPAN RINGKASAN STATUS
+    |--------------------------------------------------------------------------
+    */
+
+    $order->status_summary = [
+
+        'total' => $totalUnits,
+
+        'completed' => $completedUnits,
+
+        'cancelled' => $cancelledUnits,
+
+        'processing' => $processingUnits,
+
+        'pending' => $pendingUnits,
+
+    ];
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| HANYA TAMPILKAN ORDER YANG DIIZINKAN
+|--------------------------------------------------------------------------
+|
+| Order dengan semua menu cancelled (Bahan Habis)
+| tidak ditampilkan di Dashboard.
+|
+| Sebagian Bermasalah tetap ditampilkan.
+|
+*/
+
+$recentOrders = $recentOrders
+    ->filter(function ($order) {
+
+        return $order->display_status !== 'cancelled';
+
+    })
+    ->take(5)
+    ->values();
         /*
         |--------------------------------------------------------------------------
         | SUBSCRIPTION
