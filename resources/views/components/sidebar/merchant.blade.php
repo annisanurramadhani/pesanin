@@ -144,6 +144,21 @@
                     </span>
                 </a>
 
+                {{-- VOUCHER --}}
+                <a
+                    href="{{ route('merchant.voucher.index') }}"
+                    class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                    {{ request()->routeIs('merchant.voucher.*')
+                        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}"
+                >
+                    <i class="fa-solid fa-ticket w-5 shrink-0"></i>
+
+                    <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                        Kelola Voucher
+                    </span>
+                </a>
+
                 {{-- PENGATURAN --}}
                 <a
                     href="{{ route('merchant.settings.index') }}"

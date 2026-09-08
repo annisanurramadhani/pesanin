@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\EmailVerificationController;
 
 use App\Http\Controllers\Merchant\MerchantSetupController;
 use App\Http\Controllers\Merchant\DashboardController;
+use App\Http\Controllers\Merchant\VoucherController;
 use App\Http\Controllers\Merchant\MerchantSettingController;
 
 use App\Http\Controllers\PublicSubscription\PublicSubscriptionController;
@@ -863,6 +864,40 @@ Route::middleware('auth')
                 '/staff/{encryptedId}',
                 [StaffController::class, 'destroy']
             )->name('staff.destroy');
+
+            // ==================================================================
+            // VOUCHER
+            // ==================================================================
+
+            Route::get(
+                '/voucher',
+                [VoucherController::class, 'index']
+            )->name('voucher.index');
+
+            Route::get(
+                '/voucher/create',
+                [VoucherController::class, 'create']
+            )->name('voucher.create');
+
+            Route::post(
+                '/voucher',
+                [VoucherController::class, 'store']
+            )->name('voucher.store');
+
+            Route::get(
+                '/voucher/{id}/edit',
+                [VoucherController::class, 'edit']
+            )->name('voucher.edit');
+
+            Route::put(
+                '/voucher/{id}',
+                [VoucherController::class, 'update']
+            )->name('voucher.update');
+
+            Route::delete(
+                '/voucher/{id}',
+                [VoucherController::class, 'destroy']
+            )->name('voucher.destroy');
 
             // ==================================================================
             // PENGATURAN
