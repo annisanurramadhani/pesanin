@@ -96,6 +96,15 @@ class DashboardController extends Controller
         | Cancelled dari Dapur tetap boleh tampil.
         |
         */
+        // TAMBAHKAN BARIS INI: Menghitung total pendapatan keseluruhan (semua order yang sukses/paid)
+        $totalRevenue = Order::where(
+            'merchant_id',
+            $merchantId
+        )
+            ->where('payment_status', 'paid') // Sesuaikan jika status lunas di database kamu berbeda
+            ->sum('total');
+
+
         $recentOrders = Order::with([
             'qrCode',
             'items.menu'
@@ -117,15 +126,6 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         | SUBSCRIPTION
         |--------------------------------------------------------------------------
-        |
-        | Yang dianggap aktif hanya subscription:
-        |
-        | status    = active
-        | end_date  >= hari ini
-        |
-        | Jadi subscription expired lama tidak akan
-        | mengganggu subscription baru yang sudah berhasil dibayar.
-        |
         */
 
         $subscription = null;
@@ -134,12 +134,6 @@ class DashboardController extends Controller
 
 
         if ($user->merchant) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Cari subscription AKTIF
-            |--------------------------------------------------------------------------
-            */
 
             $subscription = $user->merchant
                 ->subscriptions()
@@ -157,25 +151,9 @@ class DashboardController extends Controller
                 ->first();
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Tidak ada subscription aktif
-            |--------------------------------------------------------------------------
-            */
-
             if (!$subscription) {
 
                 $subscriptionExpired = true;
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Ambil subscription terakhir
-                |--------------------------------------------------------------------------
-                |
-                | Hanya digunakan untuk informasi dashboard.
-                |
-                */
 
                 $subscription = $user->merchant
                     ->subscriptions()
@@ -185,23 +163,7 @@ class DashboardController extends Controller
 
             } else {
 
-                /*
-                |--------------------------------------------------------------------------
-                | SUBSCRIPTION SUDAH AKTIF
-                |--------------------------------------------------------------------------
-                |
-                | Ini bagian penting.
-                |
-                | Kalau pembayaran baru berhasil:
-                |
-                | status = active
-                |
-                | maka semua session renewal lama harus dibersihkan.
-                |
-                */
-
                 $subscriptionExpired = false;
-
 
                 session()->forget([
                     'subscription.show_renewal_modal',
@@ -214,16 +176,6 @@ class DashboardController extends Controller
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | SESSION PUBLIC SUBSCRIPTION
-        |--------------------------------------------------------------------------
-        |
-        | Hanya digunakan kalau memang belum memiliki
-        | subscription aktif.
-        |
-        */
-
         $showRenewalModal = false;
 
         $renewalPackage = null;
@@ -233,34 +185,18 @@ class DashboardController extends Controller
 
         if ($subscriptionExpired) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Cek apakah user sebelumnya memilih paket
-            | dari halaman public subscription.
-            |--------------------------------------------------------------------------
-            */
-
             $showRenewalModal = session(
                 'subscription.show_renewal_modal',
                 false
             );
 
-
             $packageId = session(
                 'subscription.package_id'
             );
 
-
             $durationId = session(
                 'subscription.duration_id'
             );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Ambil paket yang sebelumnya dipilih
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 $packageId &&
@@ -293,18 +229,6 @@ class DashboardController extends Controller
                     ->first();
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | LOGIN BIASA + EXPIRED
-            |--------------------------------------------------------------------------
-            |
-            | Kalau user login biasa tanpa membawa pilihan
-            | paket dari public subscription, popup harus muncul
-            | langsung di dashboard.
-            |
-            */
-
             if (!$showRenewalModal) {
 
                 $showRenewalModal = true;
@@ -328,6 +252,7 @@ class DashboardController extends Controller
                 'totalOrders',
                 'todayOrders',
                 'todayRevenue',
+                'totalRevenue', // Masukkan variabel ini ke compact
                 'recentOrders',
                 'subscription',
                 'subscriptionExpired',
