@@ -68,13 +68,44 @@ class OrderController extends Controller
 
         if ($role === 'dapur') {
 
-            $query->where('payment_status', 'paid')
-                ->whereIn('status', [
+    /*
+    |--------------------------------------------------------------------------
+    | DAPUR
+    |--------------------------------------------------------------------------
+    |
+    | Hanya tampilkan pesanan yang:
+    |
+    | 1. Sudah dibayar
+    | 2. Masih memiliki minimal 1 unit menu
+    |    dengan status pending / processing
+    |
+    | Jika seluruh unit sudah completed atau cancelled,
+    | pesanan otomatis hilang dari antrean dapur.
+    |
+    | Data order TIDAK dihapus dari database.
+    |
+    */
+
+    $query->where(
+        'payment_status',
+        'paid'
+    )
+    ->whereHas(
+        'items.unit',
+        function ($unitQuery) {
+
+            $unitQuery->whereIn(
+                'status',
+                [
                     'pending',
                     'processing',
-                ]);
+                ]
+            );
 
-        } else {
+        }
+    );
+
+} else {
 
             /*
             |--------------------------------------------------------------------------

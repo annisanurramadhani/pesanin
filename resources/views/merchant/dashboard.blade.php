@@ -128,15 +128,33 @@
                     @forelse($recentOrders ?? [] as $order)
                         @php
                             $itemTotal = $order->items->sum(function ($item) {
-                                return $item->subtotal ?? ($item->price * $item->quantity);
+                                return $item->subtotal ?? (
+                                    $item->price * $item->quantity
+                                );
                             });
 
-                            $grandTotal = ($order->total_amount > 0)
-                                ? $order->total_amount
-                                : (($order->total_price > 0) ? $order->total_price : $itemTotal);
+                            /*
+                            |--------------------------------------------------------------------------
+                                | TOTAL PESANAN
+                            |--------------------------------------------------------------------------
+                            |
+                            | Gunakan total akhir dari order.
+                            | Nilai ini sudah memperhitungkan voucher/discount.
+                            |
+                            */
 
-                            $isCash = in_array(strtolower($order->payment_method), ['cash', 'kasir', 'tunai']);
-                            $statusStr = strtolower($order->status ?? '');
+                            $grandTotal = (isset($order->total) && (float) $order->total > 0)
+                                ? (float) $order->total
+                                : $itemTotal;
+
+                            $isCash = in_array(
+                                strtolower($order->payment_method),
+                                ['cash', 'kasir', 'tunai']
+                            );
+
+                            $statusStr = strtolower(
+                                $order->status ?? ''
+                            );
                         @endphp
 
                         <tr class="transition hover:bg-slate-50/60">
