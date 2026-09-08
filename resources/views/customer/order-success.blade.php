@@ -186,19 +186,111 @@
             </div>
 
 
-            <div class="border-t border-slate-100
-                   mt-5 pt-4">
+            <div class="border-t border-slate-100 mt-5 pt-4 space-y-3">
 
-                <div class="flex items-center justify-between">
+                {{-- SUBTOTAL --}}
+                <div class="flex items-center justify-between gap-4">
 
-                    <span class="text-sm font-semibold
-                           text-slate-500">
-                        Total Pembayaran
+                    <span class="text-sm font-medium text-slate-500">
+                        Subtotal
                     </span>
 
-                    <span class="text-lg font-black
-                           text-slate-900">
+                    <span class="text-sm font-semibold text-slate-700">
+                        Rp {{ number_format($order->subtotal, 0, ',', '.') }}
+                    </span>
+
+                </div>
+
+
+                {{-- DISCOUNT --}}
+                @if ($order->discount > 0)
+
+                    <div
+                        class="rounded-xl border border-emerald-100
+                            bg-emerald-50 px-3 py-2.5">
+
+                        <div class="flex items-center justify-between gap-4">
+
+                            <div class="flex items-start gap-2 min-w-0">
+
+                                <div
+                                    class="mt-0.5 flex h-7 w-7 shrink-0
+                                        items-center justify-center
+                                        rounded-lg bg-emerald-100">
+
+                                    <i
+                                        class="fa-solid fa-tag
+                                            text-xs text-emerald-600">
+                                    </i>
+
+                                </div>
+
+                                <div class="min-w-0">
+
+                                    <p
+                                        class="text-sm font-bold
+                                            text-emerald-700">
+
+                                        Diskon Voucher
+
+                                    </p>
+
+                                    @if (!empty($order->voucher_code))
+
+                                        <p
+                                            class="mt-0.5 text-xs
+                                                text-emerald-600">
+
+                                            Voucher
+                                            <span class="font-bold">
+                                                {{ $order->voucher_code }}
+                                            </span>
+
+                                        </p>
+
+                                    @endif
+
+                                </div>
+
+                            </div>
+
+
+                            <span
+                                class="text-sm font-black
+                                    text-emerald-600
+                                    whitespace-nowrap">
+
+                                -Rp {{ number_format($order->discount, 0, ',', '.') }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                @endif
+
+
+                {{-- TOTAL --}}
+                <div
+                    class="border-t border-slate-100
+                        pt-4 flex items-center
+                        justify-between gap-4">
+
+                    <span
+                        class="text-sm font-semibold
+                            text-slate-500">
+
+                        Total Pembayaran
+
+                    </span>
+
+                    <span
+                        class="text-lg font-black
+                            text-slate-900">
+
                         Rp {{ number_format($order->total, 0, ',', '.') }}
+
                     </span>
 
                 </div>
