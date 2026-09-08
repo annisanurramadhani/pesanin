@@ -1609,7 +1609,7 @@ $total = max(
                 []
             );
 
-        
+
 
         if (
             empty($cart)
@@ -1835,7 +1835,7 @@ $total = max(
             );
 
 
-  
+
 /*
 |--------------------------------------------------------------------------
 | CREATE ORDER
@@ -2139,23 +2139,53 @@ $encryptedOrderNumber =
                 continue;
             }
 
-            $menu =
-                $menus[$menuId];
+            $menu = $menus[$menuId];
 
             $itemDetails[] = [
 
                 'id' =>
-                'MENU-' .
-                    $menu->id,
+                'MENU-' . $menu->id,
 
                 'price' =>
-                (int) $menu->price,
+                (int) round($menu->price),
 
                 'quantity' =>
                 (int) $quantity,
 
                 'name' =>
                 $menu->name,
+            ];
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VOUCHER / DISCOUNT
+        |--------------------------------------------------------------------------
+        |
+        | Midtrans membutuhkan total item_details
+        | sama dengan gross_amount.
+        |
+        | Karena voucher mengurangi total pembayaran,
+        | kirim voucher sebagai item dengan harga negatif.
+        |--------------------------------------------------------------------------
+        */
+
+        if ($discount > 0) {
+
+            $itemDetails[] = [
+
+                'id' =>
+                'VOUCHER-' . ($voucherId ?? 'DISCOUNT'),
+
+                'price' =>
+                -(int) round($discount),
+
+                'quantity' =>
+                1,
+
+                'name' =>
+                'Voucher ' . ($voucherCode ?? 'Discount'),
             ];
         }
 
