@@ -187,25 +187,6 @@ class CustomerOrderController extends Controller
             )
             ->firstOrFail();
 
-        if ($menu->stock <= 0) {
-            return response()->json([
-                'success' => false,
-                'message' =>
-                "Maaf, {$menu->name} sedang habis.",
-            ], 422);
-        }
-
-        if (
-            $request->quantity >
-            $menu->stock
-        ) {
-            return response()->json([
-                'success' => false,
-                'message' =>
-                "Maaf, stok {$menu->name} hanya tersisa {$menu->stock}.",
-            ], 422);
-        }
-
         $cart = session()->get(
             'cart',
             []
@@ -220,17 +201,6 @@ class CustomerOrderController extends Controller
                 $cart[$menu->id]
                 +
                 $request->quantity;
-
-            if (
-                $newQuantity >
-                $menu->stock
-            ) {
-                return response()->json([
-                    'success' => false,
-                    'message' =>
-                    "Maaf, stok {$menu->name} hanya tersisa {$menu->stock}.",
-                ], 422);
-            }
 
             $cart[$menu->id] =
                 $newQuantity;
@@ -775,10 +745,10 @@ class CustomerOrderController extends Controller
     }
 
     /**
- * =========================================================
- * REMOVE VOUCHER
- * =========================================================
- */
+     * =========================================================
+     * REMOVE VOUCHER
+     * =========================================================
+     */
 public function removeVoucher(
     string $code
 ) {
@@ -887,17 +857,6 @@ public function removeVoucher(
                 $cart[$menu->id]
             );
         } else {
-            if (
-                $request->quantity >
-                $menu->stock
-            ) {
-                return response()->json([
-                    'success' => false,
-                    'message' =>
-                    "Maaf, stok {$menu->name} hanya tersisa {$menu->stock}.",
-                ], 422);
-            }
-
             $cart[$menu->id] =
                 $request->quantity;
         }
@@ -1627,28 +1586,6 @@ $total = max(
 
         /*
         |--------------------------------------------------------------------------
-        | SIMPAN DATA PELANGGAN UNTUK RETRY PEMBAYARAN
-        |--------------------------------------------------------------------------
-        */
-
-        // session()->put(
-        //     'checkout_customer',
-        //     [
-        //         'name' =>
-        //         $validated['customer_name'] ?? null,
-
-        //         'phone' =>
-        //         $validated['customer_phone'] ?? null,
-
-        //         'email' =>
-        //         $validated['customer_email'] ?? null,
-        //     ]
-        // );
-
-
-
-        /*
-        |--------------------------------------------------------------------------
         | QR CODE
         |--------------------------------------------------------------------------
         */
@@ -1672,7 +1609,7 @@ $total = max(
                 []
             );
 
-        
+
 
         if (
             empty($cart)
@@ -1740,21 +1677,6 @@ $total = max(
 
             $menu =
                 $menus[$menuId];
-
-            if (
-                $quantity >
-                $menu->stock
-            ) {
-                return redirect()
-                    ->route(
-                        'customer.cart',
-                        $code
-                    )
-                    ->with(
-                        'error',
-                        "Stok {$menu->name} tidak mencukupi."
-                    );
-            }
 
             $subtotal +=
                 $menu->price *
@@ -1913,7 +1835,7 @@ $total = max(
             );
 
 
-  
+
 /*
 |--------------------------------------------------------------------------
 | CREATE ORDER
@@ -2217,23 +2139,53 @@ $encryptedOrderNumber =
                 continue;
             }
 
-            $menu =
-                $menus[$menuId];
+            $menu = $menus[$menuId];
 
             $itemDetails[] = [
 
                 'id' =>
-                'MENU-' .
-                    $menu->id,
+                'MENU-' . $menu->id,
 
                 'price' =>
-                (int) $menu->price,
+                (int) round($menu->price),
 
                 'quantity' =>
                 (int) $quantity,
 
                 'name' =>
                 $menu->name,
+            ];
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VOUCHER / DISCOUNT
+        |--------------------------------------------------------------------------
+        |
+        | Midtrans membutuhkan total item_details
+        | sama dengan gross_amount.
+        |
+        | Karena voucher mengurangi total pembayaran,
+        | kirim voucher sebagai item dengan harga negatif.
+        |--------------------------------------------------------------------------
+        */
+
+        if ($discount > 0) {
+
+            $itemDetails[] = [
+
+                'id' =>
+                'VOUCHER-' . ($voucherId ?? 'DISCOUNT'),
+
+                'price' =>
+                -(int) round($discount),
+
+                'quantity' =>
+                1,
+
+                'name' =>
+                'Voucher ' . ($voucherCode ?? 'Discount'),
             ];
         }
 
@@ -2560,7 +2512,7 @@ $encryptedOrderNumber =
 
                     $vaNumber =
                         $response
-                            ->va_numbers[0]
+                        ->va_numbers[0]
                         ->va_number
                         ?? null;
                 }

@@ -16,7 +16,7 @@
                             Edit Detail Menu
                         </h2>
                         <p class="text-xs font-medium text-slate-500 mt-1">
-                            Ubah informasi produk, harga, stok, kategori, atau foto menu.
+                            Ubah informasi produk, harga, kategori, atau foto menu.
                         </p>
                     </div>
 
@@ -70,30 +70,16 @@
                                     required>
                             </div>
 
-                            {{-- Harga & Stok --}}
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
-                                        Harga (Rp) *
-                                    </label>
-                                    <input type="number"
-                                        name="price"
-                                        value="{{ old('price', $menu->price) }}"
-                                        class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition"
-                                        required>
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
-                                        Stok (Porsi) *
-                                    </label>
-                                    <input type="number"
-                                        name="stock"
-                                        value="{{ old('stock', $menu->stock ?? 0) }}"
-                                        min="0"
-                                        class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition"
-                                        required>
-                                </div>
+                            {{-- Harga (Stok dihapus) --}}
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+                                    Harga (Rp) *
+                                </label>
+                                <input type="number"
+                                    name="price"
+                                    value="{{ old('price', $menu->price) }}"
+                                    class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm p-3.5 text-slate-800 font-semibold transition"
+                                    required>
                             </div>
 
                             {{-- Deskripsi --}}

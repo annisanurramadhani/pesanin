@@ -60,21 +60,21 @@
         </div>
 
 
-        {{-- Total Pendapatan Hari Ini --}}
+        {{-- Total Pendapatan Keseluruhan --}}
         <div class="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">
             <div class="absolute -bottom-4 -right-4 h-24 w-24 rounded-full bg-blue-500/10 transition duration-300 group-hover:scale-125"></div>
 
             <div class="relative z-10 space-y-1">
                 <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                    Total Pendapatan Hari Ini
+                    Total Pendapatan Keseluruhan
                 </p>
 
                 <h3 class="text-3xl font-black tracking-tight text-emerald-600">
-                    Rp {{ number_format($todayRevenue ?? 0, 0, ',', '.') }}
+                    Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}
                 </h3>
 
                 <p class="pt-1 text-xs font-medium text-slate-500">
-                    Rekap pemasukan hari ini
+                    Akumulasi pemasukan sejak awal
                 </p>
             </div>
 
