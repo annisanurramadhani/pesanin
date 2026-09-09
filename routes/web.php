@@ -375,7 +375,7 @@ Route::middleware([
         Route::put(
             '/packages/{encryptedId}/durations/{duration}',
             [PackageDurationController::class, 'update']
-        )->name('packages.update.duration');
+        )->name('packages.durations.update');
 
 
         Route::delete(
