@@ -34,6 +34,26 @@ class VoucherController extends Controller
         );
     }
 
+    public function data()
+    {
+        $merchant = Auth::user()->merchant;
+
+        $vouchers = Voucher::where('merchant_id', $merchant->id)
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'vouchers' => $vouchers->map(function ($voucher) {
+                return [
+                    'id' => $voucher->id,
+                    'used_count' => $voucher->used_count,
+                    'usage_limit' => $voucher->usage_limit,
+                    'status' => $voucher->status,
+                ];
+            }),
+        ]);
+    }
+
     /**
      * Menampilkan form tambah voucher.
      */

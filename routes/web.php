@@ -375,7 +375,7 @@ Route::middleware([
         Route::put(
             '/packages/{encryptedId}/durations/{duration}',
             [PackageDurationController::class, 'update']
-        )->name('packages.update.duration');
+        )->name('packages.durations.update');
 
 
         Route::delete(
@@ -924,6 +924,11 @@ Route::middleware('auth')
                 '/voucher',
                 [VoucherController::class, 'store']
             )->name('voucher.store');
+
+            Route::get(
+                '/voucher/data', 
+                [VoucherController::class, 'data']
+            )->name('voucher.data');
 
             Route::get(
                 '/voucher/{id}/edit',
