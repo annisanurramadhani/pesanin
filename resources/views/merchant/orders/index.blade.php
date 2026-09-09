@@ -347,34 +347,91 @@
 
 
                                 {{-- ==========================================================
-                                    PESANAN / MENU
-                                =========================================================== --}}
-                                <td class="p-4">
+    PESANAN / MENU
+========================================================== --}}
+<td class="p-4">
 
-                                    <div class="space-y-3">
+    <div class="space-y-3">
 
-                                        @foreach ($order->items as $item)
-                                            @for ($i = 0; $i < $item->quantity; $i++)
-                                                <div class="h-[40px] flex items-center gap-2 text-xs">
+        @if (Auth::user()->role === 'dapur')
 
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+            {{-- ==================================================
+                KHUSUS DAPUR
+                TETAP TAMPIL PER UNIT
+            =================================================== --}}
+            @foreach ($order->items as $item)
 
-                                                    <span class="font-semibold text-slate-700">
-                                                        {{ $item->menu_name ?? ($item->menu->name ?? 'Menu') }}
-                                                    </span>
+                @for ($i = 0; $i < $item->quantity; $i++)
 
-                                                    <span
-                                                        class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[10px]">
-                                                        (x1)
-                                                    </span>
+                    <div class="h-[40px] flex items-center gap-2 text-xs">
 
-                                                </div>
-                                            @endfor
-                                        @endforeach
+                        <span
+                            class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0">
+                        </span>
 
-                                    </div>
+                        <span class="font-semibold text-slate-700">
+                            {{ $item->menu_name ?? ($item->menu->name ?? 'Menu') }}
+                        </span>
 
-                                </td>
+                        <span
+                            class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[10px]">
+                            (x1)
+                        </span>
+
+                    </div>
+
+                @endfor
+
+            @endforeach
+
+        @else
+
+            {{-- ==================================================
+                KASIR + OWNER
+                GABUNGKAN ITEM YANG SAMA
+            =================================================== --}}
+            @php
+                $groupedItems = $order->items
+                    ->groupBy(function ($item) {
+                        return $item->menu_name ?? ($item->menu->name ?? 'Menu');
+                    })
+                    ->map(function ($items) {
+                        return [
+                            'name' => $items->first()->menu_name
+                                ?? ($items->first()->menu->name ?? 'Menu'),
+
+                            'quantity' => $items->sum('quantity'),
+                        ];
+                    });
+            @endphp
+
+
+            @foreach ($groupedItems as $groupedItem)
+
+                <div class="h-[40px] flex items-center gap-2 text-xs">
+
+                    <span
+                        class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0">
+                    </span>
+
+                    <span class="font-semibold text-slate-700">
+                        {{ $groupedItem['name'] }}
+                    </span>
+
+                    <span
+                        class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[10px]">
+                        (x{{ $groupedItem['quantity'] }})
+                    </span>
+
+                </div>
+
+            @endforeach
+
+        @endif
+
+    </div>
+
+</td>
 
 
                                 {{-- ==========================================================
@@ -625,14 +682,14 @@
                                                 <button type="button"
                                                     onclick="openOrderStatusModal('{{ $order->order_number }}', {{ $order->id }})"
                                                     class="mt-1 px-2.5 py-1
-               bg-slate-100
-               hover:bg-slate-200
-               text-slate-600
-               rounded-lg
-               text-[10px]
-               font-extrabold
-               transition
-               cursor-pointer">
+                                                    bg-slate-100
+                                                    hover:bg-slate-200
+                                                    text-slate-600
+                                                    rounded-lg
+                                                    text-[10px]
+                                                    font-extrabold
+                                                    transition
+                                                    cursor-pointer">
                                                     <i class="fa-solid fa-eye mr-1"></i>
                                                     Lihat Detail
                                                 </button>
