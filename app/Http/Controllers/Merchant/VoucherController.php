@@ -469,7 +469,30 @@ class VoucherController extends Controller
                         'Diskon persentase tidak boleh lebih dari 100%.',
                 ]);
         }
+        
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI AKTIVASI VOUCHER
+            |--------------------------------------------------------------------------
+            */
 
+            if (
+                $request->has('status')
+                &&
+                !is_null($validated['usage_limit'])
+                &&
+                $voucher->used_count >=
+                $validated['usage_limit']
+            ) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'status' =>
+                            'Voucher tidak dapat diaktifkan karena batas penggunaan sudah habis. Tingkatkan batas penggunaan terlebih dahulu.',
+                    ]);
+            }
+
+        //update voucher
         $voucher->update([
             'code' =>
                 $validated['code'],

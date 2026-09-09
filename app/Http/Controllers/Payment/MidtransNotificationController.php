@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderReceiptMail;
 use App\Models\Order;
 use App\Models\Subscription;
+use App\Models\Voucher;
 use App\Notifications\SubscriptionInvoiceNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -414,11 +415,50 @@ class MidtransNotificationController extends Controller
 
                             ]);
 
+                            /*
+                            |--------------------------------------------------------------------------
+                            | TAMBAH PENGGUNAAN VOUCHER
+                            |--------------------------------------------------------------------------
+                            */
+
+                            if (
+                                $order->voucher_id
+                            ) {
+                                Voucher::where(
+                                    'id',
+                                    $order->voucher_id
+                                )->increment(
+                                    'used_count'
+                                );
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | NONAKTIFKAN VOUCHER JIKA KUOTA HABIS
+                                |--------------------------------------------------------------------------
+                                */
+
+                                $voucher = Voucher::find(
+                                    $order->voucher_id
+                                );
+
+                                if (
+                                    $voucher
+                                    &&
+                                    !is_null($voucher->usage_limit)
+                                    &&
+                                    $voucher->used_count >=
+                                    $voucher->usage_limit
+                                ) {
+                                    $voucher->update([
+                                        'status' => 'inactive',
+                                    ]);
+                                }
+                            }
 
                             /*
-                            |----------------------------------------------------------
+                            |--------------------------------------------------------------------------
                             | Log Berhasil
-                            |----------------------------------------------------------
+                            |--------------------------------------------------------------------------                         
                             */
 
                             Log::info(
@@ -439,7 +479,7 @@ class MidtransNotificationController extends Controller
 
                                 ]
                             );
-                        }
+                        }       
                     );
 
 
