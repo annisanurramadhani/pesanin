@@ -66,15 +66,15 @@
 
             <div class="relative z-10 space-y-1">
                 <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                    Total Pendapatan Keseluruhan
+                    Pendapatan Hari Ini
                 </p>
 
                 <h3 class="text-3xl font-black tracking-tight text-emerald-600">
-                    Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}
+                    Rp {{ number_format($todayRevenue ?? 0, 0, ',', '.') }}
                 </h3>
 
                 <p class="pt-1 text-xs font-medium text-slate-500">
-                    Akumulasi pemasukan sejak awal
+                    Total pembayaran hari ini
                 </p>
             </div>
 

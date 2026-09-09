@@ -40,31 +40,43 @@ class DashboardController extends Controller
         | Hanya pesanan yang SUDAH SELESAI.
         |
         */
-        $todayOrders = Order::where(
-            'merchant_id',
-            $merchantId
-        )
-            ->whereDate(
-                'created_at',
-                today()
-            )
-            ->where(
-                'status',
-                'completed'
-            )
-            ->count();
+        $todayOrders = \App\Models\OrderItemUnit::where(
+    'order_item_units.status',
+    'completed'
+)
+    ->join(
+        'order_items',
+        'order_item_units.order_item_id',
+        '=',
+        'order_items.id'
+    )
+    ->join(
+        'orders',
+        'order_items.order_id',
+        '=',
+        'orders.id'
+    )
+    ->where(
+        'orders.merchant_id',
+        $merchantId
+    )
+    ->whereDate(
+        'orders.created_at',
+        today()
+    )
+    ->count();
 
         /*
         |--------------------------------------------------------------------------
         | PENDAPATAN HARI INI
         |--------------------------------------------------------------------------
         |
-        | Hanya pesanan:
-        | status         = completed
-        | payment_status = paid
+        | Hanya mengambil pembayaran yang sudah PAID hari ini.
+        | Untuk sementara tidak melihat status completed/cancelled.
         |
         */
-        $todayRevenueOrders = Order::where(
+
+        $todayRevenue = Order::where(
             'merchant_id',
             $merchantId
         )
@@ -73,19 +85,10 @@ class DashboardController extends Controller
                 today()
             )
             ->where(
-                'status',
-                'completed'
-            )
-            ->where(
                 'payment_status',
                 'paid'
             )
-            ->get();
-
-
-        $todayRevenue = $todayRevenueOrders->sum(function ($order) {
-            return (float) $order->total;
-        });
+            ->sum('total');
 
         /*
         |--------------------------------------------------------------------------
@@ -96,13 +99,7 @@ class DashboardController extends Controller
         | Cancelled dari Dapur tetap boleh tampil.
         |
         */
-        // TAMBAHKAN BARIS INI: Menghitung total pendapatan keseluruhan (semua order yang sukses/paid)
-        $totalRevenue = Order::where(
-            'merchant_id',
-            $merchantId
-        )
-            ->where('payment_status', 'paid') // Sesuaikan jika status lunas di database kamu berbeda
-            ->sum('total');
+        
 
 
         $recentOrders = Order::with([
@@ -412,7 +409,6 @@ $recentOrders = $recentOrders
                 'totalOrders',
                 'todayOrders',
                 'todayRevenue',
-                'totalRevenue', // Masukkan variabel ini ke compact
                 'recentOrders',
                 'subscription',
                 'subscriptionExpired',
