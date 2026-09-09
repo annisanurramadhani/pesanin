@@ -137,20 +137,13 @@ class PublicSubscriptionController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $price =
-            $duration->discount_price
-            ?? $duration->price;
+        $pricing = $duration->getSubscriptionPrice();
 
+$price = $pricing['final_price'];
 
-        $hasDiscount =
-            !is_null(
-                $duration->discount_price
-            )
-            &&
-            $duration->discount_price
-            <
-            $duration->price;
+$hasDiscount = $price < $pricing['normal_price'];
 
+$promotion = $pricing['promotion'];
 
         /*
         |--------------------------------------------------------------------------
@@ -187,14 +180,15 @@ class PublicSubscriptionController extends Controller
         */
 
         return view(
-            'public_subscription.summary',
-            compact(
-                'package',
-                'duration',
-                'price',
-                'hasDiscount'
-            )
-        );
+    'public_subscription.summary',
+    compact(
+        'package',
+        'duration',
+        'price',
+        'hasDiscount',
+        'promotion'
+    )
+);
     }
 
 
@@ -460,9 +454,11 @@ class PublicSubscriptionController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $price =
-            $duration->discount_price
-            ?? $duration->price;
+        $pricing = $duration->getSubscriptionPrice();
+
+$price = $pricing['final_price'];
+
+$promotion = $pricing['promotion'];
 
 
         /*
@@ -478,19 +474,27 @@ class PublicSubscriptionController extends Controller
         */
 
         $existingSubscription = Subscription::where(
-            'merchant_id',
-            $user->merchant_id
-        )
-            ->where(
-                'package_duration_id',
-                $duration->id
-            )
-            ->where(
-                'status',
-                'pending'
-            )
-            ->latest('id')
-            ->first();
+    'merchant_id',
+    $user->merchant_id
+)
+    ->where(
+        'package_duration_id',
+        $duration->id
+    )
+    ->where(
+        'promotion_id',
+        $promotion?->id
+    )
+    ->where(
+        'price',
+        $price
+    )
+    ->where(
+        'status',
+        'pending'
+    )
+    ->latest('id')
+    ->first();
 
 
         /*
@@ -542,6 +546,9 @@ class PublicSubscriptionController extends Controller
 
             'package_duration_id' =>
                 $duration->id,
+
+                'promotion_id' =>
+        $promotion?->id,
 
             'invoice_number' =>
                 null,

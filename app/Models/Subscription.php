@@ -13,6 +13,7 @@ class Subscription extends Model
     protected $fillable = [
         'merchant_id',
         'package_duration_id',
+        'promotion_id',
         'invoice_number',
         'start_date',
         'end_date',
@@ -36,6 +37,14 @@ class Subscription extends Model
     public function packageDuration()
     {
         return $this->belongsTo(PackageDuration::class);
+    }
+
+    public function promotion()
+    {
+        return $this->belongsTo(
+            SubscriptionPromotion::class,
+            'promotion_id'
+        );
     }
 
     /**

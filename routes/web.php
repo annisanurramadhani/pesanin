@@ -26,6 +26,7 @@ use App\Http\Controllers\Superadmin\PackageController;
 use App\Http\Controllers\Superadmin\PackageDurationController;
 use App\Http\Controllers\SuperAdmin\MerchantController as SuperAdminMerchantController;
 use App\Http\Controllers\SuperAdmin\SubscriptionController as SuperAdminSubscriptionController;
+use App\Http\Controllers\SuperAdmin\SubscriptionPromotionController;
 use App\Http\Controllers\SuperAdmin\AccountController;
 
 use Illuminate\Support\Facades\Auth;
@@ -381,6 +382,46 @@ Route::middleware([
             '/packages/{encryptedId}/durations/{duration}',
             [PackageDurationController::class, 'destroy']
         )->name('packages.durations.destroy');
+
+
+                // ==================================================================
+        // Subscription Promotions
+        // ==================================================================
+
+        Route::get(
+            '/subscription-promotions',
+            [SubscriptionPromotionController::class, 'index']
+        )->name('subscription_promotions.index');
+
+
+        Route::get(
+            '/subscription-promotions/create',
+            [SubscriptionPromotionController::class, 'create']
+        )->name('subscription_promotions.create');
+
+
+        Route::post(
+            '/subscription-promotions',
+            [SubscriptionPromotionController::class, 'store']
+        )->name('subscription_promotions.store');
+
+
+        Route::get(
+            '/subscription-promotions/{encryptedId}/edit',
+            [SubscriptionPromotionController::class, 'edit']
+        )->name('subscription_promotions.edit');
+
+
+        Route::put(
+            '/subscription-promotions/{encryptedId}',
+            [SubscriptionPromotionController::class, 'update']
+        )->name('subscription_promotions.update');
+
+
+        Route::delete(
+            '/subscription-promotions/{encryptedId}',
+            [SubscriptionPromotionController::class, 'destroy']
+        )->name('subscription_promotions.destroy');
 
 
         // ==================================================================

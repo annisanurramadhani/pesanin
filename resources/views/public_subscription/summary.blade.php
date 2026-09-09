@@ -169,18 +169,37 @@
                             <div class="p-6">
 
                                 @if ($hasDiscount)
-                                    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between">
 
-                                        <span class="text-sm text-slate-500">
-                                            Harga Normal
-                                        </span>
+        <span class="text-sm text-slate-500">
+            Harga Normal
+        </span>
 
-                                        <span class="text-sm font-semibold text-slate-400 line-through">
-                                            Rp {{ number_format($duration->price, 0, ',', '.') }}
-                                        </span>
+        <span class="text-sm font-semibold text-slate-400 line-through">
+            Rp {{ number_format($duration->price, 0, ',', '.') }}
+        </span>
 
-                                    </div>
-                                @endif
+    </div>
+@endif
+
+
+@if ($promotion)
+    <div class="mt-3 flex items-center justify-between gap-4">
+
+        <span class="text-sm text-slate-500">
+            Promo
+        </span>
+
+        <span class="text-sm font-bold text-emerald-600">
+            @if ($promotion->discount_type === 'percentage')
+                -{{ rtrim(rtrim(number_format($promotion->discount_value, 2, ',', '.'), '0'), ',') }}%
+            @else
+                - Rp {{ number_format($promotion->discount_value, 0, ',', '.') }}
+            @endif
+        </span>
+
+    </div>
+@endif
 
 
                                 <div class="mt-3 flex items-center justify-between gap-4">
