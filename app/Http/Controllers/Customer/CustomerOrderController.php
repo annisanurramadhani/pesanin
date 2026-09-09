@@ -83,8 +83,13 @@ class CustomerOrderController extends Controller
      * MENU
      * =========================================================
      */
-    public function menu(string $code)
+    public function menu(string $code, Request $request)
     {
+        // Jika tidak datang dari tombol "+ Tambah Menu" (artinya user klik "Kembali" dari header keranjang), hapus voucher
+        if (!$request->has('keep_voucher')) {
+            session()->forget('cart_voucher');
+        }
+
         $qrCode = QrCode::where('code', $code)
             ->where('status', 'active')
             ->firstOrFail();
@@ -294,62 +299,62 @@ class CustomerOrderController extends Controller
         }
 
         $total =
-    collect($cartItems)
-    ->sum('subtotal');
+            collect($cartItems)
+            ->sum('subtotal');
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | VOUCHER
     |--------------------------------------------------------------------------
     */
 
-    $cartVoucher = session()->get(
-        'cart_voucher'
-    );
+        $cartVoucher = session()->get(
+            'cart_voucher'
+        );
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | DISCOUNT
     |--------------------------------------------------------------------------
     */
 
-    $discount = 0;
+        $discount = 0;
 
-    if (
-        is_array($cartVoucher)
-        &&
-        !empty($cartVoucher['discount'])
-    ) {
-        $discount =
-            (float) $cartVoucher['discount'];
-    }
+        if (
+            is_array($cartVoucher)
+            &&
+            !empty($cartVoucher['discount'])
+        ) {
+            $discount =
+                (float) $cartVoucher['discount'];
+        }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | TOTAL SETELAH DISKON
     |--------------------------------------------------------------------------
     */
 
-    $total =
-        max(
-            0,
-            $total - $discount
+        $total =
+            max(
+                0,
+                $total - $discount
+            );
+
+
+        return view(
+            'customer.cart',
+            compact(
+                'qrCode',
+                'merchant',
+                'cartItems',
+                'total',
+                'cartVoucher',
+                'discount'
+            )
         );
-
-
-    return view(
-        'customer.cart',
-        compact(
-            'qrCode',
-            'merchant',
-            'cartItems',
-            'total',
-            'cartVoucher',
-            'discount'
-        )
-    );
     }
 
     /**
@@ -375,10 +380,10 @@ class CustomerOrderController extends Controller
             ],
         ], [
             'voucher_code.required' =>
-                'Kode voucher wajib diisi.',
+            'Kode voucher wajib diisi.',
 
             'voucher_code.max' =>
-                'Kode voucher maksimal 50 karakter.',
+            'Kode voucher maksimal 50 karakter.',
         ]);
 
 
@@ -419,7 +424,7 @@ class CustomerOrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' =>
-                    'Keranjang masih kosong.',
+                'Keranjang masih kosong.',
             ], 422);
         }
 
@@ -470,7 +475,7 @@ class CustomerOrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' =>
-                    'Kode voucher tidak ditemukan atau tidak tersedia.',
+                'Kode voucher tidak ditemukan atau tidak tersedia.',
             ], 422);
         }
 
@@ -492,7 +497,7 @@ class CustomerOrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' =>
-                    'Voucher belum mulai berlaku.',
+                'Voucher belum mulai berlaku.',
             ], 422);
         }
 
@@ -514,7 +519,7 @@ class CustomerOrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' =>
-                    'Voucher sudah kedaluwarsa.',
+                'Voucher sudah kedaluwarsa.',
             ], 422);
         }
 
@@ -535,7 +540,7 @@ class CustomerOrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' =>
-                    'Voucher sudah mencapai batas penggunaan.',
+                'Voucher sudah mencapai batas penggunaan.',
             ], 422);
         }
 
@@ -596,7 +601,7 @@ class CustomerOrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' =>
-                    'Total pesanan tidak valid.',
+                'Total pesanan tidak valid.',
             ], 422);
         }
 
@@ -615,7 +620,7 @@ class CustomerOrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' =>
-                    'Minimal pembelian untuk voucher ini adalah Rp ' .
+                'Minimal pembelian untuk voucher ini adalah Rp ' .
                     number_format(
                         $voucher->min_order_amount,
                         0,
@@ -641,7 +646,6 @@ class CustomerOrderController extends Controller
                 (
                     $voucher->value / 100
                 );
-
         } else {
 
             $discount =
@@ -701,13 +705,13 @@ class CustomerOrderController extends Controller
             'cart_voucher',
             [
                 'id' =>
-                    $voucher->id,
+                $voucher->id,
 
                 'code' =>
-                    $voucher->code,
+                $voucher->code,
 
                 'discount' =>
-                    $discount,
+                $discount,
             ]
         );
 
@@ -722,25 +726,25 @@ class CustomerOrderController extends Controller
             'success' => true,
 
             'message' =>
-                'Voucher berhasil digunakan.',
+            'Voucher berhasil digunakan.',
 
             'voucher_code' =>
-                $voucher->code,
+            $voucher->code,
 
             'discount' =>
-                $discount,
+            $discount,
 
             'subtotal' =>
-                $subtotal,
+            $subtotal,
 
             'total' =>
-                $total,
+            $total,
 
             'expires_at' =>
-                $voucher->expires_at
-                    ? $voucher->expires_at
-                        ->format('d F Y H:i')
-                    : null,
+            $voucher->expires_at
+                ? $voucher->expires_at
+                ->format('d F Y H:i')
+                : null,
         ]);
     }
 
@@ -749,53 +753,87 @@ class CustomerOrderController extends Controller
      * REMOVE VOUCHER
      * =========================================================
      */
-public function removeVoucher(
-    string $code
-) {
-    /*
-    |--------------------------------------------------------------------------
-    | CEK QR CODE
-    |--------------------------------------------------------------------------
-    */
+    public function removeVoucher(
+        Request $request,
+        string $code
+    ) {
+        /*
+        |--------------------------------------------------------------------------
+        | CEK QR CODE
+        |--------------------------------------------------------------------------
+        */
 
-    $qrCode = QrCode::where(
-        'code',
-        $code
-    )
-        ->where(
-            'status',
-            'active'
-        )
-        ->firstOrFail();
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | HAPUS VOUCHER DARI SESSION
-    |--------------------------------------------------------------------------
-    */
-
-    session()->forget(
-        'cart_voucher'
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | KEMBALI KE CART
-    |--------------------------------------------------------------------------
-    */
-
-    return redirect()
-        ->route(
-            'customer.cart',
+        $qrCode = QrCode::where(
+            'code',
             $code
         )
-        ->with(
-            'success',
-            'Voucher berhasil dihapus.'
+            ->where(
+                'status',
+                'active'
+            )
+            ->firstOrFail();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HAPUS VOUCHER DARI SESSION
+        |--------------------------------------------------------------------------
+        */
+
+        session()->forget(
+            'cart_voucher'
         );
-}
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONS AJAX ATAU REDIRECT
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->wantsJson() || $request->ajax()) {
+            $cart = session()->get('cart', []);
+            $merchant = $qrCode->merchant;
+
+            $menus = Menu::whereIn('id', array_keys($cart))
+                ->where('merchant_id', $merchant->id)
+                ->where('status', 'available')
+                ->get()
+                ->keyBy('id');
+
+            $subtotal = 0;
+            foreach ($cart as $menuId => $quantity) {
+                if (isset($menus[$menuId])) {
+                    $subtotal += $menus[$menuId]->price * $quantity;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Voucher berhasil dihapus.',
+                'subtotal' => $subtotal,
+                'total' => $subtotal,
+                'discount' => 0
+            ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | KEMBALI KE CART
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+            ->route(
+                'customer.cart',
+                $code
+            )
+            ->with(
+                'success',
+                'Voucher berhasil dihapus.'
+            );
+    }
 
     /**
      * =========================================================
@@ -978,40 +1016,40 @@ public function removeVoucher(
         return response()->json([
 
             'success' =>
-                true,
+            true,
 
             'quantity' =>
-                $currentItem['quantity']
-                    ?? 0,
+            $currentItem['quantity']
+                ?? 0,
 
             'subtotal' =>
-                $currentItem['subtotal']
-                    ?? 0,
+            $currentItem['subtotal']
+                ?? 0,
 
             'cart_subtotal' =>
-                $subtotal,
+            $subtotal,
 
             'discount' =>
-                $discount,
+            $discount,
 
             'total' =>
-                $total,
+            $total,
 
             'voucher_removed' =>
-                false,
+            false,
 
             'voucher_message' =>
-                null,
+            null,
 
             'voucher_code' =>
-                is_array($cartVoucher)
-                    ? ($cartVoucher['code'] ?? null)
-                    : null,
+            is_array($cartVoucher)
+                ? ($cartVoucher['code'] ?? null)
+                : null,
 
             'removed' =>
-                !isset(
-                    $cart[$menu->id]
-                ),
+            !isset(
+                $cart[$menu->id]
+            ),
         ]);
     }
 
@@ -1261,6 +1299,7 @@ public function removeVoucher(
     */
 
         $cartItems = [];
+        $subtotal = 0; // Diinisialisasi 0 agar aman untuk akumulasi
 
 
         foreach (
@@ -1279,6 +1318,8 @@ public function removeVoucher(
             $menu =
                 $menus[$menuId];
 
+            $itemSubtotal = $menu->price * $quantity;
+
 
             $cartItems[] = [
 
@@ -1289,173 +1330,164 @@ public function removeVoucher(
                 $quantity,
 
                 'subtotal' =>
-                $menu->price * $quantity,
+                $itemSubtotal,
 
             ];
+
+            $subtotal += $itemSubtotal; // Diakumulasikan ke subtotal utama dengan benar
         }
 
 
         /*
 |--------------------------------------------------------------------------
-| SUBTOTAL
-|--------------------------------------------------------------------------
-*/
-
-$subtotal =
-    collect($cartItems)
-    ->sum('subtotal');
-
-
-/*
-|--------------------------------------------------------------------------
 | VALIDASI ULANG VOUCHER
 |--------------------------------------------------------------------------
 */
 
-$cartVoucher = session()->get('cart_voucher');
+        $cartVoucher = session()->get('cart_voucher');
 
-$voucherId = null;
-$voucherCode = null;
-$discount = 0;
+        $voucherId = null;
+        $voucherCode = null;
+        $discount = 0;
 
-if (
-    is_array($cartVoucher)
-    &&
-    isset($cartVoucher['id'])
-    &&
-    isset($cartVoucher['code'])
-    &&
-    isset($cartVoucher['discount'])
-) {
+        if (
+            is_array($cartVoucher)
+            &&
+            isset($cartVoucher['id'])
+            &&
+            isset($cartVoucher['code'])
+            &&
+            isset($cartVoucher['discount'])
+        ) {
 
-    $voucher = Voucher::query()
-        ->where('id', $cartVoucher['id'])
-        ->where('merchant_id', $merchant->id)
-        ->where('code', $cartVoucher['code'])
-        ->where('status', 'active')
-        ->first();
+            $voucher = Voucher::query()
+                ->where('id', $cartVoucher['id'])
+                ->where('merchant_id', $merchant->id)
+                ->where('code', $cartVoucher['code'])
+                ->where('status', 'active')
+                ->first();
 
-    /*
+            /*
     |--------------------------------------------------------------------------
     | VOUCHER TIDAK DITEMUKAN / SUDAH TIDAK AKTIF
     |--------------------------------------------------------------------------
     */
 
-    if (!$voucher) {
+            if (!$voucher) {
 
-        session()->forget('cart_voucher');
+                session()->forget('cart_voucher');
 
-        return redirect()
-            ->route('customer.cart', $code)
-            ->with(
-                'error',
-                'Voucher sudah tidak tersedia atau tidak aktif.'
-            );
-    }
+                return redirect()
+                    ->route('customer.cart', $code)
+                    ->with(
+                        'error',
+                        'Voucher sudah tidak tersedia atau tidak aktif.'
+                    );
+            }
 
-    /*
+            /*
     |--------------------------------------------------------------------------
     | CEK MASA BERLAKU
     |--------------------------------------------------------------------------
     */
 
-    if (
-        $voucher->starts_at &&
-        now()->lt($voucher->starts_at)
-    ) {
+            if (
+                $voucher->starts_at &&
+                now()->lt($voucher->starts_at)
+            ) {
 
-        session()->forget('cart_voucher');
+                session()->forget('cart_voucher');
 
-        return redirect()
-            ->route('customer.cart', $code)
-            ->with(
-                'error',
-                'Voucher belum mulai berlaku.'
-            );
-    }
+                return redirect()
+                    ->route('customer.cart', $code)
+                    ->with(
+                        'error',
+                        'Voucher belum mulai berlaku.'
+                    );
+            }
 
-    if (
-        $voucher->expires_at &&
-        now()->gt($voucher->expires_at)
-    ) {
+            if (
+                $voucher->expires_at &&
+                now()->gt($voucher->expires_at)
+            ) {
 
-        session()->forget('cart_voucher');
+                session()->forget('cart_voucher');
 
-        return redirect()
-            ->route('customer.cart', $code)
-            ->with(
-                'error',
-                'Voucher sudah kedaluwarsa.'
-            );
-    }
+                return redirect()
+                    ->route('customer.cart', $code)
+                    ->with(
+                        'error',
+                        'Voucher sudah kedaluwarsa.'
+                    );
+            }
 
-    /*
+            /*
     |--------------------------------------------------------------------------
     | CEK BATAS PENGGUNAAN
     |--------------------------------------------------------------------------
     */
 
-    if (
-        !is_null($voucher->usage_limit)
-        &&
-        $voucher->used_count >= $voucher->usage_limit
-    ) {
+            if (
+                !is_null($voucher->usage_limit)
+                &&
+                $voucher->used_count >= $voucher->usage_limit
+            ) {
 
-        session()->forget('cart_voucher');
+                session()->forget('cart_voucher');
 
-        return redirect()
-            ->route('customer.cart', $code)
-            ->with(
-                'error',
-                'Voucher sudah mencapai batas penggunaan.'
-            );
-    }
+                return redirect()
+                    ->route('customer.cart', $code)
+                    ->with(
+                        'error',
+                        'Voucher sudah mencapai batas penggunaan.'
+                    );
+            }
 
-    /*
+            /*
     |--------------------------------------------------------------------------
     | CEK MINIMUM PEMBELIAN
     |--------------------------------------------------------------------------
     */
 
-    if (
-        $subtotal < (float) $voucher->min_order_amount
-    ) {
+            if (
+                $subtotal < (float) $voucher->min_order_amount
+            ) {
 
-        session()->forget('cart_voucher');
+                session()->forget('cart_voucher');
 
-        return redirect()
-            ->route('customer.cart', $code)
-            ->with(
-                'error',
-                'Minimum pembelian untuk voucher ini belum terpenuhi.'
-            );
-    }
+                return redirect()
+                    ->route('customer.cart', $code)
+                    ->with(
+                        'error',
+                        'Minimum pembelian untuk voucher ini belum terpenuhi.'
+                    );
+            }
 
-    /*
+            /*
     |--------------------------------------------------------------------------
     | GUNAKAN DISKON YANG SUDAH TERSIMPAN DI SESSION
     |--------------------------------------------------------------------------
     */
 
-    $voucherId = $voucher->id;
-    $voucherCode = $voucher->code;
+            $voucherId = $voucher->id;
+            $voucherCode = $voucher->code;
 
-    $discount = min(
-        (float) $cartVoucher['discount'],
-        $subtotal
-    );
-}
+            $discount = min(
+                (float) $cartVoucher['discount'],
+                $subtotal
+            );
+        }
 
-/*
+        /*
 |--------------------------------------------------------------------------
 | TOTAL AKHIR
 |--------------------------------------------------------------------------
 */
 
-$total = max(
-    0,
-    $subtotal - $discount
-);
+        $total = max(
+            0,
+            $subtotal - $discount
+        );
 
 
 
@@ -1703,121 +1735,121 @@ $total = max(
 |--------------------------------------------------------------------------
 */
 
-$cartVoucher = session()->get('cart_voucher');
+        $cartVoucher = session()->get('cart_voucher');
 
-$voucherId = null;
-$voucherCode = null;
-$discount = 0;
+        $voucherId = null;
+        $voucherCode = null;
+        $discount = 0;
 
-if (
-    is_array($cartVoucher)
-    &&
-    isset($cartVoucher['id'])
-    &&
-    isset($cartVoucher['code'])
-    &&
-    isset($cartVoucher['discount'])
-) {
+        if (
+            is_array($cartVoucher)
+            &&
+            isset($cartVoucher['id'])
+            &&
+            isset($cartVoucher['code'])
+            &&
+            isset($cartVoucher['discount'])
+        ) {
 
-    $voucher = Voucher::query()
-        ->where('id', $cartVoucher['id'])
-        ->where('merchant_id', $merchant->id)
-        ->where('code', $cartVoucher['code'])
-        ->where('status', 'active')
-        ->first();
+            $voucher = Voucher::query()
+                ->where('id', $cartVoucher['id'])
+                ->where('merchant_id', $merchant->id)
+                ->where('code', $cartVoucher['code'])
+                ->where('status', 'active')
+                ->first();
 
-    if (!$voucher) {
+            if (!$voucher) {
 
-        session()->forget('cart_voucher');
+                session()->forget('cart_voucher');
 
-        return redirect()
-            ->route('customer.cart', $code)
-            ->with(
-                'error',
-                'Voucher sudah tidak tersedia atau tidak aktif.'
+                return redirect()
+                    ->route('customer.cart', $code)
+                    ->with(
+                        'error',
+                        'Voucher sudah tidak tersedia atau tidak aktif.'
+                    );
+            }
+
+            if (
+                $voucher->starts_at &&
+                now()->lt($voucher->starts_at)
+            ) {
+
+                session()->forget('cart_voucher');
+
+                return redirect()
+                    ->route('customer.cart', $code)
+                    ->with(
+                        'error',
+                        'Voucher belum mulai berlaku.'
+                    );
+            }
+
+            if (
+                $voucher->expires_at &&
+                now()->gt($voucher->expires_at)
+            ) {
+
+                session()->forget('cart_voucher');
+
+                return redirect()
+                    ->route('customer.cart', $code)
+                    ->with(
+                        'error',
+                        'Voucher sudah kedaluwarsa.'
+                    );
+            }
+
+            if (
+                !is_null($voucher->usage_limit)
+                &&
+                $voucher->used_count >= $voucher->usage_limit
+            ) {
+
+                session()->forget('cart_voucher');
+
+                return redirect()
+                    ->route('customer.cart', $code)
+                    ->with(
+                        'error',
+                        'Voucher sudah mencapai batas penggunaan.'
+                    );
+            }
+
+            if (
+                $subtotal < (float) $voucher->min_order_amount
+            ) {
+
+                session()->forget('cart_voucher');
+
+                return redirect()
+                    ->route('customer.cart', $code)
+                    ->with(
+                        'error',
+                        'Minimum pembelian untuk voucher ini belum terpenuhi.'
+                    );
+            }
+
+            $voucherId = $voucher->id;
+            $voucherCode = $voucher->code;
+
+            // Gunakan nominal diskon yang sudah tersimpan di session.
+            $discount = min(
+                (float) $cartVoucher['discount'],
+                $subtotal
             );
-    }
+        }
 
-    if (
-        $voucher->starts_at &&
-        now()->lt($voucher->starts_at)
-    ) {
-
-        session()->forget('cart_voucher');
-
-        return redirect()
-            ->route('customer.cart', $code)
-            ->with(
-                'error',
-                'Voucher belum mulai berlaku.'
-            );
-    }
-
-    if (
-        $voucher->expires_at &&
-        now()->gt($voucher->expires_at)
-    ) {
-
-        session()->forget('cart_voucher');
-
-        return redirect()
-            ->route('customer.cart', $code)
-            ->with(
-                'error',
-                'Voucher sudah kedaluwarsa.'
-            );
-    }
-
-    if (
-        !is_null($voucher->usage_limit)
-        &&
-        $voucher->used_count >= $voucher->usage_limit
-    ) {
-
-        session()->forget('cart_voucher');
-
-        return redirect()
-            ->route('customer.cart', $code)
-            ->with(
-                'error',
-                'Voucher sudah mencapai batas penggunaan.'
-            );
-    }
-
-    if (
-        $subtotal < (float) $voucher->min_order_amount
-    ) {
-
-        session()->forget('cart_voucher');
-
-        return redirect()
-            ->route('customer.cart', $code)
-            ->with(
-                'error',
-                'Minimum pembelian untuk voucher ini belum terpenuhi.'
-            );
-    }
-
-    $voucherId = $voucher->id;
-    $voucherCode = $voucher->code;
-
-    // Gunakan nominal diskon yang sudah tersimpan di session.
-    $discount = min(
-        (float) $cartVoucher['discount'],
-        $subtotal
-    );
-}
-
-/*
+        /*
 |--------------------------------------------------------------------------
 | TOTAL AKHIR
 |--------------------------------------------------------------------------
 */
 
-$total = max(
-    0,
-    $subtotal - $discount
-);
+        $total = max(
+            0,
+            $subtotal - $discount
+        );
 
 
         /*
@@ -1836,153 +1868,153 @@ $total = max(
 
 
 
-/*
+        /*
 |--------------------------------------------------------------------------
 | CREATE ORDER
 |--------------------------------------------------------------------------
 */
 
-$order = DB::transaction(
-    function () use (
-        $validated,
-        $qrCode,
-        $merchant,
-        $cart,
-        $menus,
-        $subtotal,
-        $orderNumber,
-        $voucherId,
-        $voucherCode,
-        $discount,
-        $total
-    ) {
+        $order = DB::transaction(
+            function () use (
+                $validated,
+                $qrCode,
+                $merchant,
+                $cart,
+                $menus,
+                $subtotal,
+                $orderNumber,
+                $voucherId,
+                $voucherCode,
+                $discount,
+                $total
+            ) {
 
-        /*
+                /*
         |--------------------------------------------------------------------------
         | BUAT ORDER
         |--------------------------------------------------------------------------
         */
 
-        $order = Order::create([
+                $order = Order::create([
 
-            'merchant_id' =>
-                $merchant->id,
+                    'merchant_id' =>
+                    $merchant->id,
 
-            'qr_code_id' =>
-                $qrCode->id,
+                    'qr_code_id' =>
+                    $qrCode->id,
 
-            'order_number' =>
-                $orderNumber,
+                    'order_number' =>
+                    $orderNumber,
 
-            'customer_name' =>
-                strip_tags(
-                    $validated['customer_name']
-                ),
+                    'customer_name' =>
+                    strip_tags(
+                        $validated['customer_name']
+                    ),
 
-            'customer_phone' =>
-                $validated['customer_phone']
-                    ?? null,
+                    'customer_phone' =>
+                    $validated['customer_phone']
+                        ?? null,
 
-            'customer_email' =>
-                $validated['customer_email']
-                    ?? null,
+                    'customer_email' =>
+                    $validated['customer_email']
+                        ?? null,
 
-            'subtotal' =>
-                $subtotal,
+                    'subtotal' =>
+                    $subtotal,
 
-            'voucher_id' =>
-                $voucherId,
+                    'voucher_id' =>
+                    $voucherId,
 
-            'voucher_code' =>
-                $voucherCode,
+                    'voucher_code' =>
+                    $voucherCode,
 
-            'discount' =>
-                $discount,
+                    'discount' =>
+                    $discount,
 
-            'total' =>
-                $total,
+                    'total' =>
+                    $total,
 
-            'payment_method' =>
-                $validated['payment_method'],
+                    'payment_method' =>
+                    $validated['payment_method'],
 
-            'bank' =>
-                $validated['payment_method'] === 'bank'
-                    ? $validated['bank']
-                    : null,
+                    'bank' =>
+                    $validated['payment_method'] === 'bank'
+                        ? $validated['bank']
+                        : null,
 
-            'va_number' =>
-                null,
+                    'va_number' =>
+                    null,
 
-            'payment_provider' =>
-                null,
+                    'payment_provider' =>
+                    null,
 
-            'payment_status' =>
-                'pending',
+                    'payment_status' =>
+                    'pending',
 
-            'status' =>
-                'pending',
-        ]);
+                    'status' =>
+                    'pending',
+                ]);
 
 
-        /*
+                /*
         |--------------------------------------------------------------------------
         | BUAT ORDER ITEM + UNIT
         |--------------------------------------------------------------------------
         */
 
-        foreach (
-            $cart as $menuId => $quantity
-        ) {
+                foreach (
+                    $cart as $menuId => $quantity
+                ) {
 
-            /*
+                    /*
             |--------------------------------------------------------------
             | Pastikan menu tersedia
             |--------------------------------------------------------------
             */
 
-            if (
-                !isset(
-                    $menus[$menuId]
-                )
-            ) {
-                continue;
-            }
+                    if (
+                        !isset(
+                            $menus[$menuId]
+                        )
+                    ) {
+                        continue;
+                    }
 
 
-            $menu =
-                $menus[$menuId];
+                    $menu =
+                        $menus[$menuId];
 
 
-            /*
+                    /*
             |--------------------------------------------------------------
             | BUAT ORDER ITEM
             |--------------------------------------------------------------
             */
 
-            $orderItem =
-                OrderItem::create([
+                    $orderItem =
+                        OrderItem::create([
 
-                    'order_id' =>
-                        $order->id,
+                            'order_id' =>
+                            $order->id,
 
-                    'menu_id' =>
-                        $menu->id,
+                            'menu_id' =>
+                            $menu->id,
 
-                    'menu_name' =>
-                        $menu->name,
+                            'menu_name' =>
+                            $menu->name,
 
-                    'quantity' =>
-                        $quantity,
+                            'quantity' =>
+                            $quantity,
 
-                    'price' =>
-                        $menu->price,
+                            'price' =>
+                            $menu->price,
 
-                    'subtotal' =>
-                        $menu->price * $quantity,
-                ]);
+                            'subtotal' =>
+                            $menu->price * $quantity,
+                        ]);
 
 
-            /*
+                    /*
             |--------------------------------------------------------------
             | BUAT UNIT MENU
             |--------------------------------------------------------------
@@ -1995,49 +2027,48 @@ $order = DB::transaction(
             |
             */
 
-            for (
-                $i = 1;
-                $i <= $quantity;
-                $i++
-            ) {
+                    for (
+                        $i = 1;
+                        $i <= $quantity;
+                        $i++
+                    ) {
 
-                OrderItemUnit::create([
+                        OrderItemUnit::create([
 
-                    'order_item_id' =>
-                        $orderItem->id,
+                            'order_item_id' =>
+                            $orderItem->id,
 
-                    'unit_number' =>
-                        $i,
+                            'unit_number' =>
+                            $i,
 
-                    'status' =>
-                        'pending',
-                ]);
-            }
-        }
+                            'status' =>
+                            'pending',
+                        ]);
+                    }
+                }
 
 
-        /*
+                /*
         |--------------------------------------------------------------------------
         | KEMBALIKAN ORDER
         |--------------------------------------------------------------------------
         */
 
-        return $order;
+                return $order;
+            }
+        );
 
-    }
-);
 
-
-/*
+        /*
 |--------------------------------------------------------------------------
 | ENCRYPT ORDER NUMBER
 |--------------------------------------------------------------------------
 */
 
-$encryptedOrderNumber =
-    Crypt::encryptString(
-        $order->order_number
-    );
+        $encryptedOrderNumber =
+            Crypt::encryptString(
+                $order->order_number
+            );
 
 
 
@@ -2055,6 +2086,46 @@ $encryptedOrderNumber =
                 'payment_status' =>
                 'pending',
             ]);
+
+            /*
+                |--------------------------------------------------------------------------
+                | TAMBAH PENGGUNAAN VOUCHER
+                |--------------------------------------------------------------------------
+                */
+
+            if (
+                $voucherId
+            ) {
+                Voucher::where(
+                    'id',
+                    $voucherId
+                )->increment(
+                    'used_count'
+                );
+
+                /*
+                    |--------------------------------------------------------------------------
+                    | NONAKTIFKAN VOUCHER JIKA KUOTA HABIS
+                    |--------------------------------------------------------------------------
+                    */
+
+                $voucher = Voucher::find(
+                    $voucherId
+                );
+
+                if (
+                    $voucher
+                    &&
+                    !is_null($voucher->usage_limit)
+                    &&
+                    $voucher->used_count >=
+                    $voucher->usage_limit
+                ) {
+                    $voucher->update([
+                        'status' => 'inactive',
+                    ]);
+                }
+            }
 
             session()->forget(
                 'cart'
@@ -2512,7 +2583,7 @@ $encryptedOrderNumber =
 
                     $vaNumber =
                         $response
-                        ->va_numbers[0]
+                            ->va_numbers[0]
                         ->va_number
                         ?? null;
                 }

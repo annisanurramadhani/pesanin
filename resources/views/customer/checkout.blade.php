@@ -390,52 +390,52 @@
 
                     </label>
 
-{{-- Transfer Bank --}}
-<label class="cursor-pointer">
+                    {{-- Transfer Bank --}}
+                    <label class="cursor-pointer">
 
-    <input
-        type="radio"
-        name="payment_method"
-        value="bank"
-        class="peer sr-only"
-        {{ old('payment_method') === 'bank' ? 'checked' : '' }}
-    >
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            value="bank"
+                            class="peer sr-only"
+                            {{ old('payment_method') === 'bank' ? 'checked' : '' }}
+                        >
 
-    <div
-        class="rounded-2xl border border-slate-200 p-4
-               transition
-               peer-checked:border-amber-400
-               peer-checked:bg-amber-50
-               hover:border-slate-300"
-    >
+                        <div
+                            class="rounded-2xl border border-slate-200 p-4
+                                   transition
+                                   peer-checked:border-amber-400
+                                   peer-checked:bg-amber-50
+                                   hover:border-slate-300"
+                        >
 
-        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-3">
 
-            <div
-                class="w-10 h-10 rounded-xl bg-blue-50
-                       text-blue-600
-                       flex items-center justify-center"
-            >
-                <i class="fa-solid fa-building-columns"></i>
-            </div>
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-blue-50
+                                           text-blue-600
+                                           flex items-center justify-center"
+                                >
+                                    <i class="fa-solid fa-building-columns"></i>
+                                </div>
 
-            <div>
+                                <div>
 
-                <p class="text-sm font-bold text-slate-800">
-                    Transfer Bank
-                </p>
+                                    <p class="text-sm font-bold text-slate-800">
+                                        Transfer Bank
+                                    </p>
 
-                <p class="text-xs text-slate-400 mt-0.5">
-                    Bayar melalui Virtual Account
-                </p>
+                                    <p class="text-xs text-slate-400 mt-0.5">
+                                        Bayar melalui Virtual Account
+                                    </p>
 
-            </div>
+                                </div>
 
-        </div>
+                            </div>
 
-    </div>
+                        </div>
 
-</label>
+                    </label>
 
 
                     {{-- QRIS --}}
@@ -498,52 +498,47 @@
 
             {{-- UNTUK PILIHAN BANK  --}}
             <div
-    id="bank-selection"
-    class="hidden mt-4"
->
-    <label
-        for="bank"
-        class="block text-sm font-semibold text-slate-700 mb-2"
-    >
-        Pilih Bank
-        <span class="text-red-500">*</span>
-    </label>
-
-    <select
-        id="bank"
-        name="bank"
-        class="w-full rounded-xl border border-slate-200
-               bg-slate-50 px-4 py-3
-               text-sm text-slate-800
-               outline-none transition
-               focus:border-amber-400
-               focus:bg-white
-               focus:ring-2 focus:ring-amber-100"
-    >
-        <option value="">Pilih bank</option>
-
-        @foreach ($banks as $value => $label)
-            <option
-                value="{{ $value }}"
-                {{ old('bank') === $value ? 'selected' : '' }}
+                id="bank-selection"
+                class="hidden mt-4"
             >
-                {{ $label }}
-            </option>
-        @endforeach
-    </select>
+                <label
+                    for="bank"
+                    class="block text-sm font-semibold text-slate-700 mb-2"
+                >
+                    Pilih Bank
+                    <span class="text-red-500">*</span>
+                </label>
 
-    @error('bank')
-        <p class="mt-1.5 text-xs text-red-500 font-medium">
-            <i class="fa-solid fa-circle-exclamation mr-1"></i>
-            {{ $message }}
-        </p>
-    @enderror
-</div>
+                <select
+                    id="bank"
+                    name="bank"
+                    class="w-full rounded-xl border border-slate-200
+                           bg-slate-50 px-4 py-3
+                           text-sm text-slate-800
+                           outline-none transition
+                           focus:border-amber-400
+                           focus:bg-white
+                           focus:ring-2 focus:ring-amber-100"
+                >
+                    <option value="">Pilih bank</option>
 
+                    @foreach ($banks as $value => $label)
+                        <option
+                            value="{{ $value }}"
+                            {{ old('bank') === $value ? 'selected' : '' }}
+                        >
+                            {{ $label }}
+                        </option>
+                    @endforeach
+                </select>
 
-
-
-
+                @error('bank')
+                    <p class="mt-1.5 text-xs text-red-500 font-medium">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i>
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
 
 
             {{-- ========================================= --}}
@@ -583,7 +578,7 @@
                         @php
                             $menu = $item['menu'];
                             $quantity = $item['quantity'];
-                            $subtotal = $item['subtotal'];
+                            $itemSubtotal = $item['subtotal'];
                         @endphp
 
                         <div class="flex items-center justify-between gap-4">
@@ -602,7 +597,7 @@
                             </div>
 
                             <p class="text-sm font-semibold text-slate-800 whitespace-nowrap">
-                                Rp {{ number_format($subtotal, 0, ',', '.') }}
+                                Rp {{ number_format($itemSubtotal, 0, ',', '.') }}
                             </p>
 
                         </div>
@@ -643,8 +638,8 @@
 
                                 <span
                                     class="inline-flex items-center rounded-md
-                                        bg-emerald-50 px-2 py-0.5
-                                        text-[11px] font-bold text-emerald-600"
+                                           bg-emerald-50 px-2 py-0.5
+                                           text-[11px] font-bold text-emerald-600"
                                 >
                                     {{ $cartVoucher['code'] }}
                                 </span>
