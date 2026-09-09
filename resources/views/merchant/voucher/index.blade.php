@@ -99,7 +99,8 @@
 
                         @foreach ($vouchers as $voucher)
 
-                            <tr class="hover:bg-slate-50/70 transition">
+                            <tr class="hover:bg-slate-50/70 transition"
+                                data-voucher-id="{{ $voucher->id }}" >
 
                                 {{-- KODE --}}
                                 <td class="px-6 py-4">
@@ -194,7 +195,8 @@
 
 
                                 {{-- PENGGUNAAN --}}
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4" 
+                                    data-voucher-usage>
 
                                     <span class="font-semibold text-slate-700">
                                         {{ $voucher->used_count }}
@@ -218,7 +220,8 @@
 
 
                                 {{-- STATUS --}}
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center" 
+                                    data-voucher-status>
 
                                     @if ($voucher->status === 'active')
 

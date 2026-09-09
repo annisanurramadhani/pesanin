@@ -926,6 +926,11 @@ Route::middleware('auth')
             )->name('voucher.store');
 
             Route::get(
+                '/voucher/data', 
+                [VoucherController::class, 'data']
+            )->name('voucher.data');
+
+            Route::get(
                 '/voucher/{id}/edit',
                 [VoucherController::class, 'edit']
             )->name('voucher.edit');
