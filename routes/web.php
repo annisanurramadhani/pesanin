@@ -22,6 +22,7 @@ use App\Http\Controllers\Merchant\VoucherController;
 use App\Http\Controllers\Merchant\MerchantSettingController;
 
 use App\Http\Controllers\PublicSubscription\PublicSubscriptionController;
+use App\Http\Controllers\PublicSubscription\PublicSubscriptionHomeController;
 use App\Http\Controllers\Superadmin\PackageController;
 use App\Http\Controllers\Superadmin\PackageDurationController;
 use App\Http\Controllers\SuperAdmin\MerchantController as SuperAdminMerchantController;
@@ -37,9 +38,7 @@ use Illuminate\Support\Facades\Route;
 // 1. LANDING PAGE
 // ==========================================================================
 
-Route::get('/', function () {
-    return view('public_subscription.homepage');
-});
+Route::get('/', [PublicSubscriptionHomeController::class, 'index'])->name('home');
 
 
 // ==========================================================================
