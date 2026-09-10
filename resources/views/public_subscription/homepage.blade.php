@@ -64,6 +64,20 @@
                 {{-- CTA --}}
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row">
 
+                    {{-- Gabung Sekarang --}}
+                    <a
+                        href="{{ route('register') }}"
+                        class="inline-flex items-center justify-center gap-3 rounded-xl bg-amber-500 px-7 py-4 text-sm font-extrabold text-slate-950 shadow-xl shadow-amber-500/20 transition hover:-translate-y-0.5 hover:bg-amber-400"
+                    >
+
+                        Gabung Sekarang
+
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+
+                    </a>
+
+
+                    {{-- Lihat Paket --}}
                     <a
                         href="{{ route('public.subscription.index') }}"
                         class="inline-flex items-center justify-center gap-3 rounded-xl bg-amber-500 px-7 py-4 text-sm font-extrabold text-slate-950 shadow-xl shadow-amber-500/20 transition hover:-translate-y-0.5 hover:bg-amber-400"

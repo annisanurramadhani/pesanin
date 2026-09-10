@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PackageSeeder::class,
             VoucherSeeder::class,
+            SubscriptionPromotionSeeder::class,
             // MerchantSettingSeeder::class,
         ]);
     }
