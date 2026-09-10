@@ -1,13 +1,20 @@
 @extends('layouts.app')
 
 @section('body')
+    @push('styles')
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    @endpush
+
+
     <div class="min-h-screen bg-slate-50">
 
         {{-- Header --}}
         <header class="border-b border-slate-200 bg-white">
+
             <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
 
                 <div>
+
                     <h1 class="text-xl font-extrabold text-slate-900">
                         PesanIn
                     </h1>
@@ -15,9 +22,12 @@
                     <p class="text-xs text-slate-500">
                         Solusi digital untuk bisnis Anda
                     </p>
+
                 </div>
 
+
                 <div class="flex items-center gap-2 text-sm font-bold text-slate-500">
+
                     <span class="hidden sm:inline">
                         Langkah
                     </span>
@@ -30,9 +40,11 @@
                     <span class="hidden sm:inline">
                         dari 2
                     </span>
+
                 </div>
 
             </div>
+
         </header>
 
 
@@ -51,11 +63,13 @@
 
                     </span>
 
+
                     <h2 class="mt-5 text-3xl font-black tracking-tight text-slate-900 md:text-4xl">
 
                         Lengkapi Data Toko Anda
 
                     </h2>
+
 
                     <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
 
@@ -81,6 +95,7 @@
                                 <i class="fa-solid fa-store text-lg"></i>
 
                             </div>
+
 
                             <div>
 
@@ -117,9 +132,11 @@
 
                             </label>
 
+
                             <input id="name" type="text" name="name" value="{{ old('name') }}"
-                                placeholder="Contoh: Kopi PST" autocomplete="organization" required autofocus
+                                placeholder="Contoh: Warkop" autocomplete="organization" required autofocus
                                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/10">
+
 
                             @error('name')
                                 <p class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-red-500">
@@ -144,9 +161,11 @@
 
                             </label>
 
+
                             <input type="tel" name="phone" id="phone" value="{{ old('phone') }}" required
                                 inputmode="numeric" pattern="[0-9]*" maxlength="15" placeholder="Contoh: 081234567890"
                                 class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-6 py-3.5 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/10">
+
 
                             @error('phone')
                                 <p class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-red-500">
@@ -171,11 +190,144 @@
 
                             </label>
 
+
                             <textarea id="address" name="address" rows="4" placeholder="Masukkan alamat lengkap toko"
                                 autocomplete="street-address"
                                 class="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/10">{{ old('address') }}</textarea>
 
+
                             @error('address')
+                                <p class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-red-500">
+
+                                    <i class="fa-solid fa-circle-exclamation"></i>
+
+                                    {{ $message }}
+
+                                </p>
+                            @enderror
+
+                        </div>
+
+
+                        {{-- Lokasi Toko --}}
+                        <div>
+
+                            <label class="mb-2 block text-xs font-extrabold uppercase tracking-wider text-slate-700">
+
+                                Lokasi Toko
+
+                                <span class="text-red-500">*</span>
+
+                            </label>
+
+
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+
+                                {{-- Location Header --}}
+                                <div class="mb-4 flex items-start gap-3">
+
+                                    <div
+                                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+
+                                        <i class="fa-solid fa-map-location-dot"></i>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <p class="text-sm font-extrabold text-slate-800">
+                                            Tentukan lokasi toko
+                                        </p>
+
+                                        <p class="mt-1 text-xs leading-5 text-slate-500">
+                                            Klik pada peta atau geser pin untuk menentukan
+                                            posisi toko Anda.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                {{-- Search Location --}}
+                                <div class="mb-3 flex gap-2">
+
+                                    <input type="text" id="mapSearch" placeholder="Cari alamat atau nama tempat..."
+                                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10">
+
+                                    <button type="button" id="searchLocation"
+                                        class="shrink-0 rounded-xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-slate-950 transition hover:bg-amber-400">
+
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                                    </button>
+
+                                </div>
+
+                                {{-- Map --}}
+                                <div id="merchantMap"
+                                    class="h-80 w-full overflow-hidden rounded-xl border border-slate-200">
+                                </div>
+
+
+                                {{-- Location Status --}}
+                                <div class="mt-3 rounded-xl border border-slate-200 bg-white p-3">
+
+                                    <div class="flex items-center gap-2">
+
+                                        <i class="fa-solid fa-location-dot text-amber-500"></i>
+
+                                        <div>
+
+                                            <p class="text-xs font-bold text-slate-700">
+                                                Titik lokasi toko
+                                            </p>
+
+                                            <p id="locationStatus" class="mt-0.5 text-xs text-slate-400">
+
+                                                Silakan tentukan titik lokasi toko pada peta.
+
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                {{-- Device Location --}}
+                                <button type="button" id="useDeviceLocation"
+                                    class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-white px-4 py-3 text-sm font-extrabold text-amber-600 transition hover:bg-amber-50">
+
+                                    <i class="fa-solid fa-location-crosshairs"></i>
+
+                                    Gunakan Lokasi Perangkat
+
+                                </button>
+
+
+                                {{-- Coordinates --}}
+                                <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude') }}">
+
+
+                                <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude') }}">
+
+                            </div>
+
+
+                            @error('latitude')
+                                <p class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-red-500">
+
+                                    <i class="fa-solid fa-circle-exclamation"></i>
+
+                                    {{ $message }}
+
+                                </p>
+                            @enderror
+
+
+                            @error('longitude')
                                 <p class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-red-500">
 
                                     <i class="fa-solid fa-circle-exclamation"></i>
@@ -199,6 +351,7 @@
                                     <i class="fa-solid fa-info text-sm"></i>
 
                                 </div>
+
 
                                 <div>
 
@@ -279,9 +432,11 @@
         </main>
 
     </div>
-    <script>
-        document.getElementById('phone')?.addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, '');
-        });
-    </script>
+
+
+    {{-- Leaflet JS --}}
+    @push('scripts')
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="{{ asset('js/merchant/merchant-setup.js') }}"></script>
+    @endpush
 @endsection

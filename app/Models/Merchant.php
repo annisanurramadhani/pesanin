@@ -18,6 +18,8 @@ class Merchant extends Model
         'address',
         'logo',
         'status',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [

@@ -26,6 +26,7 @@ use App\Http\Controllers\PublicSubscription\PublicSubscriptionHomeController;
 use App\Http\Controllers\Superadmin\PackageController;
 use App\Http\Controllers\Superadmin\PackageDurationController;
 use App\Http\Controllers\SuperAdmin\MerchantController as SuperAdminMerchantController;
+use App\Http\Controllers\SuperAdmin\MerchantLocationController;
 use App\Http\Controllers\SuperAdmin\SubscriptionController as SuperAdminSubscriptionController;
 use App\Http\Controllers\SuperAdmin\SubscriptionPromotionController;
 use App\Http\Controllers\SuperAdmin\AccountController;
@@ -301,6 +302,12 @@ Route::middleware([
         )->name('merchants.destroy');
 
 
+        Route::get(
+            '/merchant_locations',
+            [MerchantLocationController::class, 'index']
+        )->name('merchant_locations.index');
+
+
         // ==================================================================
         // Packages
         // ==================================================================
@@ -383,7 +390,7 @@ Route::middleware([
         )->name('packages.durations.destroy');
 
 
-                // ==================================================================
+        // ==================================================================
         // Subscription Promotions
         // ==================================================================
 
@@ -925,7 +932,7 @@ Route::middleware('auth')
             )->name('voucher.store');
 
             Route::get(
-                '/voucher/data', 
+                '/voucher/data',
                 [VoucherController::class, 'data']
             )->name('voucher.data');
 

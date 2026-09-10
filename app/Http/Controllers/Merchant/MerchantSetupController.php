@@ -52,7 +52,7 @@ class MerchantSetupController extends Controller
                     'public.subscription.payment',
                     [
                         'encryptedSubscription' =>
-                            encryptId($pendingSubscription->id),
+                        encryptId($pendingSubscription->id),
                     ]
                 );
             }
@@ -126,6 +126,18 @@ class MerchantSetupController extends Controller
                 'string',
                 'max:500',
             ],
+
+            'latitude' => [
+                'required',
+                'numeric',
+                'between:-90,90',
+            ],
+
+            'longitude' => [
+                'required',
+                'numeric',
+                'between:-180,180',
+            ],
         ]);
 
 
@@ -155,7 +167,7 @@ class MerchantSetupController extends Controller
                     'public.subscription.payment',
                     [
                         'encryptedSubscription' =>
-                            encryptId($pendingSubscription->id),
+                        encryptId($pendingSubscription->id),
                     ]
                 );
             }
@@ -243,17 +255,24 @@ class MerchantSetupController extends Controller
                         'name' => $request->name,
 
                         'slug' =>
-                            Str::slug($request->name)
+                        Str::slug($request->name)
                             . '-'
                             . Str::lower(
                                 Str::random(5)
                             ),
 
                         'phone' =>
-                            $request->phone,
+                        $request->phone,
 
                         'address' =>
-                            $request->address,
+                        $request->address,
+
+
+                        'latitude' =>
+                        $request->latitude,
+
+                        'longitude' =>
+                        $request->longitude,
 
                         /*
                         | Merchant boleh active.
@@ -272,7 +291,7 @@ class MerchantSetupController extends Controller
 
                     $user->update([
                         'merchant_id' =>
-                            $merchant->id,
+                        $merchant->id,
                     ]);
 
 
@@ -301,22 +320,22 @@ class MerchantSetupController extends Controller
                     return Subscription::create([
 
                         'merchant_id' =>
-                            $merchant->id,
+                        $merchant->id,
 
                         'package_duration_id' =>
-                            $duration->id,
+                        $duration->id,
 
                         'start_date' =>
-                            null,
+                        null,
 
                         'end_date' =>
-                            null,
+                        null,
 
                         'price' =>
-                            $price,
+                        $price,
 
                         'status' =>
-                            'pending',
+                        'pending',
 
                     ]);
                 }
@@ -348,10 +367,9 @@ class MerchantSetupController extends Controller
                 'public.subscription.payment',
                 [
                     'encryptedSubscription' =>
-                        encryptId($subscription->id),
+                    encryptId($subscription->id),
                 ]
             );
-
         } catch (\Throwable $e) {
 
             report($e);

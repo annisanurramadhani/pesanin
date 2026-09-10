@@ -54,19 +54,44 @@
 
             <a href="{{ route('super_admin.subscriptions.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
-        {{ request()->routeIs('super_admin.subscriptions.*')
-            ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
-            : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                {{ request()->routeIs('super_admin.subscriptions.*')
+                    ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
                 <i class="fa-solid fa-credit-card w-5"></i>
                 <span>Kelola Langganan</span>
             </a>
+
             <a href="{{ route('super_admin.accounts.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
-    {{ request()->routeIs('super_admin.accounts.*')
-        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
-        : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                {{ request()->routeIs('super_admin.accounts.*')
+                    ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
                 <i class="fa-solid fa-users w-5"></i>
                 <span>Kelola Akun</span>
+            </a>
+
+            <a href="{{ route('super_admin.subscription_promotions.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                {{ request()->routeIs('super_admin.subscription_promotions.*')
+                    ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+
+                <i class="fa-solid fa-percent w-5"></i>
+
+                <span>Kelola Diskon</span>
+
+            </a>
+
+            <a href="{{ route('super_admin.merchant_locations.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                {{ request()->routeIs('super_admin.merchant_locations.*')
+                    ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+
+                <i class="fa-solid fa-map-location-dot w-5"></i>
+
+                <span>Lokasi Merchant</span>
+
             </a>
 
         </nav>
