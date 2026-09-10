@@ -1,29 +1,32 @@
+
 @extends('layouts.merchant')
 
-@section('content')
-
-<div class="max-w-4xl mx-auto">
-
-    {{-- HEADER --}}
-    <div class="flex items-center gap-4 mb-8">
-        <a
-            href="{{ route('merchant.voucher.index') }}"
-            class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition"
-        >
-            <i class="fa-solid fa-arrow-left text-slate-600"></i>
-        </a>
+@section('header')
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
         <div>
-            <h1 class="text-2xl font-bold text-slate-800">
+            <h2 class="font-extrabold text-2xl text-slate-900 tracking-tight">
                 Edit Voucher
-            </h1>
+            </h2>
 
-            <p class="text-sm text-slate-500 mt-1">
+            <p class="text-xs font-medium text-slate-500 mt-1">
                 Ubah informasi voucher yang sudah dibuat.
             </p>
         </div>
-    </div>
 
+        <a
+            href="{{ route('merchant.voucher.index') }}"
+            class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-extrabold transition"
+        >
+            <i class="fa-solid fa-arrow-left"></i>
+            Kembali
+        </a>
+
+    </div>
+@endsection
+
+@section('content')
+<div class="max-w-4xl mx-auto">
 
     {{-- FORM --}}
     <form

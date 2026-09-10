@@ -410,7 +410,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     paymentStatusInterval
                 );
 
-                window.location.reload();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pembayaran Berhasil!',
+                    text: 'Pembayaran kamu telah berhasil dikonfirmasi.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#f59e0b'
+                }).then(function () {
+
+                    window.location.reload();
+
+                });
 
                 return;
             }

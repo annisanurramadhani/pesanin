@@ -69,317 +69,498 @@ class OrderController extends Controller
         if ($role === 'dapur') {
 
             /*
-    |--------------------------------------------------------------------------
-    | DAPUR
-    |--------------------------------------------------------------------------
-    |
-    | Hanya tampilkan pesanan yang:
-    |
-    | 1. Sudah dibayar
-    | 2. Masih memiliki minimal 1 unit menu
-    |    dengan status pending / processing
-    |
-    | Jika seluruh unit sudah completed atau cancelled,
-    | pesanan otomatis hilang dari antrean dapur.
-    |
-    | Data order TIDAK dihapus dari database.
-    |
-    */
+            |--------------------------------------------------------------------------
+            | DAPUR
+            |--------------------------------------------------------------------------
+            |
+            | Hanya tampilkan pesanan yang:
+            |
+            | 1. Sudah dibayar
+            | 2. Masih memiliki minimal 1 unit menu
+            |    dengan status pending / processing
+            |
+            | Jika seluruh unit sudah completed atau cancelled,
+            | pesanan otomatis hilang dari antrean dapur.
+            |
+            | Data order TIDAK dihapus dari database.
+            |
+            */
 
-            $query->where(
-                'payment_status',
-                'paid'
+                    $query->where(
+                        'payment_status',
+                        'paid'
+                    )
+                        ->whereHas(
+                            'items.unit',
+                            function ($unitQuery) {
+
+                                $unitQuery->whereIn(
+                                    'status',
+                                    [
+                                        'pending',
+                                        'processing',
+                                    ]
+                                );
+                            }
+                        );
+                } else {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | FILTER OWNER / KASIR
+                    |--------------------------------------------------------------------------
+                    |
+                    | Order dengan pembayaran expired tidak ditampilkan.
+                    | Berlaku untuk Kasir dan Owner.
+                    |
+                    */
+
+                    $query->where(function ($q) {
+                        $q->whereNull('payment_status')
+                            ->orWhere('payment_status', '!=', 'expired');
+                    });
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | FILTER OWNER / KASIR
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if ($filterType === 'day') {
+
+                        $query->whereDate(
+                            'created_at',
+                            $selectedDate
+                        );
+
+                        $labelPeriode = Carbon::parse(
+                            $selectedDate
+                        )->format('d M Y');
+                    } elseif ($filterType === 'month') {
+
+                        $carbonMonth = Carbon::parse(
+                            $selectedMonth
+                        );
+
+                        $query->whereYear(
+                            'created_at',
+                            $carbonMonth->year
+                        )->whereMonth(
+                            'created_at',
+                            $carbonMonth->month
+                        );
+
+                        $labelPeriode = $carbonMonth->format(
+                            'F Y'
+                        );
+                    } elseif ($filterType === 'year') {
+
+                        $query->whereYear(
+                            'created_at',
+                            $selectedYear
+                        );
+
+                        $labelPeriode =
+                            'Tahun ' . $selectedYear;
+                    }
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | AMBIL ORDER
+                |--------------------------------------------------------------------------
+                |
+                | Dapur:
+                | oldest first → sistem antrean dapur.
+                |
+                | Kasir / Owner:
+                | newest first.
+                |
+                */
+
+                if ($role === 'dapur') {
+
+                    $orders = $query
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+                } else {
+
+                    $orders = $query
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+                }
+
+
+                /*
+        |--------------------------------------------------------------------------
+        | STATUS AGREGAT ORDER
+        |--------------------------------------------------------------------------
+        |
+        | Status kasir dihitung langsung dari OrderItemUnit.
+        | Tidak bergantung pada relasi $item->unit.
+        |
+        */
+
+                if ($role !== 'dapur') {
+
+                    $orders->each(function ($order) {
+
+                        /*
+                |--------------------------------------------------------------------------
+                | AMBIL SEMUA ORDER ITEM ID
+                |--------------------------------------------------------------------------
+                */
+
+                        $orderItemIds = $order->items
+                            ->pluck('id');
+
+
+                        /*
+                |--------------------------------------------------------------------------
+                | AMBIL SEMUA UNIT MENU
+                |--------------------------------------------------------------------------
+                */
+
+                        $units = OrderItemUnit::whereIn(
+                            'order_item_id',
+                            $orderItemIds
+                        )
+                            ->get();
+
+
+                        /*
+                |--------------------------------------------------------------------------
+                | HITUNG STATUS
+                |--------------------------------------------------------------------------
+                */
+
+                        $totalUnits =
+                            $units->count();
+
+                        $completedUnits =
+                            $units
+                            ->where('status', 'completed')
+                            ->count();
+
+                        $cancelledUnits =
+                            $units
+                            ->where('status', 'cancelled')
+                            ->count();
+
+                        $processingUnits =
+                            $units
+                            ->where('status', 'processing')
+                            ->count();
+
+                        $pendingUnits =
+                            $units
+                            ->where('status', 'pending')
+                            ->count();
+
+
+                        /*
+                |--------------------------------------------------------------------------
+                | TENTUKAN STATUS ORDER
+                |--------------------------------------------------------------------------
+                */
+
+                        if (
+                            $totalUnits > 0 &&
+                            $completedUnits === $totalUnits
+                        ) {
+
+                            $order->display_status =
+                                'completed';
+                        } elseif (
+                            $totalUnits > 0 &&
+                            $cancelledUnits === $totalUnits
+                        ) {
+
+                            $order->display_status =
+                                'cancelled';
+                        } elseif (
+                            $cancelledUnits > 0
+                        ) {
+
+                            $order->display_status =
+                                'partial_problem';
+                        } elseif (
+                            $processingUnits > 0
+                        ) {
+
+                            $order->display_status =
+                                'processing';
+                        } else {
+
+                            $order->display_status =
+                                'pending';
+                        }
+
+
+                        /*
+                |--------------------------------------------------------------------------
+                | SIMPAN RINGKASAN
+                |--------------------------------------------------------------------------
+                */
+
+                        $order->status_summary = [
+
+                            'total' =>
+                            $totalUnits,
+
+                            'completed' =>
+                            $completedUnits,
+
+                            'cancelled' =>
+                            $cancelledUnits,
+
+                            'processing' =>
+                            $processingUnits,
+
+                            'pending' =>
+                            $pendingUnits,
+
+                        ];
+                    });
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | HITUNG TOTAL PENDAPATAN
+                |--------------------------------------------------------------------------
+                |
+                | Hanya pembayaran yang SUDAH PAID
+                | yang dihitung sebagai pendapatan.
+                |
+                */
+
+                $totalRevenue = $orders
+                    ->where('payment_status', 'paid')
+                    ->sum(function ($order) {
+
+                        if (
+                            isset($order->total) &&
+                            (float) $order->total > 0
+                        ) {
+                            return (float) $order->total;
+                        }
+
+                        return $order->items->sum(function ($item) {
+
+                            return $item->subtotal
+                                ?? (
+                                    $item->price *
+                                    $item->quantity
+                                );
+                        });
+                    });
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | TOTAL ORDER
+                |--------------------------------------------------------------------------
+                */
+
+                $totalOrders = $orders->count();
+
+
+                return view(
+                    'merchant.orders.index',
+                    compact(
+                        'orders',
+                        'filterType',
+                        'selectedDate',
+                        'selectedMonth',
+                        'selectedYear',
+                        'labelPeriode',
+                        'totalRevenue',
+                        'totalOrders'
+                    )
+                );
+    }
+
+    /**
+     * =========================================================
+     * CHECK NEW ORDERS
+     * =========================================================
+     *
+     * Digunakan oleh halaman Kasir dan Dapur dan Owner
+     * untuk mengecek perubahan order secara berkala
+     * tanpa reload halaman.
+     */
+    public function checkNew()
+    {
+        $user = Auth::user();
+
+        $merchantId = $user->merchant_id ?? $user->id;
+
+        /*
+        |--------------------------------------------------------------------------
+        | KASIR
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->role === 'kasir') {
+
+            $orders = Order::where(
+                'merchant_id',
+                $merchantId
             )
+                ->where(
+                    'payment_status',
+                    'pending'
+                )
+                ->where(
+                    'payment_method',
+                    'cash'
+                )
+                ->orderByDesc(
+                    'created_at'
+                )
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'orders' => $orders->map(function ($order) {
+
+                    return [
+                        'id' => $order->id,
+                    ];
+
+                })->values(),
+            ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DAPUR
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->role === 'dapur') {
+
+            $orders = Order::where(
+                'merchant_id',
+                $merchantId
+            )
+                ->where(
+                    'payment_status',
+                    'paid'
+                )
                 ->whereHas(
                     'items.unit',
-                    function ($unitQuery) {
+                    function ($query) {
 
-                        $unitQuery->whereIn(
+                        $query->whereIn(
                             'status',
                             [
                                 'pending',
                                 'processing',
                             ]
                         );
+
                     }
-                );
-        } else {
-
-            /*
-            |--------------------------------------------------------------------------
-            | FILTER OWNER / KASIR
-            |--------------------------------------------------------------------------
-            |
-            | Order dengan pembayaran expired tidak ditampilkan.
-            | Berlaku untuk Kasir dan Owner.
-            |
-            */
-
-            $query->where(function ($q) {
-                $q->whereNull('payment_status')
-                    ->orWhere('payment_status', '!=', 'expired');
-            });
-
-            /*
-            |--------------------------------------------------------------------------
-            | FILTER OWNER / KASIR
-            |--------------------------------------------------------------------------
-            */
-
-            if ($filterType === 'day') {
-
-                $query->whereDate(
-                    'created_at',
-                    $selectedDate
-                );
-
-                $labelPeriode = Carbon::parse(
-                    $selectedDate
-                )->format('d M Y');
-            } elseif ($filterType === 'month') {
-
-                $carbonMonth = Carbon::parse(
-                    $selectedMonth
-                );
-
-                $query->whereYear(
-                    'created_at',
-                    $carbonMonth->year
-                )->whereMonth(
-                    'created_at',
-                    $carbonMonth->month
-                );
-
-                $labelPeriode = $carbonMonth->format(
-                    'F Y'
-                );
-            } elseif ($filterType === 'year') {
-
-                $query->whereYear(
-                    'created_at',
-                    $selectedYear
-                );
-
-                $labelPeriode =
-                    'Tahun ' . $selectedYear;
-            }
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | AMBIL ORDER
-        |--------------------------------------------------------------------------
-        |
-        | Dapur:
-        | oldest first → sistem antrean dapur.
-        |
-        | Kasir / Owner:
-        | newest first.
-        |
-        */
-
-        if ($role === 'dapur') {
-
-            $orders = $query
-                ->orderBy('created_at', 'desc')
-                ->get();
-        } else {
-
-            $orders = $query
-                ->orderBy('created_at', 'desc')
-                ->get();
-        }
-
-
-        /*
-|--------------------------------------------------------------------------
-| STATUS AGREGAT ORDER
-|--------------------------------------------------------------------------
-|
-| Status kasir dihitung langsung dari OrderItemUnit.
-| Tidak bergantung pada relasi $item->unit.
-|
-*/
-
-        if ($role !== 'dapur') {
-
-            $orders->each(function ($order) {
-
-                /*
-        |--------------------------------------------------------------------------
-        | AMBIL SEMUA ORDER ITEM ID
-        |--------------------------------------------------------------------------
-        */
-
-                $orderItemIds = $order->items
-                    ->pluck('id');
-
-
-                /*
-        |--------------------------------------------------------------------------
-        | AMBIL SEMUA UNIT MENU
-        |--------------------------------------------------------------------------
-        */
-
-                $units = OrderItemUnit::whereIn(
-                    'order_item_id',
-                    $orderItemIds
                 )
-                    ->get();
+                ->orderByDesc(
+                    'created_at'
+                )
+                ->get();
 
+            return response()->json([
+                'success' => true,
+                'orders' => $orders->map(function ($order) {
 
-                /*
-        |--------------------------------------------------------------------------
-        | HITUNG STATUS
-        |--------------------------------------------------------------------------
-        */
+                    return [
+                        'id' => $order->id,
+                    ];
 
-                $totalUnits =
-                    $units->count();
-
-                $completedUnits =
-                    $units
-                    ->where('status', 'completed')
-                    ->count();
-
-                $cancelledUnits =
-                    $units
-                    ->where('status', 'cancelled')
-                    ->count();
-
-                $processingUnits =
-                    $units
-                    ->where('status', 'processing')
-                    ->count();
-
-                $pendingUnits =
-                    $units
-                    ->where('status', 'pending')
-                    ->count();
-
-
-                /*
-        |--------------------------------------------------------------------------
-        | TENTUKAN STATUS ORDER
-        |--------------------------------------------------------------------------
-        */
-
-                if (
-                    $totalUnits > 0 &&
-                    $completedUnits === $totalUnits
-                ) {
-
-                    $order->display_status =
-                        'completed';
-                } elseif (
-                    $totalUnits > 0 &&
-                    $cancelledUnits === $totalUnits
-                ) {
-
-                    $order->display_status =
-                        'cancelled';
-                } elseif (
-                    $cancelledUnits > 0
-                ) {
-
-                    $order->display_status =
-                        'partial_problem';
-                } elseif (
-                    $processingUnits > 0
-                ) {
-
-                    $order->display_status =
-                        'processing';
-                } else {
-
-                    $order->display_status =
-                        'pending';
-                }
-
-
-                /*
-        |--------------------------------------------------------------------------
-        | SIMPAN RINGKASAN
-        |--------------------------------------------------------------------------
-        */
-
-                $order->status_summary = [
-
-                    'total' =>
-                    $totalUnits,
-
-                    'completed' =>
-                    $completedUnits,
-
-                    'cancelled' =>
-                    $cancelledUnits,
-
-                    'processing' =>
-                    $processingUnits,
-
-                    'pending' =>
-                    $pendingUnits,
-
-                ];
-            });
+                })->values(),
+            ]);
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | HITUNG TOTAL PENDAPATAN
+        | OWNER
         |--------------------------------------------------------------------------
         |
-        | Hanya pembayaran yang SUDAH PAID
-        | yang dihitung sebagai pendapatan.
+        | Owner membutuhkan perubahan status unit juga.
         |
         */
 
-        $totalRevenue = $orders
-            ->where('payment_status', 'paid')
-            ->sum(function ($order) {
+        if ($user->role === 'owner') {
 
-                if (
-                    isset($order->total) &&
-                    (float) $order->total > 0
-                ) {
-                    return (float) $order->total;
-                }
+            $orders = Order::where(
+                'merchant_id',
+                $merchantId
+            )
+                ->where(
+                    'payment_status',
+                    '!=',
+                    'expired'
+                )
+                ->with([
+                    'items.unit'
+                ])
+                ->orderByDesc(
+                    'created_at'
+                )
+                ->get();
 
-                return $order->items->sum(function ($item) {
 
-                    return $item->subtotal
-                        ?? (
-                            $item->price *
-                            $item->quantity
-                        );
-                });
-            });
+            return response()->json([
+                'success' => true,
+
+                'orders' => $orders->map(function ($order) {
+
+                    $unitStatuses = [];
+
+                    foreach ($order->items as $item) {
+
+                        foreach ($item->unit ?? collect() as $unit) {
+
+                            $unitStatuses[] = [
+                                'id' => $unit->id,
+                                'status' => $unit->status,
+                            ];
+
+                        }
+
+                    }
+
+
+                    return [
+                        'id' => $order->id,
+
+                        'payment_status' =>
+                            $order->payment_status,
+
+                        'status' =>
+                            $order->status,
+
+                        'units' =>
+                            $unitStatuses,
+                    ];
+
+                })->values(),
+            ]);
+        }
 
 
         /*
         |--------------------------------------------------------------------------
-        | TOTAL ORDER
+        | ROLE LAIN
         |--------------------------------------------------------------------------
         */
 
-        $totalOrders = $orders->count();
-
-
-        return view(
-            'merchant.orders.index',
-            compact(
-                'orders',
-                'filterType',
-                'selectedDate',
-                'selectedMonth',
-                'selectedYear',
-                'labelPeriode',
-                'totalRevenue',
-                'totalOrders'
-            )
-        );
+        return response()->json([
+            'success' => false,
+            'orders' => [],
+        ]);
     }
 
 
