@@ -37,40 +37,18 @@
     </div>
 
     <!-- Desain Kartu Meja -->
-    <div class="w-80 bg-white rounded-3xl p-8 border-2 border-slate-900 shadow-2xl text-center relative overflow-hidden">
-        <!-- Header Kafe -->
-        <div class="mb-4">
-            <div class="w-12 h-12 bg-amber-500 text-slate-950 rounded-2xl flex items-center justify-center font-black text-xl mx-auto shadow-md mb-2">
-                <i class="fa-solid fa-mug-hot"></i>
-            </div>
-            <h2 class="font-extrabold text-slate-900 text-lg uppercase tracking-wider">
-                {{ $qrCode->merchant->name ?? 'PesanIn Kafe' }}
-            </h2>
-            <p class="text-xs text-slate-500 font-semibold">Scan QR untuk Pesan & Bayar</p>
-        </div>
-
+    <div class="w-[450px] bg-white rounded-3xl p-8 border-2 border-slate-900 shadow-xl text-center">
+        
         <!-- Nama Meja -->
-        <div class="my-4 bg-slate-900 text-amber-400 py-2 rounded-xl font-black text-xl tracking-widest uppercase">
+        <div class="my-4 bg-slate-900 text-amber-400 py-4 rounded-xl font-black text-3xl tracking-widest uppercase">
             {{ $qrCode->name }}
         </div>
 
         <!-- QR Code (Diubah Menggunakan API Gambar) -->
-        <div class="bg-amber-50 p-4 rounded-2xl border-2 border-dashed border-amber-300 inline-block my-2">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode(route('customer.menu', $qrCode->code)) }}" 
-                 alt="QR Code {{ $qrCode->name }}" 
-                 class="w-44 h-44 rounded-xl mx-auto">
-        </div>
-
-        <!-- Petunjuk Singkat -->
-        <div class="mt-4 pt-4 border-t border-slate-100 text-slate-500 text-[11px] font-medium space-y-1">
-            <p><i class="fa-solid fa-camera text-amber-500 mr-1"></i> Buka Kamera HP kamu</p>
-            <p><i class="fa-solid fa-qrcode text-amber-500 mr-1"></i> Arahkan ke QR Code di atas</p>
-            <p><i class="fa-solid fa-utensils text-amber-500 mr-1"></i> Pilih menu dan lakukan pembayaran</p>
-        </div>
-
-        <!-- Footer -->
-        <div class="mt-6 text-[9px] font-bold text-slate-400 tracking-widest uppercase">
-            Powered by PesanIn
+        <div class="bg-white p-3 rounded-xl inline-block mt-4">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=340x340&data={{ urlencode(route('customer.menu', $qrCode->code)) }}" 
+                alt="QR Code {{ $qrCode->name }}" 
+                class="w-80 h-80 mx-auto">
         </div>
     </div>
 
