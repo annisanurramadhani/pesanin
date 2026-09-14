@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Models\Merchant;
+use App\Services\SubscriptionLimitService;
 
 class MenuController extends Controller
 {
@@ -45,49 +47,83 @@ class MenuController extends Controller
         return back()->with('success', 'Kategori berhasil ditambahkan!');
     }
 
-    // 3. Simpan Menu Baru
-    public function store(Request $request)
-    {
-        $merchantId = $request->user()->merchant_id;
-        $slug = Str::slug($request->name);
+  // 3. Simpan Menu Baru
+public function store(
+    Request $request,
+    SubscriptionLimitService $limitService
+) {
+    $user = $request->user();
+    $merchantId = $user->merchant_id;
 
-        $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('menus', 'slug')->where(function ($query) use ($merchantId) {
-                    return $query->where('merchant_id', $merchantId);
-                }),
-            ],
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ], [
-            'name.unique' => 'Menu dengan nama tersebut sudah tersedia.',
-        ]);
-
-        $imagePath = null;
-
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('menus', 'public');
-        }
-
-        Menu::create([
-            'merchant_id'  => $merchantId,
-            'category_id'  => $request->category_id,
-            'name'         => trim($request->name),
-            'slug'         => $slug,
-            'price'        => $request->price,
-            'description'  => $request->description,
-            'is_available' => true, // Default langsung ready
-            'image'        => $imagePath,
-        ]);
-
-        return back()->with('success', 'Menu berhasil ditambahkan!');
+    if (!$merchantId) {
+        return back()->with(
+            'error',
+            'Akun kamu belum terhubung ke merchant mana pun.'
+        );
     }
 
+    $merchant = Merchant::findOrFail($merchantId);
+
+    // Hitung jumlah menu yang sudah dimiliki merchant
+    $currentMenuCount = Menu::where(
+        'merchant_id',
+        $merchantId
+    )->count();
+
+    // Cek limit menu berdasarkan paket subscription
+try {
+    $limitService->ensureCanCreateMenu(
+        $merchant,
+        $currentMenuCount
+    );
+} catch (\RuntimeException $e) {
+    return back()->with('limit_reached', [
+        'type' => 'menu',
+        'title' => 'Batas Menu Tercapai',
+        'message' => $e->getMessage(),
+    ]);
+}
+    $slug = Str::slug($request->name);
+
+    $request->validate([
+        'category_id' => 'required|exists:categories,id',
+        'name' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('menus', 'slug')->where(function ($query) use ($merchantId) {
+                return $query->where('merchant_id', $merchantId);
+            }),
+        ],
+        'price' => 'required|numeric|min:0',
+        'description' => 'nullable|string',
+        'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ], [
+        'name.unique' => 'Menu dengan nama tersebut sudah tersedia.',
+    ]);
+
+    $imagePath = null;
+
+    if ($request->hasFile('image')) {
+        $imagePath = $request->file('image')->store('menus', 'public');
+    }
+
+    Menu::create([
+        'merchant_id'  => $merchantId,
+        'category_id'  => $request->category_id,
+        'name'         => trim($request->name),
+        'slug'         => $slug,
+        'price'        => $request->price,
+        'description'  => $request->description,
+        'is_available' => true,
+        'image'        => $imagePath,
+    ]);
+
+    return back()->with(
+        'success',
+        'Menu berhasil ditambahkan!'
+    );
+}
     // 4. Halaman Edit Menu
     public function edit(Request $request, $encryptedId)
     {

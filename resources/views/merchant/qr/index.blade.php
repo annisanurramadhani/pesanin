@@ -352,4 +352,123 @@
 
     </div>
 
+    {{-- SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{-- Alert ketika limit QR Code tercapai --}}
+    @if (session('limit_reached'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const limitData = @json(session('limit_reached'));
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: limitData.title,
+
+                    html: `
+                        <div class="text-sm text-slate-600 leading-6">
+                            ${limitData.message}
+                        </div>
+
+                        <div class="mt-5 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-sm font-semibold text-left">
+                            <i class="fa-solid fa-crown mr-1"></i>
+                            Upgrade langganan untuk membuat lebih banyak QR Code.
+                        </div>
+                    `,
+
+                    showCancelButton: true,
+
+                    confirmButtonText:
+                        '<i class="fa-solid fa-crown mr-1"></i> Upgrade Langganan',
+
+                    cancelButtonText: 'Nanti',
+
+                    reverseButtons: true,
+
+                    buttonsStyling: false,
+
+                    customClass: {
+                        popup: 'rounded-2xl',
+
+                        confirmButton:
+                            'bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl px-5 py-3 font-extrabold mx-1',
+
+                        cancelButton:
+                            'bg-slate-700 hover:bg-slate-600 text-white rounded-xl px-5 py-3 font-extrabold mx-1'
+                    }
+
+                }).then((result) => {
+
+                    if (result.isConfirmed) {
+                        window.location.href = '/subscription/';
+                    }
+
+                });
+            });
+        </script>
+    @endif
+
+    {{-- Alert sukses --}}
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: @json(session('success')),
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl text-xs font-bold px-4 py-2.5'
+                    }
+                });
+            });
+        </script>
+    @endif
+
+    {{-- Konfirmasi Hapus QR --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelectorAll('.delete-qr-form').forEach(function(form) {
+
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    Swal.fire({
+                        title: 'Hapus QR Code?',
+                        text: 'QR Code ini akan dihapus dari daftar meja.',
+                        icon: 'warning',
+
+                        showCancelButton: true,
+
+                        confirmButtonColor: '#e11d48',
+                        cancelButtonColor: '#64748b',
+
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+
+                        reverseButtons: true,
+
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            confirmButton: 'rounded-xl text-xs font-bold px-4 py-2.5',
+                            cancelButton: 'rounded-xl text-xs font-bold px-4 py-2.5'
+                        }
+
+                    }).then(function(result) {
+
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+
+                    });
+                });
+
+            });
+
+        });
+    </script>
+
 @endsection

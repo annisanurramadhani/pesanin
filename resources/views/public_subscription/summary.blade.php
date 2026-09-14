@@ -131,6 +131,74 @@
 
                                 </div>
 
+                                {{-- Package Limits --}}
+                                <div class="border-t border-slate-100 pt-6">
+
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                        Fasilitas Paket
+                                    </p>
+
+                                    <div class="mt-4 grid grid-cols-3 divide-x divide-slate-100">
+
+                                        {{-- QR Code --}}
+                                        <div class="px-3 text-center first:pl-0 last:pr-0">
+
+                                            <div
+                                                class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+                                                <i class="fa-solid fa-qrcode"></i>
+                                            </div>
+
+                                            <p class="mt-2 text-lg font-extrabold text-slate-900">
+                                                {{ $package->max_qr_codes }}
+                                            </p>
+
+                                            <p class="text-xs font-semibold text-slate-400">
+                                                QR Code
+                                            </p>
+
+                                        </div>
+
+
+                                        {{-- Menu --}}
+                                        <div class="px-3 text-center">
+
+                                            <div
+                                                class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500">
+                                                <i class="fa-solid fa-utensils"></i>
+                                            </div>
+
+                                            <p class="mt-2 text-lg font-extrabold text-slate-900">
+                                                {{ $package->max_menus }}
+                                            </p>
+
+                                            <p class="text-xs font-semibold text-slate-400">
+                                                Menu
+                                            </p>
+
+                                        </div>
+
+
+                                        {{-- Karyawan --}}
+                                        <div class="px-3 text-center first:pl-0 last:pr-0">
+
+                                            <div
+                                                class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
+                                                <i class="fa-solid fa-users"></i>
+                                            </div>
+
+                                            <p class="mt-2 text-lg font-extrabold text-slate-900">
+                                                {{ $package->max_staff }}
+                                            </p>
+
+                                            <p class="text-xs font-semibold text-slate-400">
+                                                Karyawan
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
 
                                 @if ($package->description)
                                     <div class="border-t border-slate-100 pt-6">
@@ -139,9 +207,9 @@
                                             Deskripsi Paket
                                         </p>
 
-                                        <p class="mt-2 text-sm leading-6 text-slate-600">
-                                            {{ $package->description }}
-                                        </p>
+                                        <div class="prose prose-sm mt-2 max-w-none leading-6 text-slate-600">
+                                            {!! $package->description !!}
+                                        </div>
 
                                     </div>
                                 @endif
@@ -169,37 +237,37 @@
                             <div class="p-6">
 
                                 @if ($hasDiscount)
-    <div class="flex items-center justify-between">
+                                    <div class="flex items-center justify-between">
 
-        <span class="text-sm text-slate-500">
-            Harga Normal
-        </span>
+                                        <span class="text-sm text-slate-500">
+                                            Harga Normal
+                                        </span>
 
-        <span class="text-sm font-semibold text-slate-400 line-through">
-            Rp {{ number_format($duration->price, 0, ',', '.') }}
-        </span>
+                                        <span class="text-sm font-semibold text-slate-400 line-through">
+                                            Rp {{ number_format($duration->price, 0, ',', '.') }}
+                                        </span>
 
-    </div>
-@endif
+                                    </div>
+                                @endif
 
 
-@if ($promotion)
-    <div class="mt-3 flex items-center justify-between gap-4">
+                                @if ($promotion)
+                                    <div class="mt-3 flex items-center justify-between gap-4">
 
-        <span class="text-sm text-slate-500">
-            Promo
-        </span>
+                                        <span class="text-sm text-slate-500">
+                                            Promo
+                                        </span>
 
-        <span class="text-sm font-bold text-emerald-600">
-            @if ($promotion->discount_type === 'percentage')
-                -{{ rtrim(rtrim(number_format($promotion->discount_value, 2, ',', '.'), '0'), ',') }}%
-            @else
-                - Rp {{ number_format($promotion->discount_value, 0, ',', '.') }}
-            @endif
-        </span>
+                                        <span class="text-sm font-bold text-emerald-600">
+                                            @if ($promotion->discount_type === 'percentage')
+                                                -{{ rtrim(rtrim(number_format($promotion->discount_value, 2, ',', '.'), '0'), ',') }}%
+                                            @else
+                                                - Rp {{ number_format($promotion->discount_value, 0, ',', '.') }}
+                                            @endif
+                                        </span>
 
-    </div>
-@endif
+                                    </div>
+                                @endif
 
 
                                 <div class="mt-3 flex items-center justify-between gap-4">

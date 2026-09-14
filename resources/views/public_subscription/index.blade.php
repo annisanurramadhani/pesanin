@@ -14,11 +14,8 @@
 
                     {{-- Logo PesanIn --}}
                     <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
-                        <img
-                            src="{{ asset('assets/images/logo-regis.jpg') }}"
-                            alt="PesanIn"
-                            class="h-full w-full object-contain"
-                        >
+                        <img src="{{ asset('assets/images/logo-regis.jpg') }}" alt="PesanIn"
+                            class="h-full w-full object-contain">
                     </div>
 
                     {{-- Brand --}}
@@ -38,10 +35,8 @@
 
 
                 {{-- Login --}}
-                <a
-                    href="{{ route('login') }}"
-                    class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-                >
+                <a href="{{ route('login') }}"
+                    class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
                     Masuk
                 </a>
 
@@ -77,11 +72,9 @@
         <section class="mx-auto max-w-7xl px-6 pb-20">
 
             @if ($packages->isEmpty())
-
                 <div class="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
 
-                    <div
-                        class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                         <i class="fa-solid fa-box-open text-xl"></i>
                     </div>
 
@@ -94,13 +87,10 @@
                     </p>
 
                 </div>
-
             @else
-
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 
                     @foreach ($packages as $package)
-
                         <div
                             class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
 
@@ -117,12 +107,10 @@
                                         </h3>
 
                                         @if ($package->badge)
-
                                             <span
                                                 class="mt-2 inline-block rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-600">
                                                 {{ $package->badge }}
                                             </span>
-
                                         @endif
 
                                     </div>
@@ -137,25 +125,70 @@
 
                                 {{-- Deskripsi --}}
                                 @if ($package->description)
-
                                     <div class="mt-5 text-sm leading-6 text-slate-500">
                                         {!! $package->description !!}
                                     </div>
-
                                 @endif
 
 
-                                {{-- Info --}}
-                                <div class="mt-6 flex items-center gap-3 text-sm text-slate-600">
+                                {{-- Package Limits --}}
+                                <div class="mt-6 space-y-3">
 
-                                    <div
-                                        class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-500">
-                                        <i class="fa-solid fa-layer-group"></i>
+                                    {{-- QR Code --}}
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+                                            <i class="fa-solid fa-qrcode"></i>
+                                        </div>
+
+                                        <div class="min-w-0">
+                                            <p class="text-xs font-semibold text-slate-400">
+                                                QR Code
+                                            </p>
+
+                                            <p class="text-sm font-bold text-slate-700">
+                                                Maksimal {{ $package->max_qr_codes }} QR Code
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    <span>
-                                        Tersedia beberapa pilihan durasi
-                                    </span>
+
+                                    {{-- Menu --}}
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500">
+                                            <i class="fa-solid fa-utensils"></i>
+                                        </div>
+
+                                        <div class="min-w-0">
+                                            <p class="text-xs font-semibold text-slate-400">
+                                                Menu
+                                            </p>
+
+                                            <p class="text-sm font-bold text-slate-700">
+                                                Maksimal {{ $package->max_menus }} Menu
+                                            </p>
+                                        </div>
+                                    </div>
+
+
+                                    {{-- Staff --}}
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
+                                            <i class="fa-solid fa-users"></i>
+                                        </div>
+
+                                        <div class="min-w-0">
+                                            <p class="text-xs font-semibold text-slate-400">
+                                                Karyawan
+                                            </p>
+
+                                            <p class="text-sm font-bold text-slate-700">
+                                                Maksimal {{ $package->max_staff }} Karyawan
+                                            </p>
+                                        </div>
+                                    </div>
 
                                 </div>
 
@@ -179,11 +212,9 @@
                             </div>
 
                         </div>
-
                     @endforeach
 
                 </div>
-
             @endif
 
         </section>
@@ -191,12 +222,12 @@
         {{-- ======================================================
                 FOOTER
             ======================================================= --}}
-            <footer class="border-t border-slate-200 pt-6 pb-8 text-center">
+        <footer class="border-t border-slate-200 pt-6 pb-8 text-center">
 
-                <p class="text-xs text-slate-400">
-                    © {{ date('Y') }} PesanIn. Semua hak dilindungi.
-                </p>
-            </footer>
+            <p class="text-xs text-slate-400">
+                © {{ date('Y') }} PesanIn. Semua hak dilindungi.
+            </p>
+        </footer>
 
     </div>
 @endsection

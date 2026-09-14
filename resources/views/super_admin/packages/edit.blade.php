@@ -93,7 +93,131 @@
                         </div>
 
                     </div>
+                    {{-- Package Limits --}}
+                    <div class="md:col-span-2">
 
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+
+                            <div class="mb-5 flex items-start gap-4">
+
+                                <div
+                                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                                    <i class="fa-solid fa-sliders"></i>
+                                </div>
+
+                                <div>
+
+                                    <p class="text-sm font-extrabold text-slate-800">
+                                        Batas Penggunaan Paket
+                                    </p>
+
+                                    <p class="mt-1 text-xs leading-5 text-slate-500">
+                                        Tentukan jumlah maksimal QR Code, Menu, dan akun Karyawan
+                                        yang dapat digunakan oleh pedagang dalam paket ini.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+
+                                {{-- QR Code Limit --}}
+                                <div>
+
+                                    <label for="max_qr_codes" class="mb-2 block text-sm font-bold text-slate-700">
+                                        Maksimal QR Code
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+
+                                    <div class="relative">
+
+                                        <input type="number" id="max_qr_codes" name="max_qr_codes"
+                                            value="{{ old('max_qr_codes', $package->max_qr_codes) }}" min="1"
+                                            required
+                                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-20 text-sm text-slate-800 outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 @error('max_qr_codes') border-rose-500 @enderror">
+
+                                        <span
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+                                            QR
+                                        </span>
+
+                                    </div>
+
+                                    @error('max_qr_codes')
+                                        <p class="mt-1 text-xs font-semibold text-rose-500">
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+
+                                </div>
+
+
+                                {{-- Menu Limit --}}
+                                <div>
+
+                                    <label for="max_menus" class="mb-2 block text-sm font-bold text-slate-700">
+                                        Maksimal Menu
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+
+                                    <div class="relative">
+
+                                        <input type="number" id="max_menus" name="max_menus"
+                                            value="{{ old('max_menus', $package->max_menus) }}" min="1" required
+                                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-20 text-sm text-slate-800 outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 @error('max_menus') border-rose-500 @enderror">
+
+                                        <span
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+                                            Menu
+                                        </span>
+
+                                    </div>
+
+                                    @error('max_menus')
+                                        <p class="mt-1 text-xs font-semibold text-rose-500">
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+
+                                </div>
+
+
+                                {{-- Staff Limit --}}
+                                <div>
+
+                                    <label for="max_staff" class="mb-2 block text-sm font-bold text-slate-700">
+                                        Maksimal Karyawan
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+
+                                    <div class="relative">
+
+                                        <input type="number" id="max_staff" name="max_staff"
+                                            value="{{ old('max_staff', $package->max_staff) }}" min="1" required
+                                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-24 text-sm text-slate-800 outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 @error('max_staff') border-rose-500 @enderror">
+
+                                        <span
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+                                            Orang
+                                        </span>
+
+                                    </div>
+
+                                    @error('max_staff')
+                                        <p class="mt-1 text-xs font-semibold text-rose-500">
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
 
                     {{-- Package Status --}}
                     @if ($package->status === 'active')
@@ -202,7 +326,8 @@
                                 Aktif
                             </option>
 
-                            <option value="inactive" {{ old('status', $package->status) === 'inactive' ? 'selected' : '' }}>
+                            <option value="inactive"
+                                {{ old('status', $package->status) === 'inactive' ? 'selected' : '' }}>
                                 Nonaktif
                             </option>
 

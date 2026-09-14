@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Merchant;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Merchant;
 use App\Rules\SecureText;
+use App\Services\SubscriptionLimitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use RuntimeException;
 
 class StaffController extends Controller
 {
@@ -23,14 +26,19 @@ class StaffController extends Controller
             ->latest()
             ->get();
 
-        return view('merchant.staff.index', compact('staffs'));
+        return view(
+            'merchant.staff.index',
+            compact('staffs')
+        );
     }
 
     /**
      * Simpan staf baru.
      */
-    public function store(Request $request)
-    {
+    public function store(
+        Request $request,
+        SubscriptionLimitService $limitService
+    ) {
         $user = $request->user();
 
         if (!$user->merchant_id) {
@@ -39,6 +47,61 @@ class StaffController extends Controller
                 'Akun kamu tidak memiliki Merchant ID.'
             );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil Merchant
+        |--------------------------------------------------------------------------
+        */
+
+        $merchant = Merchant::find($user->merchant_id);
+
+        if (!$merchant) {
+            return back()->with(
+                'error',
+                'Data merchant tidak ditemukan.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hitung Staff Saat Ini
+        |--------------------------------------------------------------------------
+        */
+
+        $currentStaffCount = User::where(
+            'merchant_id',
+            $user->merchant_id
+        )
+            ->whereIn('role', ['kasir', 'dapur'])
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Cek Limit Staff
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+            $limitService->ensureCanCreateStaff(
+                $merchant,
+                $currentStaffCount
+            );
+        } catch (RuntimeException $e) {
+            return back()
+                ->withInput()
+                ->with('limit_reached', [
+                    'type' => 'staff',
+                    'title' => 'Batas Karyawan Tercapai',
+                    'message' => $e->getMessage(),
+                ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validasi Input
+        |--------------------------------------------------------------------------
+        */
 
         $validated = $request->validate(
             [
@@ -86,6 +149,12 @@ class StaffController extends Controller
             ]
         );
 
+        /*
+        |--------------------------------------------------------------------------
+        | Buat Staff
+        |--------------------------------------------------------------------------
+        */
+
         User::create([
             'merchant_id' => $user->merchant_id,
             'name' => $validated['name'],
@@ -103,27 +172,40 @@ class StaffController extends Controller
     /**
      * Tampilkan halaman edit staf.
      */
-    public function edit(Request $request, string $encryptedId)
-    {
+    public function edit(
+        Request $request,
+        string $encryptedId
+    ) {
         $staffId = decryptId($encryptedId);
 
         $staff = User::where('id', $staffId)
-            ->where('merchant_id', $request->user()->merchant_id)
+            ->where(
+                'merchant_id',
+                $request->user()->merchant_id
+            )
             ->whereIn('role', ['kasir', 'dapur'])
             ->firstOrFail();
 
-        return view('merchant.staff.edit', compact('staff'));
+        return view(
+            'merchant.staff.edit',
+            compact('staff')
+        );
     }
 
     /**
      * Update data staf.
      */
-    public function update(Request $request, string $encryptedId)
-    {
+    public function update(
+        Request $request,
+        string $encryptedId
+    ) {
         $staffId = decryptId($encryptedId);
 
         $staff = User::where('id', $staffId)
-            ->where('merchant_id', $request->user()->merchant_id)
+            ->where(
+                'merchant_id',
+                $request->user()->merchant_id
+            )
             ->whereIn('role', ['kasir', 'dapur'])
             ->firstOrFail();
 
@@ -141,7 +223,8 @@ class StaffController extends Controller
                     'string',
                     'email',
                     'max:255',
-                    Rule::unique('users', 'email')->ignore($staff->id),
+                    Rule::unique('users', 'email')
+                        ->ignore($staff->id),
                 ],
 
                 'password' => [
@@ -177,25 +260,35 @@ class StaffController extends Controller
         $staff->role = $validated['role'];
 
         if (!empty($validated['password'])) {
-            $staff->password = Hash::make($validated['password']);
+            $staff->password = Hash::make(
+                $validated['password']
+            );
         }
 
         $staff->save();
 
         return redirect()
             ->route('merchant.staff.index')
-            ->with('success', 'Akun staf berhasil diperbarui!');
+            ->with(
+                'success',
+                'Akun staf berhasil diperbarui!'
+            );
     }
 
     /**
      * Hapus staf.
      */
-    public function destroy(Request $request, string $encryptedId)
-    {
+    public function destroy(
+        Request $request,
+        string $encryptedId
+    ) {
         $staffId = decryptId($encryptedId);
 
         $staff = User::where('id', $staffId)
-            ->where('merchant_id', $request->user()->merchant_id)
+            ->where(
+                'merchant_id',
+                $request->user()->merchant_id
+            )
             ->whereIn('role', ['kasir', 'dapur'])
             ->firstOrFail();
 

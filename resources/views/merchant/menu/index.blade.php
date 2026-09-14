@@ -316,6 +316,57 @@
 
     {{-- Script SweetAlert2 untuk Konfirmasi Hapus & Notifikasi Sukses/Error --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if (session('limit_reached'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const limitData = @json(session('limit_reached'));
+
+            Swal.fire({
+                icon: 'warning',
+                title: limitData.title,
+
+                html: `
+                    <div class="text-sm text-slate-600 leading-6">
+                        ${limitData.message}
+                    </div>
+
+                    <div class="mt-5 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-sm font-semibold text-left">
+                        <i class="fa-solid fa-crown mr-1"></i>
+                        Upgrade langganan untuk membuat lebih banyak menu.
+                    </div>
+                `,
+
+                showCancelButton: true,
+
+                confirmButtonText:
+                    '<i class="fa-solid fa-crown mr-1"></i> Upgrade Langganan',
+
+                cancelButtonText: 'Nanti',
+
+                reverseButtons: true,
+
+                buttonsStyling: false,
+
+                customClass: {
+                    popup: 'rounded-2xl',
+
+                    confirmButton:
+                        'bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl px-5 py-3 font-extrabold mx-1',
+
+                    cancelButton:
+                        'bg-slate-700 hover:bg-slate-600 text-white rounded-xl px-5 py-3 font-extrabold mx-1'
+                }
+
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+                    window.location.href = '/subscription/';
+                }
+
+            });
+        });
+    </script>
+@endif  
     @if (session('success'))
         <script>
             document.addEventListener('DOMContentLoaded', function() {

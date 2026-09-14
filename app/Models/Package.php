@@ -17,6 +17,15 @@ class Package extends Model
         'description',
         'badge',
         'status',
+        'max_qr_codes',
+        'max_menus',
+        'max_staff',
+    ];
+
+    protected $casts = [
+        'max_qr_codes' => 'integer',
+        'max_menus' => 'integer',
+        'max_staff' => 'integer',
     ];
 
     /**

@@ -301,5 +301,14 @@
 @endsection
 
 @push('scripts')
+@if(session('limit_reached'))
+    <script>
+        window.limitReachedData = @json(session('limit_reached'));
+    </script>
+@else
+    <script>
+        window.limitReachedData = null;
+    </script>
+@endif
     <script src="{{ asset('js/merchant/staf.js') }}"></script>
 @endpush

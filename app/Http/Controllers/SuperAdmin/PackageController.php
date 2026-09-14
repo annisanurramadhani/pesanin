@@ -59,6 +59,24 @@ class PackageController extends Controller
                 'required',
                 Rule::in(['active', 'inactive']),
             ],
+
+            'max_qr_codes' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+
+            'max_menus' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+
+            'max_staff' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
         ], [
             'name.required' => 'Nama paket wajib diisi.',
             'name.min' => 'Nama paket minimal 2 karakter.',
@@ -70,6 +88,18 @@ class PackageController extends Controller
 
             'status.required' => 'Status wajib dipilih.',
             'status.in' => 'Status tidak valid.',
+
+            'max_qr_codes.required' => 'Limit QR Code wajib diisi.',
+            'max_qr_codes.integer' => 'Limit QR Code harus berupa angka.',
+            'max_qr_codes.min' => 'Limit QR Code minimal 1.',
+
+            'max_menus.required' => 'Limit Menu wajib diisi.',
+            'max_menus.integer' => 'Limit Menu harus berupa angka.',
+            'max_menus.min' => 'Limit Menu minimal 1.',
+
+            'max_staff.required' => 'Limit Karyawan wajib diisi.',
+            'max_staff.integer' => 'Limit Karyawan harus berupa angka.',
+            'max_staff.min' => 'Limit Karyawan minimal 1.',
         ]);
 
         try {
@@ -84,6 +114,9 @@ class PackageController extends Controller
                         ? trim($validated['description'])
                         : null,
                     'status' => $validated['status'],
+                    'max_qr_codes' => $validated['max_qr_codes'],
+                    'max_menus' => $validated['max_menus'],
+                    'max_staff' => $validated['max_staff'],
                 ]);
             });
 
@@ -107,7 +140,10 @@ class PackageController extends Controller
 
         $package = Package::with('durations')->findOrFail($id);
 
-        return view('super_admin.packages.edit', compact('package', 'encryptedId'));
+        return view(
+            'super_admin.packages.edit',
+            compact('package', 'encryptedId')
+        );
     }
 
     public function update(
@@ -148,6 +184,24 @@ class PackageController extends Controller
                 'required',
                 Rule::in(['active', 'inactive']),
             ],
+
+            'max_qr_codes' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+
+            'max_menus' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+
+            'max_staff' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
         ], [
             'name.required' => 'Nama paket wajib diisi.',
             'name.min' => 'Nama paket minimal 2 karakter.',
@@ -159,6 +213,18 @@ class PackageController extends Controller
 
             'status.required' => 'Status wajib dipilih.',
             'status.in' => 'Status tidak valid.',
+
+            'max_qr_codes.required' => 'Limit QR Code wajib diisi.',
+            'max_qr_codes.integer' => 'Limit QR Code harus berupa angka.',
+            'max_qr_codes.min' => 'Limit QR Code minimal 1.',
+
+            'max_menus.required' => 'Limit Menu wajib diisi.',
+            'max_menus.integer' => 'Limit Menu harus berupa angka.',
+            'max_menus.min' => 'Limit Menu minimal 1.',
+
+            'max_staff.required' => 'Limit Karyawan wajib diisi.',
+            'max_staff.integer' => 'Limit Karyawan harus berupa angka.',
+            'max_staff.min' => 'Limit Karyawan minimal 1.',
         ]);
 
         try {
@@ -177,6 +243,9 @@ class PackageController extends Controller
                         ? trim($validated['description'])
                         : null,
                     'status' => $validated['status'],
+                    'max_qr_codes' => $validated['max_qr_codes'],
+                    'max_menus' => $validated['max_menus'],
+                    'max_staff' => $validated['max_staff'],
                 ]);
             });
 
