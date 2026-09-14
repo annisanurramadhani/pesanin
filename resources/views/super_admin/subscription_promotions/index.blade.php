@@ -70,27 +70,6 @@
 
     @endif
 
-
-    {{-- Success Message --}}
-    @if (session('success'))
-
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-
-            <div class="flex items-center gap-2">
-
-                <i class="fa-solid fa-circle-check text-emerald-500"></i>
-
-                <p class="text-sm font-semibold text-emerald-700">
-                    {{ session('success') }}
-                </p>
-
-            </div>
-
-        </div>
-
-    @endif
-
-
     {{-- Promotion Table --}}
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
