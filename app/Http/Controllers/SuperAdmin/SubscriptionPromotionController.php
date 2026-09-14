@@ -37,11 +37,12 @@ class SubscriptionPromotionController extends Controller
     public function create()
     {
         $durations = PackageDuration::query()
-            ->with('package')
-            ->where('status', 'active')
-            ->orderBy('package_id')
-            ->orderBy('duration_days')
-            ->get();
+    ->with('package')
+    ->where('status', 'active')
+    ->whereHas('package')
+    ->orderBy('package_id')
+    ->orderBy('duration_days')
+    ->get();
 
         return view(
             'super_admin.subscription_promotions.create',
@@ -285,11 +286,12 @@ class SubscriptionPromotionController extends Controller
         )->findOrFail($id);
 
         $durations = PackageDuration::query()
-            ->with('package')
-            ->where('status', 'active')
-            ->orderBy('package_id')
-            ->orderBy('duration_days')
-            ->get();
+    ->with('package')
+    ->where('status', 'active')
+    ->whereHas('package')
+    ->orderBy('package_id')
+    ->orderBy('duration_days')
+    ->get();
 
         $selectedDurationIds = $promotion
             ->durations
