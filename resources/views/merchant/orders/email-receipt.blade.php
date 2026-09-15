@@ -47,20 +47,39 @@
                                 margin:0 auto 15px;
                                 border-radius:16px;
                                 overflow:hidden;
+                                background:#fffbeb;
+                                text-align:center;
                             "
                         >
-                            <img
-                                src="{{ $message->embed(public_path('assets/images/logo-regis.jpg')) }}"
-                                alt="PesanIn"
-                                width="64"
-                                height="64"
-                                style="
-                                    width:64px;
-                                    height:64px;
-                                    object-fit:cover;
-                                    display:block;
-                                "
-                            >
+                            @if ($order->merchant?->logo)
+                                <img
+                                    src="{{ $message->embed(public_path('storage/' . $order->merchant->logo)) }}"
+                                    alt="{{ $order->merchant->name ?? 'Logo Merchant' }}"
+                                    width="64"
+                                    height="64"
+                                    style="
+                                        width:64px;
+                                        height:64px;
+                                        object-fit:cover;
+                                        display:block;
+                                        border-radius:16px;
+                                    "
+                                >
+                            @else
+                                <div
+                                    style="
+                                        width:64px;
+                                        height:64px;
+                                        line-height:64px;
+                                        font-size:28px;
+                                        color:#d97706;
+                                        font-family:Arial, Helvetica, sans-serif;
+                                        font-weight:bold;
+                                    "
+                                >
+                                    🏪
+                                </div>
+                            @endif
                         </div>
 
                         <h1

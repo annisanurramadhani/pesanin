@@ -80,7 +80,15 @@
                 <div
                     class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600"
                 >
-                    <i class="fa-solid fa-store text-lg"></i>
+                    @if ($order->merchant?->logo)
+                        <img
+                            src="{{ asset('storage/' . $order->merchant->logo) }}"
+                            alt="{{ $order->merchant->name ?? 'Logo Merchant' }}"
+                            class="h-full w-full object-cover"
+                        >
+                    @else
+                        <i class="fa-solid fa-store text-lg"></i>
+                    @endif
                 </div>
 
                 <h3 class="text-lg font-black text-slate-900">
@@ -257,7 +265,18 @@
                         QRIS
                     </span>
 
-                @else
+
+                @elseif (strtolower($order->payment_method) === 'bank')
+
+                    <span
+                        class="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-[10px] font-black text-blue-700"
+                    >
+                        <i class="fa-solid fa-building-columns text-blue-600"></i>
+                        Transfer Bank
+                    </span>
+
+
+                @elseif (strtolower($order->payment_method) === 'cash')
 
                     <span
                         class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3 py-1.5 text-[10px] font-black text-slate-700"
@@ -266,10 +285,19 @@
                         Bayar Kasir
                     </span>
 
+
+                @else
+
+                    <span
+                        class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3 py-1.5 text-[10px] font-black text-slate-700"
+                    >
+                        <i class="fa-solid fa-wallet text-slate-500"></i>
+                        {{ ucfirst($order->payment_method) }}
+                    </span>
+
                 @endif
 
             </div>
-
 
             {{-- ========================================= --}}
             {{-- FOOTER STRUK --}}

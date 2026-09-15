@@ -37,7 +37,7 @@ class SubscriptionPromotionDurationSeeder extends Seeder
             return;
         }
 
-        $promotion->packageDurations()->sync(
+        $promotion->durations()->sync(
             $durations->pluck('id')->toArray()
         );
 

@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 .writeText(va)
                 .then(function () {
 
-                    alert(
+                    showCopyToast(
                         'Nomor Virtual Account berhasil disalin.'
                     );
 
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             document.execCommand('copy');
 
-            alert(
+            showCopyToast(
                 'Nomor Virtual Account berhasil disalin.'
             );
 
@@ -118,6 +118,39 @@ document.addEventListener('DOMContentLoaded', function () {
         );
     }
 
+    function showCopyToast(message) {
+
+        const toast = document.createElement('div');
+
+        toast.innerHTML = `
+            <div style="
+                position:fixed;
+                top:20px;
+                right:20px;
+                z-index:9999;
+                background:#10b981;
+                color:white;
+                padding:12px 18px;
+                border-radius:12px;
+                font-size:14px;
+                font-weight:700;
+                box-shadow:0 10px 25px rgba(0,0,0,.15);
+            ">
+                <i class="fa-solid fa-check"></i>
+                ${message}
+            </div>
+        `;
+
+        document.body.appendChild(toast);
+
+
+        setTimeout(function(){
+
+            toast.remove();
+
+        },2000);
+
+    }
 
     /*
     |--------------------------------------------------------------------------
