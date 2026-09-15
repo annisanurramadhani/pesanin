@@ -27,6 +27,10 @@ class PackageSeeder extends Seeder
                 'description' => 'Silver package for merchants who are just getting started.',
                 'badge' => null,
                 'status' => 'active',
+
+                'max_qr_codes' => 2,
+                'max_menus' => 10,
+                'max_staff' => 3,
             ]
         );
 
@@ -82,6 +86,10 @@ class PackageSeeder extends Seeder
                 'description' => 'Gold package for growing merchants who need more features.',
                 'badge' => 'Popular',
                 'status' => 'active',
+
+                'max_qr_codes' => 5,
+                'max_menus' => 50,
+                'max_staff' => 10,
             ]
         );
 
@@ -137,6 +145,10 @@ class PackageSeeder extends Seeder
                 'description' => 'Platinum package for established merchants who need the most advanced features.',
                 'badge' => 'Best Value',
                 'status' => 'active',
+
+                'max_qr_codes' => 10,
+                'max_menus' => 100,
+                'max_staff' => 10,
             ]
         );
 

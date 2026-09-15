@@ -8,9 +8,6 @@ use Illuminate\Database\Seeder;
 
 class MerchantSettingSeeder extends Seeder
 {
-    /**
-     * Menjalankan seeder merchant settings.
-     */
     public function run(): void
     {
         $merchants = Merchant::all();
@@ -22,10 +19,14 @@ class MerchantSettingSeeder extends Seeder
                     'merchant_id' => $merchant->id,
                 ],
                 [
-                    'description' => null,
+                    'cs_phone' => $merchant->phone,
+                    'description' => 'Melayani pesanan makanan dan minuman.',
                 ]
             );
-
         }
+
+        $this->command->info(
+            'Merchant setting berhasil dibuat/diperbarui.'
+        );
     }
 }
