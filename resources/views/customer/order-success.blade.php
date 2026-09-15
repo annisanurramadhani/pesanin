@@ -1183,7 +1183,7 @@
         @endif
 
 
-        {{-- =========================================================
+     {{-- =========================================================
 ACTION
 ========================================================== --}}
 <div class="space-y-3">
@@ -1194,7 +1194,8 @@ ACTION
     )
 
         {{-- PEMBAYARAN GAGAL / EXPIRED --}}
-        <a href="{{ route('customer.checkout', $qrCode->code) }}?retry_order={{ urlencode(Crypt::encryptString($order->order_number)) }}"
+        <a
+            href="{{ route('customer.checkout', $qrCode->code) }}?retry_order={{ urlencode(Crypt::encryptString($order->order_number)) }}"
             class="flex items-center justify-center gap-2
                    w-full py-3
                    rounded-xl
@@ -1212,22 +1213,62 @@ ACTION
 
     @else
 
-        {{-- PEMBAYARAN BERHASIL / NORMAL --}}
-        <a href="{{ route('customer.menu', $qrCode->code) }}"
-            class="flex items-center justify-center gap-2
-                   w-full py-3
-                   rounded-xl
-                   bg-slate-900
-                   text-white
-                   text-sm font-bold
-                   hover:bg-slate-800
-                   transition">
+        {{-- KEMBALI KE MENU --}}
+        <div class="flex gap-3">
 
-            <i class="fa-solid fa-utensils"></i>
+            <a
+                href="{{ route('customer.menu', $qrCode->code) }}"
+                class="{{ $order->payment_status === 'paid'
+                    ? 'w-1/2'
+                    : 'w-full' }}
+                       flex items-center
+                       justify-center gap-2
+                       py-3
+                       rounded-xl
+                       bg-slate-900
+                       text-white
+                       text-sm font-bold
+                       hover:bg-slate-800
+                       transition">
 
-            Kembali ke Menu
+                <i class="fa-solid fa-utensils"></i>
 
-        </a>
+                Kembali ke Menu
+
+            </a>
+
+
+            {{-- DETAIL PESANAN HANYA KALAU PAID --}}
+            @if ($order->payment_status === 'paid')
+
+                <a
+                    href="{{ route(
+                        'customer.order.detail',
+                        [
+                            'code' => $qrCode->code,
+                            'orderNumber' => request()->route('orderNumber'),
+                        ]
+                    ) }}"
+                    class="w-1/2
+                           flex items-center
+                           justify-center gap-2
+                           py-3
+                           rounded-xl
+                           bg-amber-500
+                           text-white
+                           text-sm font-bold
+                           hover:bg-amber-600
+                           transition">
+
+                    <i class="fa-solid fa-receipt"></i>
+
+                    Detail Pesanan
+
+                </a>
+
+            @endif
+
+        </div>
 
     @endif
 

@@ -186,6 +186,15 @@ Route::prefix('m/{code}')
             [CustomerOrderController::class, 'success']
         )->name('order.success');
 
+        Route::get(
+            '/order/{orderNumber}/detail',
+            [CustomerOrderController::class, 'detail']
+        )->name('order.detail');
+
+        Route::get(
+            '/order/{orderNumber}/detail/status',
+            [CustomerOrderController::class, 'detailStatus']
+        )->name('order.detail.status');
 
         Route::get(
             '/order/{orderNumber}/payment',
