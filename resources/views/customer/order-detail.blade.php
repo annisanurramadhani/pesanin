@@ -548,7 +548,7 @@
 
                         @elseif ($order->payment_method === 'bank')
 
-                            Virtual Account
+                            BANK
                             @if ($order->bank)
                                 ({{ strtoupper($order->bank) }})
                             @endif

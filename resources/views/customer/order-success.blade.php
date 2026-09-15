@@ -324,7 +324,7 @@
                         @if ($order->payment_method === 'qris')
                             QRIS
                         @elseif ($order->payment_method === 'bank')
-                            Virtual Account
+                            BANK
                         @else
                             Tunai
                         @endif
