@@ -699,10 +699,7 @@
                                             @endif
 
 
-                                            {{-- WAKTU ORDER --}}
-                                            <span class="text-[11px] font-bold text-slate-500">
-                                                {{ $order->created_at->format('d/m/Y H:i') }} WIB
-                                            </span>
+                    
 
                                         </div>
 
