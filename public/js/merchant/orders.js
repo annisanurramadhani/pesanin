@@ -1,243 +1,118 @@
 // =========================================================
 // MERCHANT ORDERS JAVASCRIPT
 // =========================================================
-// Berisi seluruh JavaScript halaman Kelola Pesanan / Riwayat Pesanan.
-// Termasuk:
-// - Pembayaran Cash
-// - Filter Pesanan
-// - Konfirmasi Cancel
-// - Modal Detail Status
-// - Dynamic Order
-// =========================================================
-
 
 (function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | FORMAT RUPIAH
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // FORMAT RUPIAH
+    // =========================================================
 
     window.formatRupiah = function (value) {
-
-        return 'Rp ' + Number(value).toLocaleString(
-            'id-ID'
-        );
-
+        return 'Rp ' + Number(value).toLocaleString('id-ID');
     };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | MODAL PEMBAYARAN CASH
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // MODAL PEMBAYARAN CASH
+    // =========================================================
 
     let cashPaymentTotal = 0;
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | BUKA MODAL PEMBAYARAN CASH
-    |--------------------------------------------------------------------------
-    */
 
     window.openCashPaymentModal = function (
         encryptedId,
         total,
         orderNumber
     ) {
-
         cashPaymentTotal = Number(total);
 
+        const modal = document.getElementById('cashPaymentModal');
+        const form = document.getElementById('cashPaymentForm');
+        const input = document.getElementById('cashReceivedInput');
 
-        const modal =
-            document.getElementById(
-                'cashPaymentModal'
-            );
-
-        const form =
-            document.getElementById(
-                'cashPaymentForm'
-            );
-
-        const input =
-            document.getElementById(
-                'cashReceivedInput'
-            );
-
-
-        if (
-            !modal ||
-            !form ||
-            !input
-        ) {
+        if (!modal || !form || !input) {
             return;
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SET ACTION FORM
-        |--------------------------------------------------------------------------
-        */
 
         form.action =
             '/merchant/orders/' +
             encryptedId +
             '/payment';
 
+        const orderElement =
+            document.getElementById('cashPaymentOrder');
 
-        /*
-        |--------------------------------------------------------------------------
-        | TAMPILKAN DATA
-        |--------------------------------------------------------------------------
-        */
+        if (orderElement) {
+            orderElement.textContent = '#' + orderNumber;
+        }
 
-        document.getElementById(
-            'cashPaymentOrder'
-        ).textContent =
-            '#' + orderNumber;
+        const totalElement =
+            document.getElementById('cashPaymentTotal');
 
-
-        document.getElementById(
-            'cashPaymentTotal'
-        ).textContent =
-            formatRupiah(
-                cashPaymentTotal
-            );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESET
-        |--------------------------------------------------------------------------
-        */
+        if (totalElement) {
+            totalElement.textContent =
+                formatRupiah(cashPaymentTotal);
+        }
 
         input.value = '';
 
-
         const hiddenInput =
-            document.getElementById(
-                'cashReceivedHidden'
-            );
+            document.getElementById('cashReceivedHidden');
 
         if (hiddenInput) {
             hiddenInput.value = '';
         }
 
-
         const changeElement =
-            document.getElementById(
-                'cashPaymentChange'
-            );
+            document.getElementById('cashPaymentChange');
 
         if (changeElement) {
-            changeElement.textContent =
-                'Rp 0';
+            changeElement.textContent = 'Rp 0';
         }
-
 
         const errorElement =
-            document.getElementById(
-                'cashPaymentError'
-            );
+            document.getElementById('cashPaymentError');
 
         if (errorElement) {
-
             errorElement.textContent = '';
-
-            errorElement.classList.add(
-                'hidden'
-            );
+            errorElement.classList.add('hidden');
         }
-
 
         const submitButton =
-            document.getElementById(
-                'cashPaymentSubmit'
-            );
+            document.getElementById('cashPaymentSubmit');
 
         if (submitButton) {
-
-            submitButton.disabled =
-                true;
-
+            submitButton.disabled = true;
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | TAMPILKAN MODAL
-        |--------------------------------------------------------------------------
-        */
-
-        modal.classList.remove(
-            'hidden'
-        );
-
-        modal.classList.add(
-            'flex'
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | FOCUS INPUT
-        |--------------------------------------------------------------------------
-        */
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
 
         setTimeout(function () {
-
             input.focus();
-
         }, 100);
-
     };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | TUTUP MODAL PEMBAYARAN CASH
-    |--------------------------------------------------------------------------
-    */
-
     window.closeCashPaymentModal = function () {
-
         const modal =
-            document.getElementById(
-                'cashPaymentModal'
-            );
-
+            document.getElementById('cashPaymentModal');
 
         if (!modal) {
             return;
         }
 
-
-        modal.classList.add(
-            'hidden'
-        );
-
-        modal.classList.remove(
-            'flex'
-        );
-
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | HITUNG KEMBALIAN
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // HITUNG KEMBALIAN CASH
+    // =========================================================
 
     const cashReceivedInput =
-        document.getElementById(
-            'cashReceivedInput'
-        );
-
+        document.getElementById('cashReceivedInput');
 
     if (cashReceivedInput) {
 
@@ -246,15 +121,10 @@
             function () {
 
                 const received =
-                    Number(
-                        this.value
-                    ) || 0;
-
+                    Number(this.value) || 0;
 
                 const change =
-                    received -
-                    cashPaymentTotal;
-
+                    received - cashPaymentTotal;
 
                 const changeElement =
                     document.getElementById(
@@ -276,159 +146,75 @@
                         'cashReceivedHidden'
                     );
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | SIMPAN NILAI
-                |--------------------------------------------------------------------------
-                */
-
                 if (hiddenInput) {
-
-                    hiddenInput.value =
-                        received;
-
+                    hiddenInput.value = received;
                 }
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | BELUM DIISI
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    received <= 0
-                ) {
+                if (received <= 0) {
 
                     if (changeElement) {
-
-                        changeElement.textContent =
-                            'Rp 0';
-
+                        changeElement.textContent = 'Rp 0';
                     }
-
 
                     if (errorElement) {
-
-                        errorElement.textContent =
-                            '';
-
-                        errorElement.classList.add(
-                            'hidden'
-                        );
-
+                        errorElement.textContent = '';
+                        errorElement.classList.add('hidden');
                     }
 
-
                     if (submitButton) {
-
-                        submitButton.disabled =
-                            true;
-
+                        submitButton.disabled = true;
                     }
 
                     return;
-
                 }
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | UANG KURANG
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    received <
-                    cashPaymentTotal
-                ) {
+                if (received < cashPaymentTotal) {
 
                     if (changeElement) {
-
-                        changeElement.textContent =
-                            'Rp 0';
-
+                        changeElement.textContent = 'Rp 0';
                     }
 
-
                     if (errorElement) {
-
                         errorElement.textContent =
                             'Uang pelanggan kurang ' +
                             formatRupiah(
-                                cashPaymentTotal -
-                                received
+                                cashPaymentTotal - received
                             );
 
-                        errorElement.classList.remove(
-                            'hidden'
-                        );
-
+                        errorElement.classList.remove('hidden');
                     }
 
-
                     if (submitButton) {
-
-                        submitButton.disabled =
-                            true;
-
+                        submitButton.disabled = true;
                     }
 
                     return;
-
                 }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | UANG CUKUP / LEBIH
-                |--------------------------------------------------------------------------
-                */
 
                 if (errorElement) {
-
-                    errorElement.classList.add(
-                        'hidden'
-                    );
-
+                    errorElement.textContent = '';
+                    errorElement.classList.add('hidden');
                 }
-
 
                 if (changeElement) {
-
                     changeElement.textContent =
-                        formatRupiah(
-                            change
-                        );
-
+                        formatRupiah(change);
                 }
-
 
                 if (submitButton) {
-
-                    submitButton.disabled =
-                        false;
-
+                    submitButton.disabled = false;
                 }
-
             }
         );
-
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | KLIK DI LUAR MODAL PEMBAYARAN
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // KLIK DI LUAR MODAL CASH
+    // =========================================================
 
     const cashPaymentModal =
-        document.getElementById(
-            'cashPaymentModal'
-        );
-
+        document.getElementById('cashPaymentModal');
 
     if (cashPaymentModal) {
 
@@ -436,140 +222,75 @@
             'click',
             function (event) {
 
-                if (
-                    event.target === this
-                ) {
-
+                if (event.target === this) {
                     closeCashPaymentModal();
-
                 }
 
             }
         );
-
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | FILTER PESANAN
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // FILTER PESANAN
+    // =========================================================
 
     window.switchFilterMode = function (mode) {
 
         document
-            .getElementById(
-                'inputDayWrapper'
-            )
-            ?.classList.add(
-                'hidden'
-            );
-
+            .getElementById('inputDayWrapper')
+            ?.classList.add('hidden');
 
         document
-            .getElementById(
-                'inputMonthWrapper'
-            )
-            ?.classList.add(
-                'hidden'
-            );
-
+            .getElementById('inputMonthWrapper')
+            ?.classList.add('hidden');
 
         document
-            .getElementById(
-                'inputYearWrapper'
-            )
-            ?.classList.add(
-                'hidden'
-            );
+            .getElementById('inputYearWrapper')
+            ?.classList.add('hidden');
 
-
-        if (
-            mode === 'day'
-        ) {
+        if (mode === 'day') {
 
             document
-                .getElementById(
-                    'inputDayWrapper'
-                )
-                ?.classList.remove(
-                    'hidden'
-                );
+                .getElementById('inputDayWrapper')
+                ?.classList.remove('hidden');
 
-        }
-
-
-        else if (
-            mode === 'month'
-        ) {
+        } else if (mode === 'month') {
 
             document
-                .getElementById(
-                    'inputMonthWrapper'
-                )
-                ?.classList.remove(
-                    'hidden'
-                );
+                .getElementById('inputMonthWrapper')
+                ?.classList.remove('hidden');
 
-        }
-
-
-        else if (
-            mode === 'year'
-        ) {
+        } else if (mode === 'year') {
 
             document
-                .getElementById(
-                    'inputYearWrapper'
-                )
-                ?.classList.remove(
-                    'hidden'
-                );
-
+                .getElementById('inputYearWrapper')
+                ?.classList.remove('hidden');
         }
-
     };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | CANCEL CONFIRMATION
-    |--------------------------------------------------------------------------
-    |
-    | Menggunakan event delegation supaya tetap bekerja
-    | meskipun isi tbody diganti oleh dynamic refresh.
-    |
-    */
+    // =========================================================
+    // CANCEL MAKANAN
+    // =========================================================
 
     document.addEventListener(
         'submit',
         function (event) {
 
             const form =
-                event.target.closest(
-                    '.cancel-food-form'
-                );
-
+                event.target.closest('.cancel-food-form');
 
             if (!form) {
                 return;
             }
 
-
             event.preventDefault();
 
-
-            if (
-                typeof Swal === 'undefined'
-            ) {
-
+            if (typeof Swal === 'undefined') {
                 form.submit();
-
                 return;
-
             }
-
 
             Swal.fire({
 
@@ -594,7 +315,6 @@
                 color: '#111827',
 
                 customClass: {
-
                     popup: 'rounded-2xl',
 
                     confirmButton:
@@ -602,76 +322,48 @@
 
                     cancelButton:
                         'rounded-xl px-5 py-2.5 font-bold'
-
                 }
 
             }).then(function (result) {
 
-                if (
-                    result.isConfirmed
-                ) {
-
+                if (result.isConfirmed) {
                     form.submit();
-
                 }
 
             });
-
         }
     );
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | MODAL DETAIL STATUS PESANAN
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // MODAL DETAIL STATUS PESANAN
+    // =========================================================
 
     window.openOrderStatusModal = function (
         orderNumber,
         orderId
     ) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | CARI BARIS ORDER
-        |--------------------------------------------------------------------------
-        */
-
         const row =
             document.querySelector(
                 `tr[data-order-id="${orderId}"]`
             );
 
-
         if (!row) {
-
             console.error(
                 'Baris order tidak ditemukan:',
                 orderId
             );
-
             return;
-
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | AMBIL DATA UNIT
-        |--------------------------------------------------------------------------
-        */
 
         let units = [];
 
-
         try {
 
-            units =
-                JSON.parse(
-                    row.dataset.orderUnits ||
-                    '[]'
-                );
+            units = JSON.parse(
+                row.dataset.orderUnits || '[]'
+            );
 
         } catch (error) {
 
@@ -681,15 +373,7 @@
             );
 
             return;
-
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | ELEMENT MODAL
-        |--------------------------------------------------------------------------
-        */
 
         const modal =
             document.getElementById(
@@ -711,7 +395,6 @@
                 'orderStatusSummary'
             );
 
-
         if (
             !modal ||
             !orderNumberElement ||
@@ -724,46 +407,17 @@
             );
 
             return;
-
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | NOMOR ORDER
-        |--------------------------------------------------------------------------
-        */
 
         orderNumberElement.textContent =
             '#' + orderNumber;
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESET LIST
-        |--------------------------------------------------------------------------
-        */
-
         list.innerHTML = '';
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | COUNTER
-        |--------------------------------------------------------------------------
-        */
 
         let completed = 0;
         let cancelled = 0;
         let processing = 0;
         let pending = 0;
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | RENDER SETIAP UNIT
-        |--------------------------------------------------------------------------
-        */
 
         units.forEach(function (unit) {
 
@@ -771,22 +425,11 @@
             let statusClass = '';
             let icon = '';
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | SELESAI
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                unit.status ===
-                'completed'
-            ) {
+            if (unit.status === 'completed') {
 
                 completed++;
 
-                statusText =
-                    'Selesai';
+                statusText = 'Selesai';
 
                 statusClass =
                     'bg-emerald-100 text-emerald-700';
@@ -794,24 +437,11 @@
                 icon =
                     '<i class="fa-solid fa-check mr-1"></i>';
 
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | BAHAN HABIS
-            |--------------------------------------------------------------------------
-            */
-
-            else if (
-                unit.status ===
-                'cancelled'
-            ) {
+            } else if (unit.status === 'cancelled') {
 
                 cancelled++;
 
-                statusText =
-                    'Bahan Habis';
+                statusText = 'Bahan Habis';
 
                 statusClass =
                     'bg-rose-100 text-rose-700';
@@ -819,24 +449,11 @@
                 icon =
                     '<i class="fa-solid fa-box-open mr-1"></i>';
 
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | DIPROSES
-            |--------------------------------------------------------------------------
-            */
-
-            else if (
-                unit.status ===
-                'processing'
-            ) {
+            } else if (unit.status === 'processing') {
 
                 processing++;
 
-                statusText =
-                    'Diproses';
+                statusText = 'Diproses';
 
                 statusClass =
                     'bg-blue-100 text-blue-700';
@@ -844,48 +461,26 @@
                 icon =
                     '<i class="fa-solid fa-fire mr-1"></i>';
 
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | MENUNGGU
-            |--------------------------------------------------------------------------
-            */
-
-            else {
+            } else {
 
                 pending++;
 
-                statusText =
-                    'Menunggu';
+                statusText = 'Menunggu';
 
                 statusClass =
                     'bg-amber-100 text-amber-700';
 
                 icon =
                     '<i class="fa-regular fa-clock mr-1"></i>';
-
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | BUAT ELEMENT
-            |--------------------------------------------------------------------------
-            */
-
             const item =
-                document.createElement(
-                    'div'
-                );
-
+                document.createElement('div');
 
             item.className =
                 'flex items-center justify-between ' +
                 'gap-3 rounded-xl border ' +
                 'border-slate-100 bg-slate-50 p-3';
-
 
             item.innerHTML = `
 
@@ -901,11 +496,8 @@
                                text-slate-400
                                shrink-0"
                     >
-
                         <i class="fa-solid fa-utensils"></i>
-
                     </div>
-
 
                     <div class="min-w-0">
 
@@ -917,7 +509,6 @@
                         >
                             ${escapeHtml(unit.menu)}
                         </p>
-
 
                         <p
                             class="text-[10px]
@@ -931,7 +522,6 @@
 
                 </div>
 
-
                 <span
                     class="px-2.5 py-1
                            rounded-lg
@@ -940,158 +530,80 @@
                            whitespace-nowrap
                            ${statusClass}"
                 >
-
                     ${icon}
-
                     ${statusText}
-
                 </span>
 
             `;
 
-
-            list.appendChild(
-                item
-            );
-
+            list.appendChild(item);
         });
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | RINGKASAN
-        |--------------------------------------------------------------------------
-        */
 
         const summaryParts = [];
 
-
-        if (
-            completed > 0
-        ) {
-
-            summaryParts.push(
-                `${completed} selesai`
-            );
-
+        if (completed > 0) {
+            summaryParts.push(`${completed} selesai`);
         }
 
-
-        if (
-            cancelled > 0
-        ) {
-
-            summaryParts.push(
-                `${cancelled} bahan habis`
-            );
-
+        if (cancelled > 0) {
+            summaryParts.push(`${cancelled} bahan habis`);
         }
 
-
-        if (
-            processing > 0
-        ) {
-
-            summaryParts.push(
-                `${processing} diproses`
-            );
-
+        if (processing > 0) {
+            summaryParts.push(`${processing} diproses`);
         }
 
-
-        if (
-            pending > 0
-        ) {
-
-            summaryParts.push(
-                `${pending} menunggu`
-            );
-
+        if (pending > 0) {
+            summaryParts.push(`${pending} menunggu`);
         }
-
 
         summary.textContent =
-            summaryParts.join(
-                ' • '
-            );
+            summaryParts.join(' • ');
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | TAMPILKAN MODAL
-        |--------------------------------------------------------------------------
-        */
-
-        modal.classList.remove(
-            'hidden'
-        );
-
-        modal.classList.add(
-            'flex'
-        );
-
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | TUTUP MODAL DETAIL
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // TUTUP MODAL DETAIL
+    // =========================================================
 
-    window.closeOrderStatusModal =
-        function () {
+    window.closeOrderStatusModal = function () {
 
-            const modal =
-                document.getElementById(
-                    'orderStatusModal'
-                );
-
-
-            if (!modal) {
-                return;
-            }
-
-
-            modal.classList.add(
-                'hidden'
+        const modal =
+            document.getElementById(
+                'orderStatusModal'
             );
 
-            modal.classList.remove(
-                'flex'
-            );
+        if (!modal) {
+            return;
+        }
 
-        };
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | ESCAPE HTML
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // ESCAPE HTML
+    // =========================================================
 
     window.escapeHtml = function (value) {
 
         const div =
-            document.createElement(
-                'div'
-            );
-
+            document.createElement('div');
 
         div.textContent =
             value ?? '';
 
-
         return div.innerHTML;
-
     };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | KLIK DI LUAR MODAL DETAIL
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // KLIK DI LUAR MODAL DETAIL
+    // =========================================================
 
     document.addEventListener(
         'click',
@@ -1102,37 +614,26 @@
                     'orderStatusModal'
                 );
 
-
             if (
                 modal &&
                 event.target === modal
             ) {
-
                 closeOrderStatusModal();
-
             }
-
         }
     );
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | TOMBOL ESC
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // TOMBOL ESC
+    // =========================================================
 
     document.addEventListener(
         'keydown',
         function (event) {
 
-            if (
-                event.key ===
-                'Escape'
-            ) {
-
+            if (event.key === 'Escape') {
                 closeOrderStatusModal();
-
             }
 
         }
@@ -1142,406 +643,149 @@
     // =========================================================
     // DYNAMIC ORDER
     // =========================================================
-    // Digunakan untuk Kasir dan Dapur
-    // agar pesanan diperbarui tanpa Ctrl + R.
-    // =========================================================
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | ELEMENT UTAMA
-    |--------------------------------------------------------------------------
-    */
 
     const ordersBody =
         document.querySelector(
             '[data-orders-body]'
         );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | JIKA BUKAN HALAMAN ORDER
-    |--------------------------------------------------------------------------
-    */
-
     if (!ordersBody) {
         return;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | ROLE USER
-    |--------------------------------------------------------------------------
-    */
-
     const userRole =
         ordersBody.dataset.ordersRole;
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | HANYA KASIR & DAPUR % OWNER
-    |--------------------------------------------------------------------------
-    */
-
     if (
         userRole !== 'kasir' &&
-        userRole !== 'dapur' && 
+        userRole !== 'dapur' &&
         userRole !== 'owner'
     ) {
         return;
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | SIMPAN ORDER YANG RELEVAN
-    |--------------------------------------------------------------------------
-    |
-    | Kasir:
-    | hanya order cash yang masih pending.
-    |
-    | Dapur:
-    | seluruh order yang sedang tampil.
-    |
-    */
+    // =========================================================
+    // SIGNATURE ORDER
+    // =========================================================
 
-    let previousOrders =
-        getCurrentRelevantOrderIds();
+    function getOrderSignature(row) {
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | STATUS REQUEST
-    |--------------------------------------------------------------------------
-    |
-    | Mencegah request bertumpuk jika server lambat.
-    |
-    */
-
-    let isChecking =
-        false;
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | AMBIL ID ORDER YANG RELEVAN DARI TABEL
-    |--------------------------------------------------------------------------
-    */
-
-    function getCurrentRelevantOrderIds() {
-
-        const rows =
-            document.querySelectorAll(
-                '[data-orders-body] tr[data-order-id]'
+        const orderId =
+            String(
+                row.dataset.orderId || ''
             );
 
+        const paymentMethod =
+            String(
+                row.dataset.orderPaymentMethod || ''
+            ).toLowerCase();
 
-        return Array.from(rows)
-            .filter(function (row) {
+        const paymentStatus =
+            String(
+                row.dataset.orderPaymentStatus || ''
+            ).toLowerCase();
 
-                /*
-                |--------------------------------------------------------------------------
-                | OWNER
-                |--------------------------------------------------------------------------
-                |
-                | Semua order yang tampil diperhatikan.
-                |
-                */
+        const orderStatus =
+            String(
+                row.dataset.orderStatus || ''
+            ).toLowerCase();
 
-                if (
-                    userRole === 'owner'
-                ) {
-
-                    return true;
-
-                }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | DAPUR
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    userRole === 'dapur'
-                ) {
-
-                    return true;
-
-                }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | KASIR
-                |--------------------------------------------------------------------------
-                */
-
-                const paymentMethod =
-                    (
-                        row.dataset
-                            .orderPaymentMethod ||
-                        ''
-                    ).toLowerCase();
-
-
-                const paymentStatus =
-                    (
-                        row.dataset
-                            .orderPaymentStatus ||
-                        ''
-                    ).toLowerCase();
-
-
-                const isCash =
-                    [
-                        'cash',
-                        'kasir',
-                        'tunai'
-                    ].includes(
-                        paymentMethod
-                    );
-
-
-                return (
-                    isCash &&
-                    paymentStatus ===
-                    'pending'
-                );
-
-            })
-            .map(function (row) {
-
-                return String(
-                    row.dataset.orderId
-                );
-
-            })
-            .filter(Boolean)
-            .sort();
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | CEK APAKAH ADA PERUBAHAN ORDER
-    |--------------------------------------------------------------------------
-    */
-
-    async function checkOrders() {
-
-        if (isChecking) {
-            return;
-        }
-
-
-        isChecking = true;
-
+        let units = [];
 
         try {
 
-            const response =
-                await fetch(
-                    '/merchant/orders/check',
-                    {
-                        method: 'GET',
-
-                        headers: {
-
-                            'X-Requested-With':
-                                'XMLHttpRequest',
-
-                            'Accept':
-                                'application/json'
-
-                        },
-
-                        cache: 'no-store'
-
-                    }
-                );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | RESPONSE TIDAK VALID
-            |--------------------------------------------------------------------------
-            */
-
-            if (!response.ok) {
-                return;
-            }
-
-
-            const data =
-                await response.json();
-
-
-            if (
-                !data.success ||
-                !Array.isArray(
-                    data.orders
-                )
-            ) {
-                return;
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | ID ORDER TERBARU DARI SERVER
-            |--------------------------------------------------------------------------
-            */
-
-            const serverOrders =
-                data.orders
-                    .map(function (order) {
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | OWNER
-                        |--------------------------------------------------------------------------
-                        | Sertakan status pembayaran, status order,
-                        | dan status setiap unit.
-                        |--------------------------------------------------------------------------
-                        */
-
-                        if (
-                            userRole === 'owner'
-                        ) {
-
-                            const units =
-                                Array.isArray(
-                                    order.units
-                                )
-                                    ? order.units
-                                        .map(function (unit) {
-
-                                            return (
-                                                String(unit.id) +
-                                                ':' +
-                                                String(unit.status)
-                                            );
-
-                                        })
-                                        .sort()
-                                        .join('|')
-                                    : '';
-
-
-                            return (
-                                String(order.id) +
-                                ':' +
-                                String(
-                                    order.payment_status || ''
-                                ) +
-                                ':' +
-                                String(
-                                    order.status || ''
-                                ) +
-                                ':' +
-                                units
-                            );
-
-                        }
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | KASIR + DAPUR
-                        |--------------------------------------------------------------------------
-                        */
-
-                        return String(
-                            order.id
-                        );
-
-                    })
-                    .sort();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | BANDINKAN
-            |--------------------------------------------------------------------------
-            */
-
-            const hasChanged =
-                !areArraysEqual(
-                    previousOrders,
-                    serverOrders
-                );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | JIKA ADA PERUBAHAN
-            |--------------------------------------------------------------------------
-            */
-
-            if (hasChanged) {
-
-                const refreshed =
-                    await refreshOrderTable();
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | UPDATE BASELINE SETELAH REFRESH BERHASIL
-                |--------------------------------------------------------------------------
-                */
-
-                if (refreshed) {
-
-                    previousOrders =
-                        getCurrentRelevantOrderIds();
-
-                }
-
-            }
-
+            units = JSON.parse(
+                row.dataset.orderUnits || '[]'
+            );
 
         } catch (error) {
 
-            console.error(
-                'Dynamic order check error:',
-                error
-            );
-
-        } finally {
-
-            isChecking = false;
-
+            units = [];
         }
 
+        const unitSignature =
+            units
+                .map(function (unit) {
+
+                    return [
+                        String(
+                            unit.id ??
+                            unit.unit_id ??
+                            unit.unit ??
+                            ''
+                        ),
+
+                        String(
+                            unit.status ?? ''
+                        ).toLowerCase()
+
+                    ].join(':');
+
+                })
+                .sort()
+                .join('|');
+
+        return [
+            orderId,
+            paymentMethod,
+            paymentStatus,
+            orderStatus,
+            unitSignature
+        ].join('::');
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | BANDINGKAN ARRAY
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // AMBIL SIGNATURE TABEL
+    // =========================================================
 
-    function areArraysEqual(
-        first,
-        second
-    ) {
+    function getCurrentOrderSignatures(body) {
 
-        if (
-            first.length !==
-            second.length
-        ) {
-
-            return false;
-
+        if (!body) {
+            return [];
         }
 
+        const rows =
+            body.querySelectorAll(
+                'tr[data-order-id]'
+            );
+
+        return Array.from(rows)
+            .map(function (row) {
+                return getOrderSignature(row);
+            })
+            .filter(Boolean)
+            .sort();
+    }
+
+
+    // =========================================================
+    // BASELINE AWAL
+    // =========================================================
+
+    let previousOrders =
+        getCurrentOrderSignatures(
+            ordersBody
+        );
+
+
+    // =========================================================
+    // STATUS REQUEST
+    // =========================================================
+
+    let isChecking = false;
+
+
+    // =========================================================
+    // BANDINGKAN ARRAY
+    // =========================================================
+
+    function areArraysEqual(first, second) {
+
+        if (first.length !== second.length) {
+            return false;
+        }
 
         for (
             let i = 0;
@@ -1549,49 +793,28 @@
             i++
         ) {
 
-            if (
-                first[i] !==
-                second[i]
-            ) {
-
+            if (first[i] !== second[i]) {
                 return false;
-
             }
-
         }
 
-
         return true;
-
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | REFRESH TABEL TANPA RELOAD HALAMAN
-    |--------------------------------------------------------------------------
-    */
+    // =========================================================
+    // CEK ORDER TERBARU
+    // =========================================================
 
-    async function refreshOrderTable() {
+    async function checkOrders() {
 
-        const currentBody =
-            document.querySelector(
-                '[data-orders-body]'
-            );
-
-
-        if (!currentBody) {
-            return false;
+        if (isChecking) {
+            return;
         }
 
+        isChecking = true;
 
         try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | AMBIL HALAMAN TERBARU
-            |--------------------------------------------------------------------------
-            */
 
             const response =
                 await fetch(
@@ -1600,108 +823,95 @@
                         method: 'GET',
 
                         headers: {
-
                             'X-Requested-With':
                                 'XMLHttpRequest',
 
                             'Accept':
-                                'text/html'
-
+                                'text/html,application/xhtml+xml'
                         },
 
                         cache: 'no-store'
-
                     }
                 );
 
-
             if (!response.ok) {
-                return false;
+                return;
             }
-
 
             const html =
                 await response.text();
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | PARSE HTML
-            |--------------------------------------------------------------------------
-            */
-
             const parser =
                 new DOMParser();
 
-
-            const documentHTML =
+            const parsedDocument =
                 parser.parseFromString(
                     html,
                     'text/html'
                 );
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | AMBIL TBODY TERBARU
-            |--------------------------------------------------------------------------
-            */
-
             const newBody =
-                documentHTML.querySelector(
+                parsedDocument.querySelector(
                     '[data-orders-body]'
                 );
 
-
             if (!newBody) {
-                return false;
+                return;
             }
 
+            const newSignatures =
+                getCurrentOrderSignatures(
+                    newBody
+                );
 
-            /*
-            |--------------------------------------------------------------------------
-            | GANTI ISI TBODY
-            |--------------------------------------------------------------------------
-            |
-            | Hanya isi tabel yang diganti.
-            | Modal dan elemen lain tidak disentuh.
-            |
-            */
+            const hasChanged =
+                !areArraysEqual(
+                    previousOrders,
+                    newSignatures
+                );
+
+            if (!hasChanged) {
+                return;
+            }
+
+            const currentBody =
+                document.querySelector(
+                    '[data-orders-body]'
+                );
+
+            if (!currentBody) {
+                return;
+            }
 
             currentBody.innerHTML =
                 newBody.innerHTML;
 
-
-            return true;
-
+            previousOrders =
+                getCurrentOrderSignatures(
+                    currentBody
+                );
 
         } catch (error) {
 
             console.error(
-                'Dynamic order refresh error:',
+                'Realtime order error:',
                 error
             );
 
-            return false;
+        } finally {
 
+            isChecking = false;
         }
-
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | POLLING
-    |--------------------------------------------------------------------------
-    |
-    | Cek setiap 3 detik INI JADINYA 1 DETIK.
-    |
-    */
+    // =========================================================
+    // POLLING REALTIME
+    // =========================================================
 
     setInterval(
         checkOrders,
         1000
     );
-
 
 })();

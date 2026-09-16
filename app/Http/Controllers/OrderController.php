@@ -6,19 +6,34 @@ use App\Models\Order;
 use App\Models\OrderItemUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Mail\OrderReceiptMail;
 use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | INDEX
+    |--------------------------------------------------------------------------
+    */
+
     public function index(Request $request)
     {
         $user = Auth::user();
+
         $merchantId = $user->merchant_id ?? $user->id;
 
-        $query = Order::where('merchant_id', $merchantId)
-            ->with(['qrCode', 'items.menu', 'items.unit']);
+        $query = Order::where(
+            'merchant_id',
+            $merchantId
+        )->with([
+            'qrCode',
+            'items.menu',
+            'items.unit',
+        ]);
+
 
         /*
         |--------------------------------------------------------------------------
@@ -35,367 +50,393 @@ class OrderController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $filterType    = $request->get('filter_type', 'day');
-        $selectedDate  = $request->get(
+        $filterType = $request->get(
+            'filter_type',
+            'day'
+        );
+
+        $selectedDate = $request->get(
             'date',
             Carbon::today()->toDateString()
         );
+
         $selectedMonth = $request->get(
             'month',
             Carbon::now()->format('Y-m')
         );
-        $selectedYear  = $request->get(
+
+        $selectedYear = $request->get(
             'year',
             Carbon::now()->year
         );
 
-        $labelPeriode = Carbon::today()->format('d M Y');
+        $labelPeriode =
+            Carbon::today()->format('d M Y');
 
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER KHUSUS DAPUR
+        | DAPUR
         |--------------------------------------------------------------------------
         |
-        | Dapur hanya melihat pesanan yang SUDAH DIBAYAR.
+        | Dapur hanya melihat:
         |
-        | Cash yang belum dibayar:
-        | payment_status = pending
+        | payment_status = paid
         |
-        | Tidak akan masuk dapur.
+        | dan masih memiliki unit:
+        |
+        | pending / processing
         |
         */
 
         if ($role === 'dapur') {
 
+            $query
+                ->where(
+                    'payment_status',
+                    'paid'
+                )
+                ->whereHas(
+                    'items.unit',
+                    function ($unitQuery) {
+
+                        $unitQuery->whereIn(
+                            'status',
+                            [
+                                'pending',
+                                'processing',
+                            ]
+                        );
+
+                    }
+                );
+
+        } else {
+
             /*
             |--------------------------------------------------------------------------
-            | DAPUR
+            | KASIR / OWNER
             |--------------------------------------------------------------------------
             |
-            | Hanya tampilkan pesanan yang:
-            |
-            | 1. Sudah dibayar
-            | 2. Masih memiliki minimal 1 unit menu
-            |    dengan status pending / processing
-            |
-            | Jika seluruh unit sudah completed atau cancelled,
-            | pesanan otomatis hilang dari antrean dapur.
-            |
-            | Data order TIDAK dihapus dari database.
+            | Order expired tidak ditampilkan.
             |
             */
 
-                    $query->where(
-                        'payment_status',
-                        'paid'
+            $query->where(function ($q) {
+
+                $q->whereNull(
+                    'payment_status'
+                )->orWhere(
+                    'payment_status',
+                    '!=',
+                    'expired'
+                );
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | FILTER PERIODE
+            |--------------------------------------------------------------------------
+            */
+
+            if ($filterType === 'day') {
+
+                $query->whereDate(
+                    'created_at',
+                    $selectedDate
+                );
+
+                $labelPeriode =
+                    Carbon::parse(
+                        $selectedDate
+                    )->format('d M Y');
+
+            } elseif ($filterType === 'month') {
+
+                $carbonMonth =
+                    Carbon::parse(
+                        $selectedMonth
+                    );
+
+                $query
+                    ->whereYear(
+                        'created_at',
+                        $carbonMonth->year
                     )
-                        ->whereHas(
-                            'items.unit',
-                            function ($unitQuery) {
+                    ->whereMonth(
+                        'created_at',
+                        $carbonMonth->month
+                    );
 
-                                $unitQuery->whereIn(
-                                    'status',
-                                    [
-                                        'pending',
-                                        'processing',
-                                    ]
-                                );
-                            }
-                        );
-                } else {
+                $labelPeriode =
+                    $carbonMonth->format('F Y');
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | FILTER OWNER / KASIR
-                    |--------------------------------------------------------------------------
-                    |
-                    | Order dengan pembayaran expired tidak ditampilkan.
-                    | Berlaku untuk Kasir dan Owner.
-                    |
-                    */
+            } elseif ($filterType === 'year') {
 
-                    $query->where(function ($q) {
-                        $q->whereNull('payment_status')
-                            ->orWhere('payment_status', '!=', 'expired');
-                    });
+                $query->whereYear(
+                    'created_at',
+                    $selectedYear
+                );
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | FILTER OWNER / KASIR
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if ($filterType === 'day') {
-
-                        $query->whereDate(
-                            'created_at',
-                            $selectedDate
-                        );
-
-                        $labelPeriode = Carbon::parse(
-                            $selectedDate
-                        )->format('d M Y');
-                    } elseif ($filterType === 'month') {
-
-                        $carbonMonth = Carbon::parse(
-                            $selectedMonth
-                        );
-
-                        $query->whereYear(
-                            'created_at',
-                            $carbonMonth->year
-                        )->whereMonth(
-                            'created_at',
-                            $carbonMonth->month
-                        );
-
-                        $labelPeriode = $carbonMonth->format(
-                            'F Y'
-                        );
-                    } elseif ($filterType === 'year') {
-
-                        $query->whereYear(
-                            'created_at',
-                            $selectedYear
-                        );
-
-                        $labelPeriode =
-                            'Tahun ' . $selectedYear;
-                    }
-                }
+                $labelPeriode =
+                    'Tahun ' . $selectedYear;
+            }
+        }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | AMBIL ORDER
-                |--------------------------------------------------------------------------
-                |
-                | Dapur:
-                | oldest first → sistem antrean dapur.
-                |
-                | Kasir / Owner:
-                | newest first.
-                |
-                */
-
-                if ($role === 'dapur') {
-
-                    $orders = $query
-                        ->orderBy('created_at', 'desc')
-                        ->get();
-                } else {
-
-                    $orders = $query
-                        ->orderBy('created_at', 'desc')
-                        ->get();
-                }
-
-
-                /*
+        /*
         |--------------------------------------------------------------------------
-        | STATUS AGREGAT ORDER
+        | AMBIL ORDER
+        |--------------------------------------------------------------------------
+        */
+
+        $orders = $query
+            ->orderBy(
+                'created_at',
+                'desc'
+            )
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HITUNG STATUS AGREGAT
         |--------------------------------------------------------------------------
         |
-        | Status kasir dihitung langsung dari OrderItemUnit.
-        | Tidak bergantung pada relasi $item->unit.
+        | Khusus Kasir / Owner.
+        |
+        | Status diambil langsung dari
+        | order_item_units.
         |
         */
 
-                if ($role !== 'dapur') {
+        if ($role !== 'dapur') {
 
-                    $orders->each(function ($order) {
+            $orders->each(
+                function ($order) {
 
-                        /*
-                |--------------------------------------------------------------------------
-                | AMBIL SEMUA ORDER ITEM ID
-                |--------------------------------------------------------------------------
-                */
-
-                        $orderItemIds = $order->items
-                            ->pluck('id');
+                    $orderItemIds =
+                        $order->items->pluck('id');
 
 
-                        /*
-                |--------------------------------------------------------------------------
-                | AMBIL SEMUA UNIT MENU
-                |--------------------------------------------------------------------------
-                */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | AMBIL UNIT
+                    |--------------------------------------------------------------------------
+                    */
 
-                        $units = OrderItemUnit::whereIn(
+                    $units =
+                        OrderItemUnit::whereIn(
                             'order_item_id',
                             $orderItemIds
-                        )
-                            ->get();
+                        )->get();
 
 
-                        /*
-                |--------------------------------------------------------------------------
-                | HITUNG STATUS
-                |--------------------------------------------------------------------------
-                */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | HITUNG STATUS UNIT
+                    |--------------------------------------------------------------------------
+                    */
 
-                        $totalUnits =
-                            $units->count();
+                    $totalUnits =
+                        $units->count();
 
-                        $completedUnits =
-                            $units
-                            ->where('status', 'completed')
+                    $completedUnits =
+                        $units
+                            ->where(
+                                'status',
+                                'completed'
+                            )
                             ->count();
 
-                        $cancelledUnits =
-                            $units
-                            ->where('status', 'cancelled')
+                    $cancelledUnits =
+                        $units
+                            ->where(
+                                'status',
+                                'cancelled'
+                            )
                             ->count();
 
-                        $processingUnits =
-                            $units
-                            ->where('status', 'processing')
+                    $processingUnits =
+                        $units
+                            ->where(
+                                'status',
+                                'processing'
+                            )
                             ->count();
 
-                        $pendingUnits =
-                            $units
-                            ->where('status', 'pending')
+                    $pendingUnits =
+                        $units
+                            ->where(
+                                'status',
+                                'pending'
+                            )
                             ->count();
 
 
-                        /*
-                |--------------------------------------------------------------------------
-                | TENTUKAN STATUS ORDER
-                |--------------------------------------------------------------------------
-                */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | TENTUKAN DISPLAY STATUS
+                    |--------------------------------------------------------------------------
+                    */
 
-                        if (
-                            $totalUnits > 0 &&
-                            $completedUnits === $totalUnits
-                        ) {
+                    if (
+                        $totalUnits > 0 &&
+                        $completedUnits === $totalUnits
+                    ) {
 
-                            $order->display_status =
-                                'completed';
-                        } elseif (
-                            $totalUnits > 0 &&
-                            $cancelledUnits === $totalUnits
-                        ) {
+                        $order->display_status =
+                            'completed';
 
-                            $order->display_status =
-                                'cancelled';
-                        } elseif (
-                            $cancelledUnits > 0
-                        ) {
+                    } elseif (
+                        $totalUnits > 0 &&
+                        $cancelledUnits === $totalUnits
+                    ) {
 
-                            $order->display_status =
-                                'partial_problem';
-                        } elseif (
-                            $processingUnits > 0
-                        ) {
+                        $order->display_status =
+                            'cancelled';
 
-                            $order->display_status =
-                                'processing';
-                        } else {
+                    } elseif (
+                        $cancelledUnits > 0
+                    ) {
 
-                            $order->display_status =
-                                'pending';
-                        }
+                        $order->display_status =
+                            'partial_problem';
+
+                    } elseif (
+                        $processingUnits > 0
+                    ) {
+
+                        $order->display_status =
+                            'processing';
+
+                    } else {
+
+                        $order->display_status =
+                            'pending';
+                    }
 
 
-                        /*
-                |--------------------------------------------------------------------------
-                | SIMPAN RINGKASAN
-                |--------------------------------------------------------------------------
-                */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | STATUS SUMMARY
+                    |--------------------------------------------------------------------------
+                    */
 
-                        $order->status_summary = [
+                    $order->status_summary = [
 
-                            'total' =>
+                        'total' =>
                             $totalUnits,
 
-                            'completed' =>
+                        'completed' =>
                             $completedUnits,
 
-                            'cancelled' =>
+                        'cancelled' =>
                             $cancelledUnits,
 
-                            'processing' =>
+                        'processing' =>
                             $processingUnits,
 
-                            'pending' =>
+                        'pending' =>
                             $pendingUnits,
 
-                        ];
-                    });
+                    ];
                 }
+            );
+        }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | HITUNG TOTAL PENDAPATAN
-                |--------------------------------------------------------------------------
-                |
-                | Hanya pembayaran yang SUDAH PAID
-                | yang dihitung sebagai pendapatan.
-                |
-                */
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL PENDAPATAN
+        |--------------------------------------------------------------------------
+        */
 
-                $totalRevenue = $orders
-                    ->where('payment_status', 'paid')
-                    ->sum(function ($order) {
+        $totalRevenue =
+            $orders
+                ->where(
+                    'payment_status',
+                    'paid'
+                )
+                ->sum(
+                    function ($order) {
 
                         if (
                             isset($order->total) &&
                             (float) $order->total > 0
                         ) {
-                            return (float) $order->total;
+
+                            return (float)
+                                $order->total;
                         }
 
-                        return $order->items->sum(function ($item) {
+                        return $order->items->sum(
+                            function ($item) {
 
-                            return $item->subtotal
-                                ?? (
-                                    $item->price *
-                                    $item->quantity
-                                );
-                        });
-                    });
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | TOTAL ORDER
-                |--------------------------------------------------------------------------
-                */
-
-                $totalOrders = $orders->count();
-
-
-                return view(
-                    'merchant.orders.index',
-                    compact(
-                        'orders',
-                        'filterType',
-                        'selectedDate',
-                        'selectedMonth',
-                        'selectedYear',
-                        'labelPeriode',
-                        'totalRevenue',
-                        'totalOrders'
-                    )
+                                return
+                                    $item->subtotal
+                                    ??
+                                    (
+                                        $item->price *
+                                        $item->quantity
+                                    );
+                            }
+                        );
+                    }
                 );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL ORDER
+        |--------------------------------------------------------------------------
+        */
+
+        $totalOrders =
+            $orders->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN VIEW
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'merchant.orders.index',
+            compact(
+                'orders',
+                'filterType',
+                'selectedDate',
+                'selectedMonth',
+                'selectedYear',
+                'labelPeriode',
+                'totalRevenue',
+                'totalOrders'
+            )
+        );
     }
 
-    /**
-     * =========================================================
-     * CHECK NEW ORDERS
-     * =========================================================
-     *
-     * Digunakan oleh halaman Kasir dan Dapur dan Owner
-     * untuk mengecek perubahan order secara berkala
-     * tanpa reload halaman.
-     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHECK NEW ORDERS
+    |--------------------------------------------------------------------------
+    |
+    | Dipakai oleh Kasir, Dapur, dan Owner.
+    |
+    */
+
     public function checkNew()
     {
         $user = Auth::user();
 
-        $merchantId = $user->merchant_id ?? $user->id;
+        $merchantId =
+            $user->merchant_id
+            ?? $user->id;
+
 
         /*
         |--------------------------------------------------------------------------
@@ -405,10 +446,11 @@ class OrderController extends Controller
 
         if ($user->role === 'kasir') {
 
-            $orders = Order::where(
-                'merchant_id',
-                $merchantId
-            )
+            $orders =
+                Order::where(
+                    'merchant_id',
+                    $merchantId
+                )
                 ->where(
                     'payment_status',
                     'pending'
@@ -422,15 +464,24 @@ class OrderController extends Controller
                 )
                 ->get();
 
+
             return response()->json([
+
                 'success' => true,
-                'orders' => $orders->map(function ($order) {
 
-                    return [
-                        'id' => $order->id,
-                    ];
+                'orders' =>
+                    $orders
+                        ->map(
+                            function ($order) {
 
-                })->values(),
+                                return [
+                                    'id' =>
+                                        $order->id,
+                                ];
+                            }
+                        )
+                        ->values(),
+
             ]);
         }
 
@@ -443,10 +494,11 @@ class OrderController extends Controller
 
         if ($user->role === 'dapur') {
 
-            $orders = Order::where(
-                'merchant_id',
-                $merchantId
-            )
+            $orders =
+                Order::where(
+                    'merchant_id',
+                    $merchantId
+                )
                 ->where(
                     'payment_status',
                     'paid'
@@ -470,15 +522,24 @@ class OrderController extends Controller
                 )
                 ->get();
 
+
             return response()->json([
+
                 'success' => true,
-                'orders' => $orders->map(function ($order) {
 
-                    return [
-                        'id' => $order->id,
-                    ];
+                'orders' =>
+                    $orders
+                        ->map(
+                            function ($order) {
 
-                })->values(),
+                                return [
+                                    'id' =>
+                                        $order->id,
+                                ];
+                            }
+                        )
+                        ->values(),
+
             ]);
         }
 
@@ -487,24 +548,22 @@ class OrderController extends Controller
         |--------------------------------------------------------------------------
         | OWNER
         |--------------------------------------------------------------------------
-        |
-        | Owner membutuhkan perubahan status unit juga.
-        |
         */
 
         if ($user->role === 'owner') {
 
-            $orders = Order::where(
-                'merchant_id',
-                $merchantId
-            )
+            $orders =
+                Order::where(
+                    'merchant_id',
+                    $merchantId
+                )
                 ->where(
                     'payment_status',
                     '!=',
                     'expired'
                 )
                 ->with([
-                    'items.unit'
+                    'items.unit',
                 ])
                 ->orderByDesc(
                     'created_at'
@@ -513,40 +572,60 @@ class OrderController extends Controller
 
 
             return response()->json([
+
                 'success' => true,
 
-                'orders' => $orders->map(function ($order) {
+                'orders' =>
+                    $orders
+                        ->map(
+                            function ($order) {
 
-                    $unitStatuses = [];
-
-                    foreach ($order->items as $item) {
-
-                        foreach ($item->unit ?? collect() as $unit) {
-
-                            $unitStatuses[] = [
-                                'id' => $unit->id,
-                                'status' => $unit->status,
-                            ];
-
-                        }
-
-                    }
+                                $unitStatuses = [];
 
 
-                    return [
-                        'id' => $order->id,
+                                foreach (
+                                    $order->items
+                                    as $item
+                                ) {
 
-                        'payment_status' =>
-                            $order->payment_status,
+                                    foreach (
+                                        $item->unit
+                                        ?? collect()
+                                        as $unit
+                                    ) {
 
-                        'status' =>
-                            $order->status,
+                                        $unitStatuses[] = [
 
-                        'units' =>
-                            $unitStatuses,
-                    ];
+                                            'id' =>
+                                                $unit->id,
 
-                })->values(),
+                                            'status' =>
+                                                $unit->status,
+
+                                        ];
+                                    }
+                                }
+
+
+                                return [
+
+                                    'id' =>
+                                        $order->id,
+
+                                    'payment_status' =>
+                                        $order->payment_status,
+
+                                    'status' =>
+                                        $order->status,
+
+                                    'units' =>
+                                        $unitStatuses,
+
+                                ];
+                            }
+                        )
+                        ->values(),
+
             ]);
         }
 
@@ -558,8 +637,11 @@ class OrderController extends Controller
         */
 
         return response()->json([
+
             'success' => false,
+
             'orders' => [],
+
         ]);
     }
 
@@ -568,35 +650,55 @@ class OrderController extends Controller
     |--------------------------------------------------------------------------
     | KASIR - KONFIRMASI PEMBAYARAN CASH
     |--------------------------------------------------------------------------
-    |
-    | Method ini HANYA mengubah payment_status.
-    |
-    | Tidak menyentuh status makanan.
-    |
     */
 
     public function markAsPaid($id)
     {
         $user = Auth::user();
-        $merchantId = $user->merchant_id ?? $user->id;
 
-        $orderId = decryptId($id);
+        $merchantId =
+            $user->merchant_id
+            ?? $user->id;
 
-        abort_unless($orderId, 404);
 
-        $order = Order::where(
-            'merchant_id',
-            $merchantId
-        )->findOrFail($orderId);
+        $orderId =
+            decryptId($id);
+
+
+        abort_unless(
+            $orderId,
+            404
+        );
 
 
         /*
         |--------------------------------------------------------------------------
-        | Pastikan hanya order CASH
+        | AMBIL ORDER
         |--------------------------------------------------------------------------
         */
 
-        if ($order->payment_method !== 'cash') {
+        $order =
+            Order::where(
+                'merchant_id',
+                $merchantId
+            )
+            ->findOrFail(
+                $orderId
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI PAYMENT METHOD
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            strtolower(
+                $order->payment_method
+                ?? ''
+            ) !== 'cash'
+        ) {
 
             return back()->with(
                 'error',
@@ -607,11 +709,14 @@ class OrderController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Pastikan belum dibayar
+        | VALIDASI PAYMENT STATUS
         |--------------------------------------------------------------------------
         */
 
-        if ($order->payment_status === 'paid') {
+        if (
+            $order->payment_status ===
+            'paid'
+        ) {
 
             return back()->with(
                 'error',
@@ -622,18 +727,48 @@ class OrderController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Konfirmasi pembayaran
+        | UPDATE PAYMENT
         |--------------------------------------------------------------------------
         */
 
-        $order->update([
-            'payment_status' => 'paid',
-            'cashier_id' => Auth::id(),
-        ]);
+        DB::transaction(
+            function () use (
+                $order
+            ) {
 
+                $order->payment_status =
+                    'paid';
+
+                /*
+                |--------------------------------------------------------------------------
+                | Pastikan updated_at berubah
+                |--------------------------------------------------------------------------
+                */
+
+                $order->updated_at =
+                    now();
+
+                /*
+                |--------------------------------------------------------------------------
+                | Simpan
+                |--------------------------------------------------------------------------
+                */
+
+                $order->save();
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
-            ->route('merchant.orders.index')
+            ->route(
+                'merchant.orders.index'
+            )
             ->with(
                 'success',
                 'Pembayaran pesanan #' .
@@ -645,10 +780,14 @@ class OrderController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | DAPUR - UPDATE STATUS MAKANAN
+    | DAPUR - UPDATE STATUS ORDER
     |--------------------------------------------------------------------------
     |
-    | Status pembayaran TIDAK disentuh di sini.
+    | Method ini dipertahankan untuk kebutuhan
+    | update status order secara umum.
+    |
+    | Untuk aksi per menu/unit,
+    | gunakan updateUnitStatus().
     |
     */
 
@@ -656,113 +795,21 @@ class OrderController extends Controller
         Request $request,
         $id
     ) {
-        $request->validate([
-            'status' => [
-                'required',
-                'string',
-                'in:pending,processing,completed,cancelled',
-            ],
-        ]);
-
-
-        $user = Auth::user();
-        $merchantId = $user->merchant_id ?? $user->id;
-
-        $orderId = decryptId($id);
-
-        abort_unless($orderId, 404);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Ambil order berdasarkan merchant
-        |--------------------------------------------------------------------------
-        */
-
-        $order = Order::where(
-            'merchant_id',
-            $merchantId
-        )->findOrFail($orderId);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Dapur hanya boleh memproses order yang sudah dibayar
-        |--------------------------------------------------------------------------
-        */
-
-        if ($order->payment_status !== 'paid') {
-
-            return back()->with(
-                'error',
-                'Pesanan belum dibayar dan belum dapat diproses dapur.'
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Update STATUS MAKANAN
-        |--------------------------------------------------------------------------
-        */
-
-        $order->update([
-            'status' => $request->status,
-        ]);
-
-
-        return redirect()
-            ->route('merchant.orders.index')
-            ->with(
-                'success',
-                'Status pesanan #' .
-                    $order->order_number .
-                    ' berhasil diperbarui!'
-            );
-    }
-
-    /*
-|--------------------------------------------------------------------------
-| DAPUR - UPDATE STATUS SATU UNIT MENU
-|--------------------------------------------------------------------------
-|
-| Contoh:
-|
-| Nasi Goreng 1 → completed
-|
-| Tidak akan mengubah:
-|
-| Nasi Goreng 2
-| Es Teh 1
-| Ayam Bakar 1
-|
-*/
-
-    public function updateUnitStatus(
-        Request $request,
-        $id
-    ) {
-
-        /*
-    |--------------------------------------------------------------------------
-    | VALIDASI STATUS
-    |--------------------------------------------------------------------------
-    */
 
         $request->validate([
+
             'status' => [
+
                 'required',
+
                 'string',
+
                 'in:pending,processing,completed,cancelled',
+
             ],
+
         ]);
 
-
-        /*
-    |--------------------------------------------------------------------------
-    | USER & MERCHANT
-    |--------------------------------------------------------------------------
-    */
 
         $user = Auth::user();
 
@@ -771,63 +818,35 @@ class OrderController extends Controller
             ?? $user->id;
 
 
-        /*
-    |--------------------------------------------------------------------------
-    | DECRYPT UNIT ID
-    |--------------------------------------------------------------------------
-    */
-
-        $unitId =
+        $orderId =
             decryptId($id);
 
+
         abort_unless(
-            $unitId,
+            $orderId,
             404
         );
 
 
-        /*
-    |--------------------------------------------------------------------------
-    | AMBIL UNIT
-    |--------------------------------------------------------------------------
-    |
-    | Sekaligus memastikan unit tersebut
-    | benar-benar milik merchant yang sedang login.
-    |
-    */
-
-        $unit = OrderItemUnit::where(
-            'id',
-            $unitId
-        )
-            ->whereHas(
-                'orderItem.order',
-                function ($query) use (
-                    $merchantId
-                ) {
-                    $query->where(
-                        'merchant_id',
-                        $merchantId
-                    );
-                }
-            )
-            ->with([
-                'orderItem.order',
-            ])
-            ->firstOrFail();
-
-
-        /*
-    |--------------------------------------------------------------------------
-    | PASTIKAN PEMBAYARAN SUDAH DIBAYAR
-    |--------------------------------------------------------------------------
-    */
-
         $order =
-            $unit->orderItem->order;
+            Order::where(
+                'merchant_id',
+                $merchantId
+            )
+            ->findOrFail(
+                $orderId
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HARUS SUDAH DIBAYAR
+        |--------------------------------------------------------------------------
+        */
 
         if (
-            $order->payment_status !== 'paid'
+            $order->payment_status !==
+            'paid'
         ) {
 
             return back()->with(
@@ -838,22 +857,285 @@ class OrderController extends Controller
 
 
         /*
+        |--------------------------------------------------------------------------
+        | UPDATE ORDER
+        |--------------------------------------------------------------------------
+        */
+
+        DB::transaction(
+            function () use (
+                $order,
+                $request
+            ) {
+
+                $order->status =
+                    $request->status;
+
+                $order->updated_at =
+                    now();
+
+                $order->save();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Jika update status order selesai,
+                | sinkronkan unit yang masih aktif.
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    in_array(
+                        $request->status,
+                        [
+                            'completed',
+                            'cancelled',
+                        ],
+                        true
+                    )
+                ) {
+
+                    $orderItemIds =
+                        $order->items()
+                            ->pluck('id');
+
+
+                    OrderItemUnit::whereIn(
+                        'order_item_id',
+                        $orderItemIds
+                    )
+                    ->whereIn(
+                        'status',
+                        [
+                            'pending',
+                            'processing',
+                        ]
+                    )
+                    ->update([
+
+                        'status' =>
+                            $request->status,
+
+                        'updated_at' =>
+                            now(),
+
+                    ]);
+                }
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+            ->route(
+                'merchant.orders.index'
+            )
+            ->with(
+                'success',
+                'Status pesanan #' .
+                    $order->order_number .
+                    ' berhasil diperbarui!'
+            );
+    }
+
+
+    /*
     |--------------------------------------------------------------------------
-    | UPDATE STATUS UNIT
+    | DAPUR - UPDATE STATUS SATU UNIT MENU
     |--------------------------------------------------------------------------
+    |
+    | INI YANG PALING PENTING UNTUK REALTIME DASHBOARD.
+    |
+    | Contoh:
+    |
+    | Hamburger 1 → completed
+    |
+    | Hamburger 2 → processing
+    |
+    | Setiap unit diproses sendiri.
+    |
     */
 
-        $unit->update([
-            'status' =>
-            $request->status,
+    public function updateUnitStatus(
+        Request $request,
+        $id
+    ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI
+        |--------------------------------------------------------------------------
+        */
+
+        $request->validate([
+
+            'status' => [
+
+                'required',
+
+                'string',
+
+                'in:pending,processing,completed,cancelled',
+
+            ],
+
         ]);
 
 
         /*
-    |--------------------------------------------------------------------------
-    | RESPONSE
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | USER
+        |--------------------------------------------------------------------------
+        */
+
+        $user =
+            Auth::user();
+
+
+        $merchantId =
+            $user->merchant_id
+            ?? $user->id;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DECRYPT UNIT ID
+        |--------------------------------------------------------------------------
+        */
+
+        $unitId =
+            decryptId($id);
+
+
+        abort_unless(
+            $unitId,
+            404
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AMBIL UNIT
+        |--------------------------------------------------------------------------
+        |
+        | Sekaligus memastikan unit
+        | milik merchant yang sedang login.
+        |
+        */
+
+        $unit =
+            OrderItemUnit::where(
+                'id',
+                $unitId
+            )
+            ->whereHas(
+                'orderItem.order',
+                function ($query) use (
+                    $merchantId
+                ) {
+
+                    $query->where(
+                        'merchant_id',
+                        $merchantId
+                    );
+
+                }
+            )
+            ->with([
+                'orderItem.order',
+            ])
+            ->firstOrFail();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AMBIL ORDER
+        |--------------------------------------------------------------------------
+        */
+
+        $order =
+            $unit
+                ->orderItem
+                ->order;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI PEMBAYARAN
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $order->payment_status !==
+            'paid'
+        ) {
+
+            return back()->with(
+                'error',
+                'Pesanan belum dibayar dan belum dapat diproses dapur.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE UNIT + TOUCH ORDER
+        |--------------------------------------------------------------------------
+        |
+        | Ini bagian penting untuk dashboard realtime.
+        |
+        */
+
+        DB::transaction(
+            function () use (
+                $unit,
+                $order,
+                $request
+            ) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update unit makanan
+                |--------------------------------------------------------------------------
+                */
+
+                $unit->status =
+                    $request->status;
+
+                $unit->updated_at =
+                    now();
+
+                $unit->save();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update timestamp order induk
+                |--------------------------------------------------------------------------
+                |
+                | Dashboard menggunakan updated_at
+                | untuk menentukan order terbaru.
+                |
+                */
+
+                $order->updated_at =
+                    now();
+
+                $order->save();
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
             ->route(
@@ -870,25 +1152,46 @@ class OrderController extends Controller
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | RECEIPT
+    |--------------------------------------------------------------------------
+    */
+
     public function receipt($id)
     {
-        $user = Auth::user();
-        $merchantId = $user->merchant_id ?? $user->id;
+        $user =
+            Auth::user();
 
-        $orderId = decryptId($id);
+        $merchantId =
+            $user->merchant_id
+            ?? $user->id;
 
-        abort_unless($orderId, 404);
 
-        $order = Order::where(
-            'merchant_id',
-            $merchantId
-        )
+        $orderId =
+            decryptId($id);
+
+
+        abort_unless(
+            $orderId,
+            404
+        );
+
+
+        $order =
+            Order::where(
+                'merchant_id',
+                $merchantId
+            )
             ->with([
                 'merchant',
                 'qrCode',
                 'items.menu',
             ])
-            ->findOrFail($orderId);
+            ->findOrFail(
+                $orderId
+            );
+
 
         return view(
             'merchant.orders.receipt',
@@ -897,25 +1200,52 @@ class OrderController extends Controller
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | SEND RECEIPT
+    |--------------------------------------------------------------------------
+    */
+
     public function sendReceipt($id)
     {
-        $user = Auth::user();
-        $merchantId = $user->merchant_id ?? $user->id;
+        $user =
+            Auth::user();
 
-        $orderId = decryptId($id);
+        $merchantId =
+            $user->merchant_id
+            ?? $user->id;
 
-        abort_unless($orderId, 404);
 
-        $order = Order::where(
-            'merchant_id',
-            $merchantId
-        )
+        $orderId =
+            decryptId($id);
+
+
+        abort_unless(
+            $orderId,
+            404
+        );
+
+
+        $order =
+            Order::where(
+                'merchant_id',
+                $merchantId
+            )
             ->with([
                 'merchant',
                 'qrCode',
                 'items.menu',
             ])
-            ->findOrFail($orderId);
+            ->findOrFail(
+                $orderId
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI EMAIL
+        |--------------------------------------------------------------------------
+        */
 
         if (!$order->customer_email) {
 
@@ -925,14 +1255,35 @@ class OrderController extends Controller
             );
         }
 
-        Mail::to($order->customer_email)
-            ->send(
-                new OrderReceiptMail($order)
-            );
+
+        /*
+        |--------------------------------------------------------------------------
+        | KIRIM EMAIL
+        |--------------------------------------------------------------------------
+        */
+
+        Mail::to(
+            $order->customer_email
+        )->send(
+            new OrderReceiptMail(
+                $order
+            )
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN WAKTU STRUK
+        |--------------------------------------------------------------------------
+        */
 
         $order->update([
-            'receipt_sent_at' => now(),
+
+            'receipt_sent_at' =>
+                now(),
+
         ]);
+
 
         return back()->with(
             'success',

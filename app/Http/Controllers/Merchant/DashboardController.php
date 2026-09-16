@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Merchant;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderItemUnit;
 use App\Models\Package;
 use App\Models\PackageDuration;
 use Illuminate\Http\Request;
@@ -22,268 +23,280 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | STATISTIK DASHBOARD
+        | TOTAL ORDER
         |--------------------------------------------------------------------------
         */
-
 
         $totalOrders = Order::where(
             'merchant_id',
             $merchantId
         )->count();
 
+
+
         /*
         |--------------------------------------------------------------------------
         | PESANAN HARI INI
         |--------------------------------------------------------------------------
         |
-        | Hanya pesanan yang SUDAH SELESAI.
+        | Hanya:
+        | - payment paid
+        | - semua menu selesai
         |
         */
-        $todayOrders = \App\Models\OrderItemUnit::where(
-    'order_item_units.status',
-    'completed'
-)
-    ->join(
-        'order_items',
-        'order_item_units.order_item_id',
-        '=',
-        'order_items.id'
-    )
-    ->join(
-        'orders',
-        'order_items.order_id',
-        '=',
-        'orders.id'
-    )
-    ->where(
-        'orders.merchant_id',
-        $merchantId
-    )
-    ->whereDate(
-        'orders.created_at',
-        today()
-    )
-    ->count();
+
+        $todayOrders = OrderItemUnit::where(
+            'order_item_units.status',
+            'completed'
+        )
+        ->join(
+            'order_items',
+            'order_item_units.order_item_id',
+            '=',
+            'order_items.id'
+        )
+        ->join(
+            'orders',
+            'order_items.order_id',
+            '=',
+            'orders.id'
+        )
+        ->where(
+            'orders.merchant_id',
+            $merchantId
+        )
+        ->where(
+            'orders.payment_status',
+            'paid'
+        )
+        ->whereDate(
+            'orders.created_at',
+            today()
+        )
+        ->count();
+
+
 
         /*
         |--------------------------------------------------------------------------
         | PENDAPATAN HARI INI
         |--------------------------------------------------------------------------
-        |
-        | Hanya mengambil pembayaran yang sudah PAID hari ini.
-        | Untuk sementara tidak melihat status completed/cancelled.
-        |
         */
 
         $todayRevenue = Order::where(
             'merchant_id',
             $merchantId
         )
-            ->whereDate(
-                'created_at',
-                today()
-            )
-            ->where(
-                'payment_status',
-                'paid'
-            )
-            ->sum('total');
+        ->where(
+            'payment_status',
+            'paid'
+        )
+        ->whereDate(
+            'created_at',
+            today()
+        )
+        ->sum('total');
+
+
 
         /*
         |--------------------------------------------------------------------------
-        | PESANAN TERBARU
+        | ORDER TERBARU
         |--------------------------------------------------------------------------
         |
-        | Expired tidak ditampilkan.
-        | Cancelled dari Dapur tetap boleh tampil.
+        | Tidak tampil:
+        | - expired
         |
         */
-        
-
 
         $recentOrders = Order::with([
             'qrCode',
             'items.menu',
             'items.unit',
         ])
-            ->where(
-                'merchant_id',
-                $merchantId
-            )
-            ->where(function ($query) {
-                $query->whereNull('payment_status')
-                    ->orWhere('payment_status', '!=', 'expired');
-            })
-            ->latest()
-            ->take(5)
-            ->get();
+        ->where(
+            'merchant_id',
+            $merchantId
+        )
+        ->where(
+            'payment_status',
+            'paid'
+        )
+        ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HITUNG STATUS ORDER
+        |--------------------------------------------------------------------------
+        */
+
+        $recentOrders->each(function ($order) {
+
+
+            $orderItemIds =
+                $order->items->pluck('id');
+
+
+            $units =
+                OrderItemUnit::whereIn(
+                    'order_item_id',
+                    $orderItemIds
+                )
+                ->get();
+
+
+
+            $totalUnits =
+                $units->count();
+
+
+            $completedUnits =
+                $units
+                    ->where(
+                        'status',
+                        'completed'
+                    )
+                    ->count();
+
+
+            $cancelledUnits =
+                $units
+                    ->where(
+                        'status',
+                        'cancelled'
+                    )
+                    ->count();
+
+
+            $processingUnits =
+                $units
+                    ->where(
+                        'status',
+                        'processing'
+                    )
+                    ->count();
+
+
+            $pendingUnits =
+                $units
+                    ->where(
+                        'status',
+                        'pending'
+                    )
+                    ->count();
+
+
 
             /*
-|--------------------------------------------------------------------------
-| PESANAN TERBARU DASHBOARD
-|--------------------------------------------------------------------------
-|
-| Yang ditampilkan:
-| - Selesai
-| - Diproses
-| - Menunggu
-| - Sebagian Bermasalah
-|
-| Yang TIDAK ditampilkan:
-| - Semua menu Bahan Habis
-| - Payment expired
-|
-| Status dihitung berdasarkan OrderItemUnit.
-|
-*/
-
-$recentOrders = Order::with([
-    'qrCode',
-    'items.menu',
-    'items.unit',
-])
-    ->where(
-        'merchant_id',
-        $merchantId
-    )
-    ->where(function ($query) {
-        $query->whereNull('payment_status')
-            ->orWhere('payment_status', '!=', 'expired');
-    })
-    ->latest()
-    ->get();
+            |--------------------------------------------------------------------------
+            | STATUS DISPLAY
+            |--------------------------------------------------------------------------
+            */
 
 
-/*
-|--------------------------------------------------------------------------
-| HITUNG STATUS SETIAP ORDER
-|--------------------------------------------------------------------------
-*/
+            if (
+                $totalUnits > 0 &&
+                $completedUnits == $totalUnits
+            ) {
 
-$recentOrders->each(function ($order) {
-
-    $orderItemIds = $order->items->pluck('id');
-
-    $units = \App\Models\OrderItemUnit::whereIn(
-        'order_item_id',
-        $orderItemIds
-    )->get();
+                $order->display_status =
+                    'completed';
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | HITUNG JUMLAH STATUS UNIT
-    |--------------------------------------------------------------------------
-    */
+            } elseif (
+                $totalUnits > 0 &&
+                $cancelledUnits == $totalUnits
+            ) {
 
-    $totalUnits = $units->count();
-
-    $completedUnits = $units
-        ->where('status', 'completed')
-        ->count();
-
-    $cancelledUnits = $units
-        ->where('status', 'cancelled')
-        ->count();
-
-    $processingUnits = $units
-        ->where('status', 'processing')
-        ->count();
-
-    $pendingUnits = $units
-        ->where('status', 'pending')
-        ->count();
+                $order->display_status =
+                    'cancelled';
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | TENTUKAN DISPLAY STATUS
-    |--------------------------------------------------------------------------
-    */
+            } elseif (
+                $cancelledUnits > 0
+            ) {
 
-    if (
-        $totalUnits > 0 &&
-        $completedUnits === $totalUnits
-    ) {
-
-        $order->display_status = 'completed';
-
-    } elseif (
-        $totalUnits > 0 &&
-        $cancelledUnits === $totalUnits
-    ) {
-
-        // Semua menu bahan habis
-        $order->display_status = 'cancelled';
-
-    } elseif (
-        $cancelledUnits > 0
-    ) {
-
-        // Ada sebagian menu yang bahan habis
-        $order->display_status = 'partial_problem';
-
-    } elseif (
-        $processingUnits > 0
-    ) {
-
-        $order->display_status = 'processing';
-
-    } else {
-
-        $order->display_status = 'pending';
-
-    }
+                $order->display_status =
+                    'partial_problem';
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | SIMPAN RINGKASAN STATUS
-    |--------------------------------------------------------------------------
-    */
+            } elseif (
+                $processingUnits > 0
+            ) {
 
-    $order->status_summary = [
-
-        'total' => $totalUnits,
-
-        'completed' => $completedUnits,
-
-        'cancelled' => $cancelledUnits,
-
-        'processing' => $processingUnits,
-
-        'pending' => $pendingUnits,
-
-    ];
-});
+                $order->display_status =
+                    'processing';
 
 
-/*
-|--------------------------------------------------------------------------
-| HANYA TAMPILKAN ORDER YANG DIIZINKAN
-|--------------------------------------------------------------------------
-|
-| Order dengan semua menu cancelled (Bahan Habis)
-| tidak ditampilkan di Dashboard.
-|
-| Sebagian Bermasalah tetap ditampilkan.
-|
-*/
+            } else {
 
-$recentOrders = $recentOrders
-    ->filter(function ($order) {
+                $order->display_status =
+                    'pending';
 
-        return $order->display_status !== 'cancelled';
+            }
 
-    })
-    ->take(5)
-    ->values();
+
+
+            $order->status_summary = [
+
+                'total' =>
+                    $totalUnits,
+
+                'completed' =>
+                    $completedUnits,
+
+                'cancelled' =>
+                    $cancelledUnits,
+
+                'processing' =>
+                    $processingUnits,
+
+                'pending' =>
+                    $pendingUnits,
+
+            ];
+
+        });
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER DASHBOARD
+        |--------------------------------------------------------------------------
+        |
+        | Semua menu bahan habis tidak tampil
+        |
+        */
+
+
+        $recentOrders =
+            $recentOrders
+            ->filter(function ($order) {
+
+                return $order->display_status
+                    !== 'cancelled';
+
+            })
+            ->sortByDesc(function ($order) {
+
+                return $order->updated_at;
+
+            })
+            ->take(5)
+            ->values();
+
+
+
+
+
         /*
         |--------------------------------------------------------------------------
         | SUBSCRIPTION
         |--------------------------------------------------------------------------
         */
+
 
         $subscription = null;
 
@@ -292,7 +305,9 @@ $recentOrders = $recentOrders
 
         if ($user->merchant) {
 
-            $subscription = $user->merchant
+
+            $subscription =
+                $user->merchant
                 ->subscriptions()
                 ->where(
                     'status',
@@ -308,29 +323,26 @@ $recentOrders = $recentOrders
                 ->first();
 
 
+
             if (!$subscription) {
+
 
                 $subscriptionExpired = true;
 
-                $subscription = $user->merchant
+
+                $subscription =
+                    $user->merchant
                     ->subscriptions()
                     ->latest('end_date')
                     ->latest('id')
                     ->first();
 
-            } else {
-
-                $subscriptionExpired = false;
-
-                session()->forget([
-                    'subscription.show_renewal_modal',
-                    'subscription.continue_payment',
-                    'subscription.from_public',
-                    'subscription.package_id',
-                    'subscription.duration_id',
-                ]);
             }
+
         }
+
+
+
 
 
         $showRenewalModal = false;
@@ -340,30 +352,41 @@ $recentOrders = $recentOrders
         $renewalDuration = null;
 
 
+
         if ($subscriptionExpired) {
 
-            $showRenewalModal = session(
-                'subscription.show_renewal_modal',
-                false
-            );
 
-            $packageId = session(
-                'subscription.package_id'
-            );
+            $showRenewalModal =
+                session(
+                    'subscription.show_renewal_modal',
+                    false
+                );
 
-            $durationId = session(
-                'subscription.duration_id'
-            );
+
+            $packageId =
+                session(
+                    'subscription.package_id'
+                );
+
+
+            $durationId =
+                session(
+                    'subscription.duration_id'
+                );
+
+
 
             if (
                 $packageId &&
                 $durationId
             ) {
 
-                $renewalPackage = Package::where(
-                    'id',
-                    $packageId
-                )
+
+                $renewalPackage =
+                    Package::where(
+                        'id',
+                        $packageId
+                    )
                     ->where(
                         'status',
                         'active'
@@ -371,10 +394,12 @@ $recentOrders = $recentOrders
                     ->first();
 
 
-                $renewalDuration = PackageDuration::where(
-                    'id',
-                    $durationId
-                )
+
+                $renewalDuration =
+                    PackageDuration::where(
+                        'id',
+                        $durationId
+                    )
                     ->where(
                         'package_id',
                         $packageId
@@ -384,24 +409,26 @@ $recentOrders = $recentOrders
                         'active'
                     )
                     ->first();
+
             }
+
 
             if (!$showRenewalModal) {
 
                 $showRenewalModal = true;
 
+
                 session([
-                    'subscription.show_renewal_modal' => true,
+                    'subscription.show_renewal_modal'
+                    => true
                 ]);
+
             }
+
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | KIRIM DATA KE VIEW
-        |--------------------------------------------------------------------------
-        */
+
 
         return view(
             'merchant.dashboard',
@@ -417,5 +444,6 @@ $recentOrders = $recentOrders
                 'renewalDuration'
             )
         );
+
     }
 }
