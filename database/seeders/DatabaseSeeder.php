@@ -2,19 +2,35 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
         $this->call([
+
+            // Master
             PackageSeeder::class,
+            MerchantSeeder::class,
+            UserSeeder::class,
+
+            // Merchant data
+            CategorySeeder::class,
+            MenuSeeder::class,
+            QrCodeSeeder::class,
+            MerchantSettingSeeder::class,
             VoucherSeeder::class,
+
+            // Subscription
             SubscriptionPromotionSeeder::class,
-            // MerchantSettingSeeder::class,
+            SubscriptionPromotionDurationSeeder::class,
+            SubscriptionSeeder::class,
+
+            // Orders
+            OrderSeeder::class,
+            OrderItemSeeder::class,
+            OrderItemUnitSeeder::class,
         ]);
     }
 }

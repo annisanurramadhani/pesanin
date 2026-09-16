@@ -12,7 +12,7 @@ class SubscriptionPromotionSeeder extends Seeder
      */
     public function run(): void
     {
-        SubscriptionPromotion::create([
+        SubscriptionPromotion::updateOrCreate([
             'name' => 'Promo Spesial PesanIn',
             'description' => 'Nikmati diskon spesial untuk berlangganan PesanIn.',
             'discount_type' => 'percentage',

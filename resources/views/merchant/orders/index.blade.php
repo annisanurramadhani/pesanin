@@ -350,91 +350,91 @@
 
 
                                 {{-- ==========================================================
-    PESANAN / MENU
-========================================================== --}}
-<td class="p-4">
+                                    PESANAN / MENU
+                                ========================================================== --}}
+                                <td class="p-4">
 
-    <div class="space-y-3">
+                                    <div class="space-y-3">
 
-        @if (Auth::user()->role === 'dapur')
+                                        @if (Auth::user()->role === 'dapur')
 
-            {{-- ==================================================
-                KHUSUS DAPUR
-                TETAP TAMPIL PER UNIT
-            =================================================== --}}
-            @foreach ($order->items as $item)
+                                            {{-- ==================================================
+                                                KHUSUS DAPUR
+                                                TETAP TAMPIL PER UNIT
+                                            =================================================== --}}
+                                            @foreach ($order->items as $item)
 
-                @for ($i = 0; $i < $item->quantity; $i++)
+                                                @for ($i = 0; $i < $item->quantity; $i++)
 
-                    <div class="h-[40px] flex items-center gap-2 text-xs">
+                                                    <div class="h-[40px] flex items-center gap-2 text-xs">
 
-                        <span
-                            class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0">
-                        </span>
+                                                        <span
+                                                            class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0">
+                                                        </span>
 
-                        <span class="font-semibold text-slate-700">
-                            {{ $item->menu_name ?? ($item->menu->name ?? 'Menu') }}
-                        </span>
+                                                        <span class="font-semibold text-slate-700">
+                                                            {{ $item->menu_name ?? ($item->menu->name ?? 'Menu') }}
+                                                        </span>
 
-                        <span
-                            class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[10px]">
-                            (x1)
-                        </span>
+                                                        <span
+                                                            class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[10px]">
+                                                            (x1)
+                                                        </span>
 
-                    </div>
+                                                    </div>
 
-                @endfor
+                                                @endfor
 
-            @endforeach
+                                            @endforeach
 
-        @else
+                                        @else
 
-            {{-- ==================================================
-                KASIR + OWNER
-                GABUNGKAN ITEM YANG SAMA
-            =================================================== --}}
-            @php
-                $groupedItems = $order->items
-                    ->groupBy(function ($item) {
-                        return $item->menu_name ?? ($item->menu->name ?? 'Menu');
-                    })
-                    ->map(function ($items) {
-                        return [
-                            'name' => $items->first()->menu_name
-                                ?? ($items->first()->menu->name ?? 'Menu'),
+                                            {{-- ==================================================
+                                                KASIR + OWNER
+                                                GABUNGKAN ITEM YANG SAMA
+                                            =================================================== --}}
+                                            @php
+                                                $groupedItems = $order->items
+                                                    ->groupBy(function ($item) {
+                                                        return $item->menu_name ?? ($item->menu->name ?? 'Menu');
+                                                    })
+                                                    ->map(function ($items) {
+                                                        return [
+                                                            'name' => $items->first()->menu_name
+                                                                ?? ($items->first()->menu->name ?? 'Menu'),
 
-                            'quantity' => $items->sum('quantity'),
-                        ];
-                    });
-            @endphp
+                                                            'quantity' => $items->sum('quantity'),
+                                                        ];
+                                                    });
+                                            @endphp
 
 
-            @foreach ($groupedItems as $groupedItem)
+                                            @foreach ($groupedItems as $groupedItem)
 
-                <div class="h-[40px] flex items-center gap-2 text-xs">
+                                                <div class="h-[40px] flex items-center gap-2 text-xs">
 
-                    <span
-                        class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0">
-                    </span>
+                                                    <span
+                                                        class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0">
+                                                    </span>
 
-                    <span class="font-semibold text-slate-700">
-                        {{ $groupedItem['name'] }}
-                    </span>
+                                                    <span class="font-semibold text-slate-700">
+                                                        {{ $groupedItem['name'] }}
+                                                    </span>
 
-                    <span
-                        class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[10px]">
-                        (x{{ $groupedItem['quantity'] }})
-                    </span>
+                                                    <span
+                                                        class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[10px]">
+                                                        (x{{ $groupedItem['quantity'] }})
+                                                    </span>
 
-                </div>
+                                                </div>
 
-            @endforeach
+                                            @endforeach
 
-        @endif
+                                        @endif
 
-    </div>
+                                    </div>
 
-</td>
+                                </td>
 
 
                                 {{-- ==========================================================
@@ -449,20 +449,22 @@
                                             @if ($isCash)
                                                 <span
                                                     class="px-3 py-1 text-xs bg-slate-100 text-slate-800 font-extrabold rounded-xl border border-slate-200/80 inline-flex items-center gap-1.5">
-
                                                     <i class="fa-solid fa-cash-register text-slate-500"></i>
-
                                                     Bayar Kasir
-
                                                 </span>
+
+                                            @elseif (strtolower($order->payment_method ?? '') === 'bank')
+                                                <span
+                                                    class="px-3 py-1 text-xs bg-blue-50 text-blue-700 font-extrabold rounded-xl border border-blue-200/80 inline-flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-building-columns text-blue-600"></i>
+                                                    BANK
+                                                </span>
+
                                             @else
                                                 <span
                                                     class="px-3 py-1 text-xs bg-amber-50 text-amber-700 font-extrabold rounded-xl border border-amber-200/80 inline-flex items-center gap-1.5">
-
                                                     <i class="fa-solid fa-qrcode text-amber-600"></i>
-
                                                     QRIS
-
                                                 </span>
                                             @endif
 
@@ -714,9 +716,9 @@
 
 
                                     {{-- ======================================================
-    KHUSUS DAPUR
-    STATUS PER UNIT MENU
-======================================================= --}}
+                                        KHUSUS DAPUR
+                                        STATUS PER UNIT MENU
+                                    ======================================================= --}}
                                     @if (Auth::user()->role === 'dapur')
                                         <div class="space-y-3">
 
@@ -752,15 +754,15 @@
 
                                                                 <button type="submit"
                                                                     class="px-3 py-2
-                                       bg-emerald-600
-                                       hover:bg-emerald-500
-                                       text-white
-                                       rounded-xl
-                                       text-xs
-                                       font-black
-                                       transition
-                                       cursor-pointer
-                                       whitespace-nowrap">
+                                                                    bg-emerald-600
+                                                                    hover:bg-emerald-500
+                                                                    text-white
+                                                                    rounded-xl
+                                                                    text-xs
+                                                                    font-black
+                                                                    transition
+                                                                    cursor-pointer
+                                                                    whitespace-nowrap">
                                                                     <i class="fa-solid fa-check mr-1"></i>
                                                                     Selesai
                                                                 </button>
@@ -769,8 +771,8 @@
 
 
                                                             {{-- ==============================================
-                            BAHAN HABIS
-                        =============================================== --}}
+                                                                BAHAN HABIS
+                                                            =============================================== --}}
                                                             <form
                                                                 action="{{ route('merchant.orders.unit.status', encryptId($unit->id)) }}"
                                                                 method="POST" class="cancel-food-form inline-block">
@@ -782,18 +784,18 @@
 
                                                                 <button type="submit"
                                                                     class="cancel-food-btn
-                                       px-3 py-2
-                                       bg-rose-100
-                                       hover:bg-rose-200
-                                       text-rose-700
-                                       rounded-xl
-                                       text-xs
-                                       font-black
-                                       border
-                                       border-rose-200
-                                       transition
-                                       cursor-pointer
-                                       whitespace-nowrap">
+                                                                    px-3 py-2
+                                                                    bg-rose-100
+                                                                    hover:bg-rose-200
+                                                                    text-rose-700
+                                                                    rounded-xl
+                                                                    text-xs
+                                                                    font-black
+                                                                    border
+                                                                    border-rose-200
+                                                                    transition
+                                                                    cursor-pointer
+                                                                    whitespace-nowrap">
                                                                     <i class="fa-solid fa-box-open mr-1"></i>
                                                                     Bahan Habis
                                                                 </button>
@@ -802,38 +804,38 @@
 
 
                                                             {{-- ==================================================
-                        SUDAH SELESAI
-                    ================================================== --}}
+                                                                SUDAH SELESAI
+                                                            ================================================== --}}
                                                         @elseif ($unit->status === 'completed')
                                                             <span
                                                                 class="px-3 py-2
-                                   bg-emerald-50
-                                   text-emerald-700
-                                   rounded-xl
-                                   text-xs
-                                   font-black
-                                   border
-                                   border-emerald-200
-                                   whitespace-nowrap">
+                                                                bg-emerald-50
+                                                                text-emerald-700
+                                                                rounded-xl
+                                                                text-xs
+                                                                font-black
+                                                                border
+                                                                border-emerald-200
+                                                                whitespace-nowrap">
                                                                 <i class="fa-solid fa-circle-check mr-1"></i>
                                                                 Selesai
                                                             </span>
 
 
                                                             {{-- ==================================================
-                        BAHAN HABIS
-                    ================================================== --}}
+                                                                BAHAN HABIS
+                                                            ================================================== --}}
                                                         @elseif ($unit->status === 'cancelled')
                                                             <span
                                                                 class="px-3 py-2
-                                   bg-rose-50
-                                   text-rose-700
-                                   rounded-xl
-                                   text-xs
-                                   font-black
-                                   border
-                                   border-rose-200
-                                   whitespace-nowrap">
+                                                                bg-rose-50
+                                                                text-rose-700
+                                                                rounded-xl
+                                                                text-xs
+                                                                font-black
+                                                                border
+                                                                border-rose-200
+                                                                whitespace-nowrap">
                                                                 <i class="fa-solid fa-box-open mr-1"></i>
                                                                 Bahan Habis
                                                             </span>

@@ -3066,6 +3066,274 @@ class CustomerOrderController extends Controller
         }
     }
 
+    /**
+     * =========================================================
+     * ORDER DETAIL
+     * =========================================================
+     */
+    public function detail(
+        string $code,
+        string $orderNumber
+    ) {
+        /*
+        |--------------------------------------------------------------------------
+        | DECRYPT ORDER NUMBER
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            $decryptedOrderNumber =
+                Crypt::decryptString(
+                    $orderNumber
+                );
+
+        } catch (\Exception $e) {
+
+            $decryptedOrderNumber =
+                $orderNumber;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | QR CODE
+        |--------------------------------------------------------------------------
+        */
+
+        $qrCode = QrCode::where(
+            'code',
+            $code
+        )
+            ->where(
+                'status',
+                'active'
+            )
+            ->firstOrFail();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | MERCHANT
+        |--------------------------------------------------------------------------
+        */
+
+        $merchant =
+            $qrCode->merchant;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ORDER
+        |--------------------------------------------------------------------------
+        */
+
+        $order = Order::with([
+            'items.unit',
+            'merchant',
+            'qrCode',
+            'cashier',
+        ])
+            ->where(
+                'order_number',
+                $decryptedOrderNumber
+            )
+            ->where(
+                'merchant_id',
+                $merchant->id
+            )
+            ->firstOrFail();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DETAIL HANYA BOLEH DIAKSES JIKA SUDAH LUNAS
+        |--------------------------------------------------------------------------
+        */
+
+        if ($order->payment_status !== 'paid') {
+
+            return redirect()
+                ->route(
+                    'customer.order.success',
+                    [
+                        'code' =>
+                        $code,
+
+                        'orderNumber' =>
+                        $orderNumber,
+                    ]
+                )
+                ->with(
+                    'error',
+                    'Detail pesanan belum tersedia karena pembayaran belum dikonfirmasi.'
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VIEW
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'customer.order-detail',
+            compact(
+                'qrCode',
+                'merchant',
+                'order'
+            )
+        );
+    }
+
+    /**
+     * =========================================================
+     * ORDER DETAIL STATUS
+     * =========================================================
+     *
+     * Digunakan oleh halaman Detail Pesanan customer
+     * untuk mengambil perubahan status makanan secara realtime.
+     */
+    public function detailStatus(
+        string $code,
+        string $orderNumber
+    ) {
+        /*
+        |--------------------------------------------------------------------------
+        | DECRYPT ORDER NUMBER
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            $decryptedOrderNumber =
+                Crypt::decryptString(
+                    $orderNumber
+                );
+
+        } catch (\Exception $e) {
+
+            $decryptedOrderNumber =
+                $orderNumber;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | QR CODE
+        |--------------------------------------------------------------------------
+        */
+
+        $qrCode = QrCode::where(
+            'code',
+            $code
+        )
+            ->where(
+                'status',
+                'active'
+            )
+            ->firstOrFail();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ORDER
+        |--------------------------------------------------------------------------
+        */
+
+        $order = Order::with([
+            'items.unit',
+        ])
+            ->where(
+                'order_number',
+                $decryptedOrderNumber
+            )
+            ->where(
+                'merchant_id',
+                $qrCode->merchant_id
+            )
+            ->firstOrFail();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DETAIL HANYA UNTUK ORDER PAID
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $order->payment_status !== 'paid'
+        ) {
+
+            return response()->json([
+                'success' => false,
+                'payment_status' =>
+                    $order->payment_status,
+            ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STATUS SETIAP MENU
+        |--------------------------------------------------------------------------
+        */
+
+        $items = [];
+
+        foreach (
+            $order->items as $item
+        ) {
+
+            $units = [];
+
+            foreach (
+                $item->unit as $unit
+            ) {
+
+                $units[] = [
+                    'id' =>
+                        $unit->id,
+
+                    'unit_number' =>
+                        $unit->unit_number,
+
+                    'status' =>
+                        $unit->status,
+                ];
+            }
+
+
+            $items[] = [
+                'id' =>
+                    $item->id,
+
+                'menu_name' =>
+                    $item->menu_name,
+
+                'quantity' =>
+                    $item->quantity,
+
+                'units' =>
+                    $units,
+            ];
+        }
+
+
+        return response()->json([
+            'success' => true,
+
+            'payment_status' =>
+                $order->payment_status,
+
+            'order_status' =>
+                $order->status,
+
+            'items' =>
+                $items,
+        ]);
+    }
 
     /**
      * =========================================================
