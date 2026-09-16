@@ -846,6 +846,10 @@ Route::middleware('auth')
                 [MenuController::class, 'storeCategory']
             )->name('category.store');
 
+            Route::delete(
+                '/category/{encryptedId}',
+                [MenuController::class, 'destroyCategory']
+            )->name('category.destroy');
 
             Route::post(
                 '/menu',

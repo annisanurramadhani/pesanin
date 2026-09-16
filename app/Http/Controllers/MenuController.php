@@ -47,6 +47,41 @@ class MenuController extends Controller
         return back()->with('success', 'Kategori berhasil ditambahkan!');
     }
 
+    // Hapus Kategori
+    public function destroyCategory(Request $request, $encryptedId)
+    {
+        $id = $this->resolveId($encryptedId);
+
+        if (!$id) {
+            abort(404, 'ID Kategori tidak valid.');
+        }
+
+        $category = Category::where(
+            'merchant_id',
+            $request->user()->merchant_id
+        )->findOrFail($id);
+
+
+        // Cek apakah masih ada menu
+        if ($category->menus()->count() > 0) {
+
+            return back()->with(
+                'error',
+                'Kategori masih memiliki menu. Hapus semua menu terlebih dahulu.'
+            );
+
+        }
+
+
+        $category->delete();
+
+
+        return back()->with(
+            'success',
+            'Kategori berhasil dihapus!'
+        );
+    }
+
   // 3. Simpan Menu Baru
 public function store(
     Request $request,

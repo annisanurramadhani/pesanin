@@ -10,7 +10,11 @@
             'code' => $qrCode->code,
             'orderNumber' => request()->route('orderNumber'),
         ]
-    ) }}">
+    ) }}"
+    
+    data-merchant-phone="{{ $merchant->phone }}"
+    data-order-number="{{ $order->order_number }}"
+    >
 
     <div class="max-w-lg mx-auto px-4 py-6">
 
