@@ -93,7 +93,8 @@
             data-payment-url="{{ route('customer.order.payment', [
                 'code' => $qrCode->code,
                 'orderNumber' => request()->route('orderNumber'),
-            ]) }}">
+            ]) }}"
+            data-customer-token="{{ session('customer_token', '') }}">
         </div>
 
 
@@ -204,9 +205,7 @@
 
                 {{-- DISCOUNT --}}
                 @if ($order->discount > 0)
-
-                    <div
-                        class="rounded-xl border border-emerald-100
+                    <div class="rounded-xl border border-emerald-100
                             bg-emerald-50 px-3 py-2.5">
 
                         <div class="flex items-center justify-between gap-4">
@@ -236,7 +235,6 @@
                                     </p>
 
                                     @if (!empty($order->voucher_code))
-
                                         <p
                                             class="mt-0.5 text-xs
                                                 text-emerald-600">
@@ -247,7 +245,6 @@
                                             </span>
 
                                         </p>
-
                                     @endif
 
                                 </div>
@@ -267,7 +264,6 @@
                         </div>
 
                     </div>
-
                 @endif
 
 
@@ -277,16 +273,14 @@
                         pt-4 flex items-center
                         justify-between gap-4">
 
-                    <span
-                        class="text-sm font-semibold
+                    <span class="text-sm font-semibold
                             text-slate-500">
 
                         Total Pembayaran
 
                     </span>
 
-                    <span
-                        class="text-lg font-black
+                    <span class="text-lg font-black
                             text-slate-900">
 
                         Rp {{ number_format($order->total, 0, ',', '.') }}
@@ -472,8 +466,7 @@
                             Total Pembayaran
                         </p>
 
-                        <p
-                            class="mt-1 text-3xl
+                        <p class="mt-1 text-3xl
                                 font-black text-slate-900">
                             Rp {{ number_format($order->total, 0, ',', '.') }}
                         </p>
@@ -485,7 +478,6 @@
                         QRIS EXPIRED
                     ================================================== --}}
                     @if ($order->payment_status === 'expired')
-
                         <div
                             class="mt-6 rounded-2xl
                                 border border-red-100
@@ -499,8 +491,7 @@
                                     text-xl text-red-600"></i>
                             </div>
 
-                            <p
-                                class="mt-3 text-sm font-bold
+                            <p class="mt-3 text-sm font-bold
                                     text-red-800">
 
                                 Pembayaran Kedaluwarsa
@@ -521,11 +512,10 @@
                         </div>
 
 
-                    {{-- =================================================
+                        {{-- =================================================
                         QR CODE
                     ================================================== --}}
                     @elseif ($order->payment_status === 'pending')
-
                         <div class="mt-7 text-center">
 
                             <p class="text-sm font-bold text-slate-700">
@@ -539,7 +529,6 @@
 
 
                             @if (!empty($payment['qr_code_url']))
-
                                 <div
                                     class="mx-auto mt-6 flex w-fit
                                         items-center justify-center
@@ -547,16 +536,11 @@
                                         border-slate-200
                                         bg-white p-4 shadow-sm">
 
-                                    <img
-                                        src="{{ $payment['qr_code_url'] }}"
-                                        alt="QRIS Pembayaran"
-                                        class="h-56 w-56 object-contain"
-                                    >
+                                    <img src="{{ $payment['qr_code_url'] }}" alt="QRIS Pembayaran"
+                                        class="h-56 w-56 object-contain">
 
                                 </div>
-
                             @else
-
                                 <div
                                     class="mt-6 rounded-xl
                                         bg-red-50
@@ -570,7 +554,6 @@
                                     </p>
 
                                 </div>
-
                             @endif
 
                         </div>
@@ -579,8 +562,7 @@
                         {{-- =================================================
                             CARA PEMBAYARAN QRIS
                         ================================================== --}}
-                        <div
-                            class="mt-7 rounded-2xl
+                        <div class="mt-7 rounded-2xl
                                 bg-slate-50 p-5 text-left">
 
                             <div class="flex gap-3">
@@ -631,11 +613,10 @@
                         </div>
 
 
-                    {{-- =================================================
+                        {{-- =================================================
                         QRIS PAID
                     ================================================== --}}
                     @elseif ($order->payment_status === 'paid')
-
                         <div
                             class="mt-6 rounded-2xl
                                 border border-emerald-100
@@ -653,14 +634,12 @@
 
                             </div>
 
-                            <p
-                                class="mt-3 text-sm font-bold
+                            <p class="mt-3 text-sm font-bold
                                     text-emerald-800">
                                 Pembayaran berhasil
                             </p>
 
-                            <p
-                                class="mt-1 text-xs
+                            <p class="mt-1 text-xs
                                     text-emerald-600">
                                 Pembayaran QRIS telah dikonfirmasi.
                             </p>
@@ -668,11 +647,10 @@
                         </div>
 
 
-                    {{-- =================================================
+                        {{-- =================================================
                         QRIS FAILED
                     ================================================== --}}
                     @elseif ($order->payment_status === 'failed')
-
                         <div
                             class="mt-6 rounded-2xl
                                 border border-red-100
@@ -683,15 +661,13 @@
                                     items-center justify-center
                                     rounded-full bg-red-100">
 
-                                <i
-                                    class="fa-solid fa-xmark
+                                <i class="fa-solid fa-xmark
                                         text-xl text-red-600">
                                 </i>
 
                             </div>
 
-                            <p
-                                class="mt-3 text-sm font-bold
+                            <p class="mt-3 text-sm font-bold
                                     text-red-800">
                                 Pembayaran Gagal
                             </p>
@@ -705,16 +681,12 @@
                             </p>
 
                         </div>
-
                     @endif
 
                 </div>
 
             </div>
-
-
         @elseif ($order->payment_method === 'bank')
-
             {{-- =====================================================
                 BANK TRANSFER PAYMENT
             ====================================================== --}}
@@ -723,8 +695,7 @@
                     border border-slate-200
                     shadow-sm p-5 mb-5">
 
-                <div
-                    class="border-t border-slate-100
+                <div class="border-t border-slate-100
                         mt-0 pt-5">
 
                     {{-- TOTAL --}}
@@ -737,8 +708,7 @@
                             Total Pembayaran
                         </p>
 
-                        <p
-                            class="mt-1 text-3xl
+                        <p class="mt-1 text-3xl
                                 font-black text-slate-900">
                             Rp {{ number_format($order->total, 0, ',', '.') }}
                         </p>
@@ -750,7 +720,6 @@
                         BANK EXPIRED
                     ================================================== --}}
                     @if ($order->payment_status === 'expired')
-
                         <div
                             class="mt-6 rounded-2xl
                                 border border-red-100
@@ -764,8 +733,7 @@
                                     text-xl text-red-600"></i>
                             </div>
 
-                            <p
-                                class="mt-3 text-sm font-bold
+                            <p class="mt-3 text-sm font-bold
                                     text-red-800">
 
                                 Pembayaran Kedaluwarsa
@@ -787,11 +755,10 @@
                         </div>
 
 
-                    {{-- =================================================
+                        {{-- =================================================
                         BANK INFORMATION
                     ================================================== --}}
                     @elseif ($order->payment_status === 'pending')
-
                         <div
                             class="mt-6 rounded-2xl
                                 border border-indigo-100
@@ -811,14 +778,12 @@
 
                                 </div>
 
-                                <p
-                                    class="mt-3 text-sm
+                                <p class="mt-3 text-sm
                                         font-bold text-indigo-800">
                                     Virtual Account
                                 </p>
 
-                                <p
-                                    class="mt-1 text-xs
+                                <p class="mt-1 text-xs
                                         text-indigo-600">
                                     Silakan lakukan transfer
                                     sesuai nominal berikut.
@@ -827,7 +792,6 @@
 
                                 {{-- BANK --}}
                                 @if (!empty($payment['bank']))
-
                                     <div
                                         class="mt-5 rounded-xl
                                             bg-white
@@ -846,13 +810,11 @@
                                         </p>
 
                                     </div>
-
                                 @endif
 
 
                                 {{-- VA NUMBER --}}
                                 @if (!empty($payment['va_number']))
-
                                     <div
                                         class="mt-4 rounded-xl
                                             bg-white
@@ -869,8 +831,7 @@
                                                 justify-between
                                                 gap-3">
 
-                                            <p
-                                                id="va-number"
+                                            <p id="va-number"
                                                 class="text-xl
                                                     font-black
                                                     tracking-wider
@@ -879,9 +840,7 @@
                                                 {{ $payment['va_number'] }}
                                             </p>
 
-                                            <button
-                                                type="button"
-                                                onclick="copyVA()"
+                                            <button type="button" onclick="copyVA()"
                                                 class="shrink-0
                                                     inline-flex
                                                     items-center
@@ -901,7 +860,6 @@
                                         </div>
 
                                     </div>
-
                                 @endif
 
 
@@ -945,8 +903,7 @@
                         {{-- =================================================
                             CARA PEMBAYARAN BANK
                         ================================================== --}}
-                        <div
-                            class="mt-5 rounded-2xl
+                        <div class="mt-5 rounded-2xl
                                 bg-slate-50 p-5">
 
                             <div class="flex gap-3">
@@ -1000,11 +957,10 @@
                         </div>
 
 
-                    {{-- =================================================
+                        {{-- =================================================
                         BANK PAID
                     ================================================== --}}
                     @elseif ($order->payment_status === 'paid')
-
                         <div
                             class="mt-6 rounded-2xl
                                 border border-emerald-100
@@ -1022,14 +978,12 @@
 
                             </div>
 
-                            <p
-                                class="mt-3 text-sm font-bold
+                            <p class="mt-3 text-sm font-bold
                                     text-emerald-800">
                                 Pembayaran berhasil
                             </p>
 
-                            <p
-                                class="mt-1 text-xs
+                            <p class="mt-1 text-xs
                                     text-emerald-600">
                                 Pembayaran transfer bank
                                 telah dikonfirmasi.
@@ -1038,11 +992,10 @@
                         </div>
 
 
-                    {{-- =================================================
+                        {{-- =================================================
                         BANK FAILED
                     ================================================== --}}
                     @elseif ($order->payment_status === 'failed')
-
                         <div
                             class="mt-6 rounded-2xl
                                 border border-red-100
@@ -1053,15 +1006,13 @@
                                     items-center justify-center
                                     rounded-full bg-red-100">
 
-                                <i
-                                    class="fa-solid fa-xmark
+                                <i class="fa-solid fa-xmark
                                         text-xl text-red-600">
                                 </i>
 
                             </div>
 
-                            <p
-                                class="mt-3 text-sm font-bold
+                            <p class="mt-3 text-sm font-bold
                                     text-red-800">
                                 Pembayaran Gagal
                             </p>
@@ -1075,16 +1026,12 @@
                             </p>
 
                         </div>
-
                     @endif
 
                 </div>
 
             </div>
-
-
         @elseif ($order->payment_method === 'cash')
-
             {{-- =========================================================
                 CASH PAYMENT
             ========================================================== --}}
@@ -1100,21 +1047,18 @@
 
                     <div class="flex gap-3">
 
-                        <i
-                            class="fa-solid fa-circle-info
+                        <i class="fa-solid fa-circle-info
                                 text-emerald-500 mt-0.5">
                         </i>
 
                         <div>
 
-                            <p
-                                class="text-sm font-semibold
+                            <p class="text-sm font-semibold
                                     text-emerald-800">
                                 Pembayaran Tunai
                             </p>
 
-                            <p
-                                class="text-xs text-emerald-600
+                            <p class="text-xs text-emerald-600
                                     mt-1 leading-relaxed">
                                 Silakan lakukan pembayaran secara tunai
                                 kepada kasir saat pesanan diproses.
@@ -1135,9 +1079,7 @@
             STATUS INFO
         ========================================================= --}}
         @if ($order->payment_method === 'qris' || $order->payment_method === 'bank')
-
             @if ($order->payment_status === 'pending')
-
                 <div class="text-center mb-5">
 
                     <p class="text-xs text-slate-400">
@@ -1149,9 +1091,7 @@
                     </p>
 
                 </div>
-
             @elseif ($order->payment_status === 'paid')
-
                 <div class="text-center mb-5">
 
                     <p class="text-xs text-emerald-600">
@@ -1163,9 +1103,7 @@
                     </p>
 
                 </div>
-
             @elseif ($order->payment_status === 'failed')
-
                 <div class="text-center mb-5">
 
                     <p class="text-xs text-red-600">
@@ -1177,26 +1115,19 @@
                     </p>
 
                 </div>
-
             @endif
-
         @endif
 
 
-     {{-- =========================================================
+        {{-- =========================================================
 ACTION
 ========================================================== --}}
-<div class="space-y-3">
+        <div class="space-y-3">
 
-    @if (
-        $order->payment_status === 'expired' ||
-        $order->payment_status === 'failed'
-    )
-
-        {{-- PEMBAYARAN GAGAL / EXPIRED --}}
-        <a
-            href="{{ route('customer.checkout', $qrCode->code) }}?retry_order={{ urlencode(Crypt::encryptString($order->order_number)) }}"
-            class="flex items-center justify-center gap-2
+            @if ($order->payment_status === 'expired' || $order->payment_status === 'failed')
+                {{-- PEMBAYARAN GAGAL / EXPIRED --}}
+                <a href="{{ route('customer.checkout', $qrCode->code) }}?retry_order={{ urlencode(Crypt::encryptString($order->order_number)) }}"
+                    class="flex items-center justify-center gap-2
                    w-full py-3
                    rounded-xl
                    bg-slate-900
@@ -1205,22 +1136,17 @@ ACTION
                    hover:bg-slate-800
                    transition">
 
-            <i class="fa-solid fa-arrow-left"></i>
+                    <i class="fa-solid fa-arrow-left"></i>
 
-            Kembali ke Checkout
+                    Kembali ke Checkout
 
-        </a>
+                </a>
+            @else
+                {{-- KEMBALI KE MENU --}}
+                <div class="flex gap-3">
 
-    @else
-
-        {{-- KEMBALI KE MENU --}}
-        <div class="flex gap-3">
-
-            <a
-                href="{{ route('customer.menu', $qrCode->code) }}"
-                class="{{ $order->payment_status === 'paid'
-                    ? 'w-1/2'
-                    : 'w-full' }}
+                    <a href="{{ route('customer.menu', $qrCode->code) }}"
+                        class="{{ $order->payment_status === 'paid' ? 'w-1/2' : 'w-full' }}
                        flex items-center
                        justify-center gap-2
                        py-3
@@ -1231,25 +1157,20 @@ ACTION
                        hover:bg-slate-800
                        transition">
 
-                <i class="fa-solid fa-utensils"></i>
+                        <i class="fa-solid fa-utensils"></i>
 
-                Kembali ke Menu
+                        Kembali ke Menu
 
-            </a>
+                    </a>
 
 
-            {{-- DETAIL PESANAN HANYA KALAU PAID --}}
-            @if ($order->payment_status === 'paid')
-
-                <a
-                    href="{{ route(
-                        'customer.order.detail',
-                        [
+                    {{-- DETAIL PESANAN HANYA KALAU PAID --}}
+                    @if ($order->payment_status === 'paid')
+                        <a href="{{ route('customer.order.detail', [
                             'code' => $qrCode->code,
                             'orderNumber' => request()->route('orderNumber'),
-                        ]
-                    ) }}"
-                    class="w-1/2
+                        ]) }}"
+                            class="w-1/2
                            flex items-center
                            justify-center gap-2
                            py-3
@@ -1260,19 +1181,17 @@ ACTION
                            hover:bg-amber-600
                            transition">
 
-                    <i class="fa-solid fa-receipt"></i>
+                            <i class="fa-solid fa-receipt"></i>
 
-                    Detail Pesanan
+                            Detail Pesanan
 
-                </a>
+                        </a>
+                    @endif
 
+                </div>
             @endif
 
         </div>
-
-    @endif
-
-</div>
 
 
         {{-- =========================================================

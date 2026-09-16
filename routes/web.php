@@ -200,6 +200,11 @@ Route::prefix('m/{code}')
             '/order/{orderNumber}/payment',
             [CustomerOrderController::class, 'payment']
         )->name('order.payment');
+
+        Route::get(
+            '/customer/profile',
+            [CustomerOrderController::class, 'customerProfile']
+        )->name('customer.profile');
     });
 
 

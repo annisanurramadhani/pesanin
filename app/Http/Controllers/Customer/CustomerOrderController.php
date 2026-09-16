@@ -10,6 +10,8 @@ use App\Models\OrderItem;
 use App\Models\QrCode;
 use App\Models\Voucher;
 use App\Models\OrderItemUnit;
+use App\Models\Customer;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +33,7 @@ class CustomerOrderController extends Controller
     |
     */
 
-    private const PAYMENT_EXPIRY_TESTING = false;
+    private const PAYMENT_EXPIRY_TESTING = true;
 
     private const PAYMENT_EXPIRY_SECONDS = 10;
 
@@ -1576,6 +1578,12 @@ class CustomerOrderController extends Controller
                     'max:100',
                 ],
 
+                'customer_token' => [
+                    'nullable',
+                    'string',
+                    'max:100',
+                ],
+
                 'payment_method' => [
                     'required',
                     'in:qris,cash,bank',
@@ -1868,6 +1876,94 @@ class CustomerOrderController extends Controller
 
 
 
+
+        /*
+|--------------------------------------------------------------------------
+| CUSTOMER MEMORY
+|--------------------------------------------------------------------------
+*/
+
+        $customer = null;
+
+
+        /*
+|--------------------------------------------------------------------------
+| CARI CUSTOMER LAMA DARI TOKEN BROWSER
+|--------------------------------------------------------------------------
+*/
+
+        if (
+            !empty($validated['customer_token'])
+        ) {
+
+            $customer =
+                Customer::where(
+                    'customer_token',
+                    $validated['customer_token']
+                )
+                ->first();
+        }
+
+
+        /*
+|--------------------------------------------------------------------------
+| JIKA CUSTOMER BARU
+|--------------------------------------------------------------------------
+*/
+
+        if (!$customer) {
+
+            $customer =
+                Customer::create([
+
+                    'customer_token' =>
+                    Str::uuid(),
+
+                    'name' =>
+                    $validated['customer_name'],
+
+                    'phone' =>
+                    $validated['customer_phone']
+                        ?? null,
+
+                    'email' =>
+                    $validated['customer_email']
+                        ?? null,
+
+                    'last_order_at' =>
+                    now(),
+
+                ]);
+        }
+
+
+        /*
+|--------------------------------------------------------------------------
+| UPDATE CUSTOMER LAMA
+|--------------------------------------------------------------------------
+*/ else {
+
+            $customer->update([
+
+                'name' =>
+                $validated['customer_name'],
+
+                'phone' =>
+                $validated['customer_phone']
+                    ?? $customer->phone,
+
+                'email' =>
+                $validated['customer_email']
+                    ?? $customer->email,
+
+                'last_order_at' =>
+                now(),
+
+            ]);
+        }
+
+
+
         /*
 |--------------------------------------------------------------------------
 | CREATE ORDER
@@ -1886,7 +1982,8 @@ class CustomerOrderController extends Controller
                 $voucherId,
                 $voucherCode,
                 $discount,
-                $total
+                $total,
+                $customer
             ) {
 
                 /*
@@ -1918,6 +2015,9 @@ class CustomerOrderController extends Controller
                     'customer_email' =>
                     $validated['customer_email']
                         ?? null,
+
+                    'customer_id' =>
+                    $customer->id,
 
                     'subtotal' =>
                     $subtotal,
@@ -2126,6 +2226,11 @@ class CustomerOrderController extends Controller
                     ]);
                 }
             }
+
+            session()->flash(
+                'customer_token',
+                $customer->customer_token
+            );
 
             session()->forget(
                 'cart'
@@ -2736,6 +2841,11 @@ class CustomerOrderController extends Controller
             $paymentData
         );
 
+        session()->flash(
+            'customer_token',
+            $customer->customer_token
+        );
+
         session()->forget(
             'cart'
         );
@@ -2770,6 +2880,52 @@ class CustomerOrderController extends Controller
                     : 'Pesanan berhasil dibuat. Silakan scan QRIS untuk membayar.'
             );
     }
+
+
+    /**
+ * =========================================================
+ * CUSTOMER PROFILE
+ * =========================================================
+ *
+ * Mengambil data customer berdasarkan token browser.
+ */
+public function customerProfile(Request $request)
+{
+    $validated = $request->validate([
+        'customer_token' => [
+            'required',
+            'uuid',
+        ],
+    ]);
+
+    $customer = Customer::where(
+        'customer_token',
+        $validated['customer_token']
+    )->first();
+
+    if (!$customer) {
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Data customer tidak ditemukan.',
+        ], 404);
+    }
+
+    return response()->json([
+        'success' => true,
+
+        'customer' => [
+            'name' =>
+            $customer->name,
+
+            'phone' =>
+            $customer->phone,
+
+            'email' =>
+            $customer->email,
+        ],
+    ]);
+}
 
 
     /**
@@ -3087,7 +3243,6 @@ class CustomerOrderController extends Controller
                 Crypt::decryptString(
                     $orderNumber
                 );
-
         } catch (\Exception $e) {
 
             $decryptedOrderNumber =
@@ -3211,7 +3366,6 @@ class CustomerOrderController extends Controller
                 Crypt::decryptString(
                     $orderNumber
                 );
-
         } catch (\Exception $e) {
 
             $decryptedOrderNumber =
@@ -3269,7 +3423,7 @@ class CustomerOrderController extends Controller
             return response()->json([
                 'success' => false,
                 'payment_status' =>
-                    $order->payment_status,
+                $order->payment_status,
             ]);
         }
 
@@ -3294,29 +3448,29 @@ class CustomerOrderController extends Controller
 
                 $units[] = [
                     'id' =>
-                        $unit->id,
+                    $unit->id,
 
                     'unit_number' =>
-                        $unit->unit_number,
+                    $unit->unit_number,
 
                     'status' =>
-                        $unit->status,
+                    $unit->status,
                 ];
             }
 
 
             $items[] = [
                 'id' =>
-                    $item->id,
+                $item->id,
 
                 'menu_name' =>
-                    $item->menu_name,
+                $item->menu_name,
 
                 'quantity' =>
-                    $item->quantity,
+                $item->quantity,
 
                 'units' =>
-                    $units,
+                $units,
             ];
         }
 
@@ -3325,13 +3479,13 @@ class CustomerOrderController extends Controller
             'success' => true,
 
             'payment_status' =>
-                $order->payment_status,
+            $order->payment_status,
 
             'order_status' =>
-                $order->status,
+            $order->status,
 
             'items' =>
-                $items,
+            $items,
         ]);
     }
 

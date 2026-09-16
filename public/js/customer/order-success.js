@@ -1,31 +1,37 @@
-document.addEventListener('DOMContentLoaded', function () {
-
+document.addEventListener("DOMContentLoaded", function () {
     /*
     |--------------------------------------------------------------------------
     | PAYMENT CONFIG
     |--------------------------------------------------------------------------
     */
 
-    const paymentContainer =
-        document.getElementById('payment-container');
+    const paymentContainer = document.getElementById("payment-container");
 
     if (!paymentContainer) {
         return;
     }
 
+    const paymentStatus = paymentContainer.dataset.paymentStatus || "";
 
-    const paymentStatus =
-        paymentContainer.dataset.paymentStatus || '';
+    const paymentMethod = paymentContainer.dataset.paymentMethod || "";
 
-    const paymentMethod =
-        paymentContainer.dataset.paymentMethod || '';
+    const paymentExpiresAt = paymentContainer.dataset.paymentExpiresAt || "";
 
-    const paymentExpiresAt =
-        paymentContainer.dataset.paymentExpiresAt || '';
+    const paymentUrl = paymentContainer.dataset.paymentUrl || "";
 
-    const paymentUrl =
-        paymentContainer.dataset.paymentUrl || '';
+    /*
+|--------------------------------------------------------------------------
+| CUSTOMER MEMORY
+|--------------------------------------------------------------------------
+*/
 
+    const customerToken = paymentContainer.dataset.customerToken || "";
+
+    const CUSTOMER_TOKEN_KEY = "pesanin_customer_token";
+
+    if (customerToken) {
+        localStorage.setItem(CUSTOMER_TOKEN_KEY, customerToken);
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -34,93 +40,58 @@ document.addEventListener('DOMContentLoaded', function () {
     */
 
     window.copyVA = function () {
-
-        const vaElement =
-            document.getElementById('va-number');
+        const vaElement = document.getElementById("va-number");
 
         if (!vaElement) {
             return;
         }
 
-        const va =
-            vaElement.innerText.trim();
+        const va = vaElement.innerText.trim();
 
         if (!va) {
             return;
         }
 
-
-        if (
-            navigator.clipboard &&
-            window.isSecureContext
-        ) {
-
+        if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard
                 .writeText(va)
                 .then(function () {
-
-                    showCopyToast(
-                        'Nomor Virtual Account berhasil disalin.'
-                    );
-
+                    showCopyToast("Nomor Virtual Account berhasil disalin.");
                 })
                 .catch(function () {
-
                     fallbackCopyVA(va);
-
                 });
-
         } else {
-
             fallbackCopyVA(va);
-
         }
     };
 
-
     function fallbackCopyVA(va) {
-
-        const textarea =
-            document.createElement('textarea');
+        const textarea = document.createElement("textarea");
 
         textarea.value = va;
 
-        textarea.style.position =
-            'fixed';
+        textarea.style.position = "fixed";
 
-        textarea.style.opacity =
-            '0';
+        textarea.style.opacity = "0";
 
-        document.body.appendChild(
-            textarea
-        );
+        document.body.appendChild(textarea);
 
         textarea.select();
 
         try {
+            document.execCommand("copy");
 
-            document.execCommand('copy');
-
-            showCopyToast(
-                'Nomor Virtual Account berhasil disalin.'
-            );
-
+            showCopyToast("Nomor Virtual Account berhasil disalin.");
         } catch (error) {
-
-            alert(
-                'Gagal menyalin nomor Virtual Account.'
-            );
-
+            alert("Gagal menyalin nomor Virtual Account.");
         }
 
-        document.body.removeChild(
-            textarea
-        );
+        document.body.removeChild(textarea);
     }
 
     function showCopyToast(message) {
-
-        const toast = document.createElement('div');
+        const toast = document.createElement("div");
 
         toast.innerHTML = `
             <div style="
@@ -143,13 +114,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.body.appendChild(toast);
 
-
-        setTimeout(function(){
-
+        setTimeout(function () {
             toast.remove();
-
-        },2000);
-
+        }, 2000);
     }
 
     /*
@@ -158,62 +125,34 @@ document.addEventListener('DOMContentLoaded', function () {
     |--------------------------------------------------------------------------
     */
 
-    const timerContainer =
-        document.getElementById(
-            'payment-countdown-container'
-        );
+    const timerContainer = document.getElementById(
+        "payment-countdown-container",
+    );
 
-    const timerElement =
-        document.getElementById(
-            'payment-countdown'
-        );
-
+    const timerElement = document.getElementById("payment-countdown");
 
     if (
         timerContainer &&
         timerElement &&
         paymentExpiresAt &&
-        paymentStatus === 'pending'
+        paymentStatus === "pending"
     ) {
-
-        startCountdown(
-            paymentExpiresAt,
-            timerContainer,
-            timerElement
-        );
+        startCountdown(paymentExpiresAt, timerContainer, timerElement);
     }
 
+    function startCountdown(expiryTime, container, element) {
+        const expiry = new Date(expiryTime).getTime();
 
-    function startCountdown(
-        expiryTime,
-        container,
-        element
-    ) {
-
-        const expiry =
-            new Date(expiryTime).getTime();
-
-
-        if (
-            Number.isNaN(expiry)
-        ) {
-            console.warn(
-                'payment_expires_at tidak valid:',
-                expiryTime
-            );
+        if (Number.isNaN(expiry)) {
+            console.warn("payment_expires_at tidak valid:", expiryTime);
 
             return;
         }
 
-
         function updateCountdown() {
+            const now = new Date().getTime();
 
-            const now =
-                new Date().getTime();
-
-            const distance =
-                expiry - now;
-
+            const distance = expiry - now;
 
             /*
             |--------------------------------------------------------------------------
@@ -222,52 +161,30 @@ document.addEventListener('DOMContentLoaded', function () {
             */
 
             if (distance <= 0) {
+                element.innerText = "00:00";
 
-                element.innerText =
-                    '00:00';
+                container.classList.remove("bg-amber-50", "border-amber-100");
 
-                container.classList.remove(
-                    'bg-amber-50',
-                    'border-amber-100'
+                container.classList.add("bg-red-50", "border-red-100");
+
+                const title = document.getElementById(
+                    "payment-countdown-title",
                 );
 
-                container.classList.add(
-                    'bg-red-50',
-                    'border-red-100'
+                const description = document.getElementById(
+                    "payment-countdown-description",
                 );
-
-
-                const title =
-                    document.getElementById(
-                        'payment-countdown-title'
-                    );
-
-                const description =
-                    document.getElementById(
-                        'payment-countdown-description'
-                    );
-
 
                 if (title) {
-
-                    title.innerText =
-                        'Pembayaran Kedaluwarsa';
-
+                    title.innerText = "Pembayaran Kedaluwarsa";
                 }
-
 
                 if (description) {
-
                     description.innerText =
-                        'Waktu pembayaran telah habis. Silakan buat pesanan baru.';
-
+                        "Waktu pembayaran telah habis. Silakan buat pesanan baru.";
                 }
 
-
-                clearInterval(
-                    countdownInterval
-                );
-
+                clearInterval(countdownInterval);
 
                 /*
                 |--------------------------------------------------------------------------
@@ -279,18 +196,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 |
                 */
 
-                setTimeout(
-                    function () {
-
-                        window.location.reload();
-
-                    },
-                    1000
-                );
+                setTimeout(function () {
+                    window.location.reload();
+                }, 1000);
 
                 return;
             }
-
 
             /*
             |--------------------------------------------------------------------------
@@ -298,69 +209,37 @@ document.addEventListener('DOMContentLoaded', function () {
             |--------------------------------------------------------------------------
             */
 
-            const totalSeconds =
-                Math.floor(
-                    distance / 1000
-                );
+            const totalSeconds = Math.floor(distance / 1000);
 
+            const hours = Math.floor(totalSeconds / 3600);
 
-            const hours =
-                Math.floor(
-                    totalSeconds / 3600
-                );
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
 
-
-            const minutes =
-                Math.floor(
-                    (totalSeconds % 3600) / 60
-                );
-
-
-            const seconds =
-                totalSeconds % 60;
-
+            const seconds = totalSeconds % 60;
 
             let timeText;
 
-
             if (hours > 0) {
-
                 timeText =
-                    String(hours)
-                        .padStart(2, '0')
-                    + ':' +
-                    String(minutes)
-                        .padStart(2, '0')
-                    + ':' +
-                    String(seconds)
-                        .padStart(2, '0');
-
+                    String(hours).padStart(2, "0") +
+                    ":" +
+                    String(minutes).padStart(2, "0") +
+                    ":" +
+                    String(seconds).padStart(2, "0");
             } else {
-
                 timeText =
-                    String(minutes)
-                        .padStart(2, '0')
-                    + ':' +
-                    String(seconds)
-                        .padStart(2, '0');
+                    String(minutes).padStart(2, "0") +
+                    ":" +
+                    String(seconds).padStart(2, "0");
             }
 
-
-            element.innerText =
-                timeText;
+            element.innerText = timeText;
         }
-
 
         updateCountdown();
 
-
-        const countdownInterval =
-            setInterval(
-                updateCountdown,
-                1000
-            );
+        const countdownInterval = setInterval(updateCountdown, 1000);
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -370,63 +249,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (
         !paymentUrl ||
-        paymentStatus !== 'pending' ||
-        (
-            paymentMethod !== 'qris' &&
-            paymentMethod !== 'bank'
-        )
+        paymentStatus !== "pending" ||
+        (paymentMethod !== "qris" && paymentMethod !== "bank")
     ) {
         return;
     }
 
-
     let checkingPayment = false;
 
-
     async function checkPaymentStatus() {
-
         if (checkingPayment) {
             return;
         }
 
-
         checkingPayment = true;
 
-
         try {
+            const response = await fetch(paymentUrl, {
+                method: "GET",
 
-            const response =
-                await fetch(
-                    paymentUrl,
-                    {
-                        method: 'GET',
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
 
-                        headers: {
-                            'X-Requested-With':
-                                'XMLHttpRequest',
+                    Accept: "application/json",
+                },
 
-                            'Accept':
-                                'application/json'
-                        },
-
-                        cache:
-                            'no-store'
-                    }
-                );
-
+                cache: "no-store",
+            });
 
             if (!response.ok) {
-
-                throw new Error(
-                    'HTTP error ' +
-                    response.status
-                );
+                throw new Error("HTTP error " + response.status);
             }
 
-
-            const data =
-                await response.json();
-
+            const data = await response.json();
 
             /*
             |--------------------------------------------------------------------------
@@ -434,30 +289,21 @@ document.addEventListener('DOMContentLoaded', function () {
             |--------------------------------------------------------------------------
             */
 
-            if (
-                data.success &&
-                data.payment_status === 'paid'
-            ) {
-
-                clearInterval(
-                    paymentStatusInterval
-                );
+            if (data.success && data.payment_status === "paid") {
+                clearInterval(paymentStatusInterval);
 
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Pembayaran Berhasil!',
-                    text: 'Pembayaran kamu telah berhasil dikonfirmasi.',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#f59e0b'
+                    icon: "success",
+                    title: "Pembayaran Berhasil!",
+                    text: "Pembayaran kamu telah berhasil dikonfirmasi.",
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#f59e0b",
                 }).then(function () {
-
                     window.location.reload();
-
                 });
 
                 return;
             }
-
 
             /*
             |--------------------------------------------------------------------------
@@ -465,20 +311,13 @@ document.addEventListener('DOMContentLoaded', function () {
             |--------------------------------------------------------------------------
             */
 
-            if (
-                data.success &&
-                data.payment_status === 'expired'
-            ) {
-
-                clearInterval(
-                    paymentStatusInterval
-                );
+            if (data.success && data.payment_status === "expired") {
+                clearInterval(paymentStatusInterval);
 
                 window.location.reload();
 
                 return;
             }
-
 
             /*
             |--------------------------------------------------------------------------
@@ -486,35 +325,19 @@ document.addEventListener('DOMContentLoaded', function () {
             |--------------------------------------------------------------------------
             */
 
-            if (
-                data.success &&
-                data.payment_status === 'failed'
-            ) {
-
-                clearInterval(
-                    paymentStatusInterval
-                );
+            if (data.success && data.payment_status === "failed") {
+                clearInterval(paymentStatusInterval);
 
                 window.location.reload();
 
                 return;
             }
-
-
         } catch (error) {
-
-            console.error(
-                'Gagal mengecek status pembayaran:',
-                error
-            );
-
+            console.error("Gagal mengecek status pembayaran:", error);
         } finally {
-
             checkingPayment = false;
-
         }
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -522,12 +345,7 @@ document.addEventListener('DOMContentLoaded', function () {
     |--------------------------------------------------------------------------
     */
 
-    const paymentStatusInterval =
-        setInterval(
-            checkPaymentStatus,
-            1000
-        );
-
+    const paymentStatusInterval = setInterval(checkPaymentStatus, 1000);
 
     /*
     |--------------------------------------------------------------------------
@@ -536,5 +354,4 @@ document.addEventListener('DOMContentLoaded', function () {
     */
 
     checkPaymentStatus();
-
 });
