@@ -727,7 +727,11 @@ Route::middleware('auth')
                 '/orders/{encryptedId}/receipt',
                 [OrderController::class, 'receipt']
             )->name('orders.receipt');
-
+            
+            Route::get(
+                '/orders/{id}/receipt/pdf',
+                [OrderController::class, 'receiptPdf']
+            )->name('orders.receipt.pdf');
 
             Route::post(
                 '/orders/{encryptedId}/receipt/email',
