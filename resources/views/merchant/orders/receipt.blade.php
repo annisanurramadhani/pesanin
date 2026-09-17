@@ -19,14 +19,14 @@
         <div class="flex flex-wrap items-center gap-2">
 
             {{-- Cetak --}}
-            <button
-                type="button"
-                onclick="printReceipt()"
-                class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-slate-800"
+            <a
+                href="{{ route('merchant.orders.receipt.pdf', encryptId($order->id)) }}"
+                target="_blank"
+                class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-400"
             >
                 <i class="fa-solid fa-print"></i>
                 Cetak Struk
-            </button>
+            </a>
 
             {{-- Kirim Email --}}
             @if ($order->customer_email)
@@ -285,15 +285,40 @@
                         Bayar Kasir
                     </span>
 
+                    {{-- Detail Cash --}}
+                    <div class="mt-4 space-y-2 text-left text-[11px]">
 
-                @else
 
-                    <span
-                        class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3 py-1.5 text-[10px] font-black text-slate-700"
-                    >
-                        <i class="fa-solid fa-wallet text-slate-500"></i>
-                        {{ ucfirst($order->payment_method) }}
-                    </span>
+                        <div class="flex justify-between">
+
+                            <span class="text-slate-500">
+                                Uang Diterima
+                            </span>
+
+
+                            <span class="font-bold text-slate-700">
+                                Rp {{ number_format($order->cash_received ?? 0, 0, ',', '.') }}
+                            </span>
+
+                        </div>
+
+
+
+                        <div class="flex justify-between">
+
+                            <span class="text-slate-500">
+                                Kembalian
+                            </span>
+
+
+                            <span class="font-black text-amber-600">
+                                Rp {{ number_format($order->cash_change ?? 0, 0, ',', '.') }}
+                            </span>
+
+                        </div>
+
+
+                    </div>
 
                 @endif
 

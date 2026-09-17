@@ -8,11 +8,11 @@
 
                 <div>
                     <h1 class="text-xl font-extrabold text-slate-900">
-                        PesanIn
+                        {{ $setting?->website_name ?? 'PesanIn' }}
                     </h1>
 
                     <p class="text-xs text-slate-500">
-                        Solusi digital untuk bisnis Anda
+                        {{ $setting?->tagline ?? 'Solusi digital untuk bisnis Anda' }}
                     </p>
                 </div>
 

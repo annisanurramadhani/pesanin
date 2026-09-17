@@ -619,6 +619,7 @@
 
                             @elseif(strtolower($order->payment_method) === 'cash')
 
+                                {{-- Badge tetap tengah --}}
                                 <span
                                     style="
                                         display:inline-block;
@@ -634,7 +635,73 @@
                                     Bayar Kasir
                                 </span>
 
+                                {{-- Detail cash rata kiri kanan --}}
+                                <table
+                                    width="100%"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    style="
+                                        margin-top:15px;
+                                        text-align:left;
+                                    "
+                                >
+
+                                    <tr>
+
+                                        <td
+                                            style="
+                                                padding:8px 0;
+                                                color:#64748b;
+                                                font-size:12px;
+                                            "
+                                        >
+                                            Uang Diterima
+                                        </td>
+
+                                        <td
+                                            align="right"
+                                            style="
+                                                padding:8px 0;
+                                                color:#111827;
+                                                font-size:12px;
+                                                font-weight:bold;
+                                            "
+                                        >
+                                            Rp {{ number_format($order->cash_received ?? 0, 0, ',', '.') }}
+                                        </td>
+
+                                    </tr>
+
+                                    <tr>
+
+                                        <td
+                                            style="
+                                                padding:8px 0;
+                                                color:#64748b;
+                                                font-size:12px;
+                                            "
+                                        >
+                                            Kembalian
+                                        </td>
+
+                                        <td
+                                            align="right"
+                                            style="
+                                                padding:8px 0;
+                                                color:#d97706;
+                                                font-size:12px;
+                                                font-weight:bold;
+                                            "
+                                        >
+                                            Rp {{ number_format($order->cash_change ?? 0, 0, ',', '.') }}
+                                        </td>
+
+                                    </tr>
+
+                                </table>
+
                             @endif
+
                         </div>
 
                         {{-- Closing --}}

@@ -33,7 +33,7 @@ class CustomerOrderController extends Controller
     |
     */
 
-    private const PAYMENT_EXPIRY_TESTING = true;
+    private const PAYMENT_EXPIRY_TESTING = false;
 
     private const PAYMENT_EXPIRY_SECONDS = 10;
 
@@ -3475,17 +3475,36 @@ public function customerProfile(Request $request)
         }
 
 
+        $hasCancelledItem = false;
+
+        foreach ($items as $item) {
+
+            foreach ($item['units'] as $unit) {
+
+                if ($unit['status'] === 'cancelled') {
+                    $hasCancelledItem = true;
+                }
+
+            }
+
+        }
+
+
         return response()->json([
+
             'success' => true,
 
             'payment_status' =>
-            $order->payment_status,
+                $order->payment_status,
 
             'order_status' =>
-            $order->status,
+                $order->status,
+
+            'has_cancelled_item' =>
+                $hasCancelledItem,
 
             'items' =>
-            $items,
+                $items,
         ]);
     }
 

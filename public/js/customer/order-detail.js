@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const statusUrl =
         container.dataset.statusUrl;
 
+    const orderNumber =
+        container.dataset.orderNumber;
 
     if (!statusUrl) {
         return;
@@ -443,6 +445,117 @@ document.addEventListener('DOMContentLoaded', function () {
             updateOverallStatus(
                 data.items
             );
+
+           /*
+            |--------------------------------------------------------------------------
+            | NOTIFIKASI BAHAN HABIS
+            |--------------------------------------------------------------------------
+            */
+
+            const hasCancelledItem =
+                data.items.some(item =>
+                    item.units.some(
+                        unit => unit.status === 'cancelled'
+                    )
+                );
+
+
+            if (
+                hasCancelledItem &&
+                !localStorage.getItem(
+                    `cancel-alert-${orderNumber}`
+                )
+            ) {
+
+                localStorage.setItem(
+                    `cancel-alert-${orderNumber}`,
+                    true
+                );
+
+
+                Swal.fire({
+
+                    icon: 'warning',
+
+                    title: 'Salah Satu Menu Tidak Tersedia',
+
+                    html: `
+                        <p>
+                            Mohon maaf, salah satu menu dalam pesanan kamu sedang habis.
+                        </p>
+
+                        <p class="mt-3">
+                            Apakah kamu ingin melakukan pengembalian dana (return)
+                            atau mendapatkan solusi lain dari kasir?
+                        </p>
+                    `,
+
+
+                    showCancelButton: true,
+
+
+                    confirmButtonText:
+                        '<i class="fa-brands fa-whatsapp"></i> Hubungi Customer Service',
+
+
+                    cancelButtonText:
+                        'Tutup',
+
+
+                    confirmButtonColor:
+                        '#25D366',
+
+
+                    cancelButtonColor:
+                        '#94a3b8'
+
+
+                }).then((result)=>{
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | HUBUNGI KASIR VIA WHATSAPP
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if(result.isConfirmed){
+
+
+                        const phone =
+                            container.dataset.merchantPhone;
+
+
+                        const orderNumber =
+                            container.dataset.orderNumber;
+
+
+
+                        const message =
+            `Halo, saya pemesan ${orderNumber}.
+
+            Mohon bantuannya, salah satu menu dari pesanan saya sedang habis.
+
+            Apakah bisa dilakukan pengembalian dana (return) untuk menu tersebut atau ada solusi lain?
+
+            Terima kasih.`;
+
+
+                        const whatsapp =
+                            `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+
+                        window.open(
+                            whatsapp,
+                            '_blank'
+                        );
+
+                    }
+
+
+                });
+
+            }
 
         } catch (error) {
 

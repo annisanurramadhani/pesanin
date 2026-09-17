@@ -14,7 +14,7 @@
 
                     {{-- Logo PesanIn --}}
                     <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
-                        <img src="{{ asset('assets/images/logo-regis.jpg') }}" alt="PesanIn"
+                        <img src="{{ menuImage($setting?->logo) }}" alt="{{ $setting?->website_name ?? 'PesanIn' }}"
                             class="h-full w-full object-contain">
                     </div>
 
@@ -22,11 +22,11 @@
                     <div>
 
                         <h1 class="text-xl font-extrabold text-slate-900">
-                            PesanIn
+                            {{ $setting?->website_name ?? 'PesanIn' }}
                         </h1>
 
                         <p class="text-xs text-slate-500">
-                            Solusi digital untuk bisnis Anda
+                            {{ $setting?->tagline ?? 'Solusi digital untuk bisnis Anda' }}
                         </p>
 
                     </div>
@@ -225,7 +225,9 @@
         <footer class="border-t border-slate-200 pt-6 pb-8 text-center">
 
             <p class="text-xs text-slate-400">
-                © {{ date('Y') }} PesanIn. Semua hak dilindungi.
+                © {{ date('Y') }}
+                {{ $setting?->website_name ?? 'PesanIn' }}.
+                {{ $setting?->footer_text ?? 'Semua hak dilindungi.' }}
             </p>
         </footer>
 

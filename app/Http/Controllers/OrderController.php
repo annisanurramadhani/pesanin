@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Mail\OrderReceiptMail;
 use Illuminate\Support\Facades\Mail;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderController extends Controller
 {
@@ -107,10 +108,8 @@ class OrderController extends Controller
                                 'processing',
                             ]
                         );
-
                     }
                 );
-
         } else {
 
             /*
@@ -131,7 +130,6 @@ class OrderController extends Controller
                     '!=',
                     'expired'
                 );
-
             });
 
 
@@ -152,7 +150,6 @@ class OrderController extends Controller
                     Carbon::parse(
                         $selectedDate
                     )->format('d M Y');
-
             } elseif ($filterType === 'month') {
 
                 $carbonMonth =
@@ -172,7 +169,6 @@ class OrderController extends Controller
 
                 $labelPeriode =
                     $carbonMonth->format('F Y');
-
             } elseif ($filterType === 'year') {
 
                 $query->whereYear(
@@ -245,35 +241,35 @@ class OrderController extends Controller
 
                     $completedUnits =
                         $units
-                            ->where(
-                                'status',
-                                'completed'
-                            )
-                            ->count();
+                        ->where(
+                            'status',
+                            'completed'
+                        )
+                        ->count();
 
                     $cancelledUnits =
                         $units
-                            ->where(
-                                'status',
-                                'cancelled'
-                            )
-                            ->count();
+                        ->where(
+                            'status',
+                            'cancelled'
+                        )
+                        ->count();
 
                     $processingUnits =
                         $units
-                            ->where(
-                                'status',
-                                'processing'
-                            )
-                            ->count();
+                        ->where(
+                            'status',
+                            'processing'
+                        )
+                        ->count();
 
                     $pendingUnits =
                         $units
-                            ->where(
-                                'status',
-                                'pending'
-                            )
-                            ->count();
+                        ->where(
+                            'status',
+                            'pending'
+                        )
+                        ->count();
 
 
                     /*
@@ -289,7 +285,6 @@ class OrderController extends Controller
 
                         $order->display_status =
                             'completed';
-
                     } elseif (
                         $totalUnits > 0 &&
                         $cancelledUnits === $totalUnits
@@ -297,21 +292,18 @@ class OrderController extends Controller
 
                         $order->display_status =
                             'cancelled';
-
                     } elseif (
                         $cancelledUnits > 0
                     ) {
 
                         $order->display_status =
                             'partial_problem';
-
                     } elseif (
                         $processingUnits > 0
                     ) {
 
                         $order->display_status =
                             'processing';
-
                     } else {
 
                         $order->display_status =
@@ -328,19 +320,19 @@ class OrderController extends Controller
                     $order->status_summary = [
 
                         'total' =>
-                            $totalUnits,
+                        $totalUnits,
 
                         'completed' =>
-                            $completedUnits,
+                        $completedUnits,
 
                         'cancelled' =>
-                            $cancelledUnits,
+                        $cancelledUnits,
 
                         'processing' =>
-                            $processingUnits,
+                        $processingUnits,
 
                         'pending' =>
-                            $pendingUnits,
+                        $pendingUnits,
 
                     ];
                 }
@@ -356,36 +348,36 @@ class OrderController extends Controller
 
         $totalRevenue =
             $orders
-                ->where(
-                    'payment_status',
-                    'paid'
-                )
-                ->sum(
-                    function ($order) {
+            ->where(
+                'payment_status',
+                'paid'
+            )
+            ->sum(
+                function ($order) {
 
-                        if (
-                            isset($order->total) &&
-                            (float) $order->total > 0
-                        ) {
+                    if (
+                        isset($order->total) &&
+                        (float) $order->total > 0
+                    ) {
 
-                            return (float)
-                                $order->total;
-                        }
-
-                        return $order->items->sum(
-                            function ($item) {
-
-                                return
-                                    $item->subtotal
-                                    ??
-                                    (
-                                        $item->price *
-                                        $item->quantity
-                                    );
-                            }
-                        );
+                        return (float)
+                        $order->total;
                     }
-                );
+
+                    return $order->items->sum(
+                        function ($item) {
+
+                            return
+                                $item->subtotal
+                                ??
+                                (
+                                    $item->price *
+                                    $item->quantity
+                                );
+                        }
+                    );
+                }
+            );
 
 
         /*
@@ -470,17 +462,17 @@ class OrderController extends Controller
                 'success' => true,
 
                 'orders' =>
-                    $orders
-                        ->map(
-                            function ($order) {
+                $orders
+                    ->map(
+                        function ($order) {
 
-                                return [
-                                    'id' =>
-                                        $order->id,
-                                ];
-                            }
-                        )
-                        ->values(),
+                            return [
+                                'id' =>
+                                $order->id,
+                            ];
+                        }
+                    )
+                    ->values(),
 
             ]);
         }
@@ -514,7 +506,6 @@ class OrderController extends Controller
                                 'processing',
                             ]
                         );
-
                     }
                 )
                 ->orderByDesc(
@@ -528,17 +519,17 @@ class OrderController extends Controller
                 'success' => true,
 
                 'orders' =>
-                    $orders
-                        ->map(
-                            function ($order) {
+                $orders
+                    ->map(
+                        function ($order) {
 
-                                return [
-                                    'id' =>
-                                        $order->id,
-                                ];
-                            }
-                        )
-                        ->values(),
+                            return [
+                                'id' =>
+                                $order->id,
+                            ];
+                        }
+                    )
+                    ->values(),
 
             ]);
         }
@@ -576,55 +567,55 @@ class OrderController extends Controller
                 'success' => true,
 
                 'orders' =>
-                    $orders
-                        ->map(
-                            function ($order) {
+                $orders
+                    ->map(
+                        function ($order) {
 
-                                $unitStatuses = [];
+                            $unitStatuses = [];
 
+
+                            foreach (
+                                $order->items
+                                as $item
+                            ) {
 
                                 foreach (
-                                    $order->items
-                                    as $item
+                                    $item->unit
+                                        ?? collect()
+                                    as $unit
                                 ) {
 
-                                    foreach (
-                                        $item->unit
-                                        ?? collect()
-                                        as $unit
-                                    ) {
+                                    $unitStatuses[] = [
 
-                                        $unitStatuses[] = [
+                                        'id' =>
+                                        $unit->id,
 
-                                            'id' =>
-                                                $unit->id,
+                                        'status' =>
+                                        $unit->status,
 
-                                            'status' =>
-                                                $unit->status,
-
-                                        ];
-                                    }
+                                    ];
                                 }
-
-
-                                return [
-
-                                    'id' =>
-                                        $order->id,
-
-                                    'payment_status' =>
-                                        $order->payment_status,
-
-                                    'status' =>
-                                        $order->status,
-
-                                    'units' =>
-                                        $unitStatuses,
-
-                                ];
                             }
-                        )
-                        ->values(),
+
+
+                            return [
+
+                                'id' =>
+                                $order->id,
+
+                                'payment_status' =>
+                                $order->payment_status,
+
+                                'status' =>
+                                $order->status,
+
+                                'units' =>
+                                $unitStatuses,
+
+                            ];
+                        }
+                    )
+                    ->values(),
 
             ]);
         }
@@ -652,7 +643,7 @@ class OrderController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function markAsPaid($id)
+    public function markAsPaid(Request $request, $id)
     {
         $user = Auth::user();
 
@@ -696,7 +687,7 @@ class OrderController extends Controller
         if (
             strtolower(
                 $order->payment_method
-                ?? ''
+                    ?? ''
             ) !== 'cash'
         ) {
 
@@ -723,7 +714,13 @@ class OrderController extends Controller
                 'Pesanan ini sudah dibayar.'
             );
         }
-
+        $request->validate([
+            'cash_received' => [
+                'required',
+                'numeric',
+                'min:' . $order->total
+            ]
+        ]);
 
         /*
         |--------------------------------------------------------------------------
@@ -733,26 +730,30 @@ class OrderController extends Controller
 
         DB::transaction(
             function () use (
-                $order
+                $order,
+                $request
             ) {
+
+
+                $order->cash_received =
+                    $request->cash_received;
+
+
+                $order->cash_change =
+                    $request->cash_received
+                    - $order->total;
+
+
 
                 $order->payment_status =
                     'paid';
 
-                /*
-                |--------------------------------------------------------------------------
-                | Pastikan updated_at berubah
-                |--------------------------------------------------------------------------
-                */
+
 
                 $order->updated_at =
                     now();
 
-                /*
-                |--------------------------------------------------------------------------
-                | Simpan
-                |--------------------------------------------------------------------------
-                */
+
 
                 $order->save();
             }
@@ -897,29 +898,29 @@ class OrderController extends Controller
 
                     $orderItemIds =
                         $order->items()
-                            ->pluck('id');
+                        ->pluck('id');
 
 
                     OrderItemUnit::whereIn(
                         'order_item_id',
                         $orderItemIds
                     )
-                    ->whereIn(
-                        'status',
-                        [
-                            'pending',
-                            'processing',
-                        ]
-                    )
-                    ->update([
+                        ->whereIn(
+                            'status',
+                            [
+                                'pending',
+                                'processing',
+                            ]
+                        )
+                        ->update([
 
-                        'status' =>
+                            'status' =>
                             $request->status,
 
-                        'updated_at' =>
+                            'updated_at' =>
                             now(),
 
-                    ]);
+                        ]);
                 }
             }
         );
@@ -1043,7 +1044,6 @@ class OrderController extends Controller
                         'merchant_id',
                         $merchantId
                     );
-
                 }
             )
             ->with([
@@ -1060,8 +1060,8 @@ class OrderController extends Controller
 
         $order =
             $unit
-                ->orderItem
-                ->order;
+            ->orderItem
+            ->order;
 
 
         /*
@@ -1199,6 +1199,73 @@ class OrderController extends Controller
         );
     }
 
+    //buat cetak pdf struk
+    public function receiptPdf($id)
+    {
+        $user = Auth::user();
+
+        $merchantId =
+            $user->merchant_id
+            ?? $user->id;
+
+
+        $orderId = decryptId($id);
+
+
+        abort_unless(
+            $orderId,
+            404
+        );
+
+
+        $order = Order::where(
+            'merchant_id',
+            $merchantId
+        )
+            ->with([
+                'merchant.settings',
+                'qrCode',
+                'items.menu',
+                'cashier',
+            ])
+            ->findOrFail($orderId);
+
+
+
+        $pdf = Pdf::loadView(
+            'merchant.orders.receipt-pdf',
+            compact('order')
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ukuran Thermal Printer
+        |--------------------------------------------------------------------------
+        |
+        | 58mm
+        |
+        */
+
+        $height = 300 +
+            ($order->items->count() * 40);
+
+
+        $pdf->setPaper(
+            [
+                0,
+                0,
+                164.40, // 58mm
+                $height
+            ],
+            'portrait'
+        );
+
+
+        return $pdf->stream(
+            'receipt-' . $order->order_number . '.pdf'
+        );
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -1280,7 +1347,7 @@ class OrderController extends Controller
         $order->update([
 
             'receipt_sent_at' =>
-                now(),
+            now(),
 
         ]);
 

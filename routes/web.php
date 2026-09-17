@@ -29,6 +29,7 @@ use App\Http\Controllers\SuperAdmin\MerchantController as SuperAdminMerchantCont
 use App\Http\Controllers\SuperAdmin\MerchantLocationController;
 use App\Http\Controllers\SuperAdmin\SubscriptionController as SuperAdminSubscriptionController;
 use App\Http\Controllers\SuperAdmin\SubscriptionPromotionController;
+use App\Http\Controllers\SuperAdmin\WebsiteSettingController;
 use App\Http\Controllers\SuperAdmin\AccountController;
 
 use Illuminate\Support\Facades\Auth;
@@ -528,7 +529,23 @@ Route::middleware([
             '/accounts/{encryptedId}',
             [AccountController::class, 'destroy']
         )->name('accounts.destroy');
+
+
+        // ==================================================================
+        // SETTINGS
+        // ==================================================================
+        Route::get(
+            '/settings',
+            [WebsiteSettingController::class, 'index']
+        )->name('settings.index');
+
+
+        Route::put(
+            '/settings',
+            [WebsiteSettingController::class, 'update']
+        )->name('settings.update');
     });
+
 
 
 // ==========================================================================
@@ -728,6 +745,10 @@ Route::middleware('auth')
                 [OrderController::class, 'receipt']
             )->name('orders.receipt');
 
+            Route::get(
+                '/orders/{id}/receipt/pdf',
+                [OrderController::class, 'receiptPdf']
+            )->name('orders.receipt.pdf');
 
             Route::post(
                 '/orders/{encryptedId}/receipt/email',
@@ -846,6 +867,10 @@ Route::middleware('auth')
                 [MenuController::class, 'storeCategory']
             )->name('category.store');
 
+            Route::delete(
+                '/category/{encryptedId}',
+                [MenuController::class, 'destroyCategory']
+            )->name('category.destroy');
 
             Route::post(
                 '/menu',

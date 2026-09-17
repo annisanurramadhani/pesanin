@@ -165,20 +165,58 @@
                             </div>
 
                             {{-- Pengelompokan Tabel Per Kategori --}}
-                            @forelse($menus->groupBy(fn($item) => $item->category->name ?? 'Tanpa Kategori') as $categoryName => $groupedMenus)
+                            @forelse($categories as $category)
+
+                            @php
+                                $groupedMenus = $menus->where('category_id', $category->id);
+                            @endphp
                                 <div class="border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
                                     {{-- Header Kategori --}}
                                     <div class="bg-slate-900 px-5 py-3.5 flex items-center justify-between">
+
                                         <div class="flex items-center gap-2.5">
                                             <i class="fa-solid fa-layer-group text-amber-400 text-xs"></i>
+
                                             <h4 class="font-black text-amber-400 text-xs uppercase tracking-wider">
-                                                {{ $categoryName }}
+                                                {{ $category->name }}
                                             </h4>
                                         </div>
-                                        <span
-                                            class="bg-slate-800 text-slate-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-slate-700">
-                                            {{ count($groupedMenus) }} Item
-                                        </span>
+
+
+                                        <div class="flex items-center gap-2">
+
+                                            <span
+                                                class="bg-slate-800 text-slate-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-slate-700">
+                                                {{ count($groupedMenus) }} Item
+                                            </span>
+
+
+                                            {{-- Hapus Kategori --}}
+                                            @php
+                                                $categoryId = $category->id;
+                                            @endphp
+
+                                            <form 
+                                                action="{{ route('merchant.category.destroy', encryptId($categoryId)) }}"
+                                                method="POST">
+
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button
+                                                    type="button"
+                                                    onclick="confirmDeleteCategory(event, this, '{{ $category->name }}')"
+                                                    class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white flex items-center justify-center transition"
+                                                    title="Hapus Kategori">
+
+                                                    <i class="fa-solid fa-trash text-[11px]"></i>
+
+                                                </button>
+
+                                            </form>
+
+                                        </div>
+
                                     </div>
 
                                     {{-- Tabel Menu --}}
@@ -285,6 +323,18 @@
                                                         </td>
                                                     </tr>
                                                 @endforeach
+                                                @if($groupedMenus->isEmpty())
+
+                                                <tr>
+                                                    <td colspan="4" class="py-8 text-center text-slate-400">
+                                                        <i class="fa-solid fa-box-open text-xl mb-2"></i>
+                                                        <p class="text-xs font-semibold">
+                                                            Belum ada menu pada kategori ini
+                                                        </p>
+                                                    </td>
+                                                </tr>
+
+                                                @endif
                                             </tbody>
                                         </table>
                                     </div>
@@ -427,6 +477,35 @@
                 if (result.isConfirmed && form) {
                     form.submit();
                 }
+            });
+        }
+
+        function confirmDeleteCategory(event, buttonElement, categoryName) {
+
+            event.stopPropagation();
+
+            const form = buttonElement.closest('form');
+
+            Swal.fire({
+                title: 'Hapus Kategori?',
+                text: `Kategori "${categoryName}" akan dihapus.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl text-xs font-bold px-4 py-2.5',
+                    cancelButton: 'rounded-xl text-xs font-bold px-4 py-2.5'
+                }
+            }).then((result)=>{
+
+                if(result.isConfirmed && form){
+                    form.submit();
+                }
+
             });
         }
     </script>

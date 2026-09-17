@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PublicSubscription;
 
 use App\Http\Controllers\Controller;
 use App\Models\SubscriptionPromotion;
+use App\Models\WebsiteSetting;
 
 class PublicSubscriptionHomeController extends Controller
 {
@@ -12,6 +13,14 @@ class PublicSubscriptionHomeController extends Controller
      */
     public function index()
     {
+        /*
+    |--------------------------------------------------------------------------
+    | Ambil Setting Website
+    |--------------------------------------------------------------------------
+    */
+        $setting=WebsiteSetting::first();
+
+
         /*
         |--------------------------------------------------------------------------
         | Ambil Promo Subscription Aktif
@@ -41,7 +50,7 @@ class PublicSubscriptionHomeController extends Controller
 
         return view(
             'public_subscription.homepage',
-            compact('activePromotion')
+            compact('activePromotion', 'setting')
         );
     }
 }

@@ -31,6 +31,9 @@ class DatabaseSeeder extends Seeder
             OrderSeeder::class,
             OrderItemSeeder::class,
             OrderItemUnitSeeder::class,
+
+            //setting
+            WebsiteSettingSeeder::class,
         ]);
     }
 }
