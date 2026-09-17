@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Mail\OrderReceiptMail;
 use Illuminate\Support\Facades\Mail;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\WalletService;
 
 class OrderController extends Controller
 {
@@ -643,7 +644,10 @@ class OrderController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function markAsPaid(Request $request, $id)
+    public function markAsPaid(
+        $id,
+        \App\Services\WalletService $walletService
+    )
     {
         $user = Auth::user();
 
@@ -731,7 +735,8 @@ class OrderController extends Controller
         DB::transaction(
             function () use (
                 $order,
-                $request
+                $request,
+                $walletService
             ) {
 
 
@@ -756,6 +761,16 @@ class OrderController extends Controller
 
 
                 $order->save();
+                /*
+                |--------------------------------------------------------------------------
+                | Tambahkan saldo merchant
+                |--------------------------------------------------------------------------
+                */
+
+                $walletService
+                    ->addOrderPayment(
+                        $order
+                    );
             }
         );
 

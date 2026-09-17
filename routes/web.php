@@ -20,6 +20,9 @@ use App\Http\Controllers\Merchant\MerchantSetupController;
 use App\Http\Controllers\Merchant\DashboardController;
 use App\Http\Controllers\Merchant\VoucherController;
 use App\Http\Controllers\Merchant\MerchantSettingController;
+use App\Http\Controllers\Merchant\FinanceController;
+use App\Http\Controllers\Merchant\MerchantBankAccountController;
+use App\Http\Controllers\Merchant\WithdrawalController as MerchantWithdrawalController;
 
 use App\Http\Controllers\PublicSubscription\PublicSubscriptionController;
 use App\Http\Controllers\PublicSubscription\PublicSubscriptionHomeController;
@@ -31,6 +34,7 @@ use App\Http\Controllers\SuperAdmin\SubscriptionController as SuperAdminSubscrip
 use App\Http\Controllers\SuperAdmin\SubscriptionPromotionController;
 use App\Http\Controllers\SuperAdmin\WebsiteSettingController;
 use App\Http\Controllers\SuperAdmin\AccountController;
+use App\Http\Controllers\SuperAdmin\WithdrawalController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -539,11 +543,41 @@ Route::middleware([
             [WebsiteSettingController::class, 'index']
         )->name('settings.index');
 
-
         Route::put(
             '/settings',
             [WebsiteSettingController::class, 'update']
         )->name('settings.update');
+
+        // ==================================================================
+        // WITHDRAWALS
+        // ==================================================================
+        Route::get(
+            '/withdrawals',
+            [
+                WithdrawalController::class,
+                'index'
+            ]
+        )
+        ->name('withdrawals.index');
+
+        Route::post(
+            '/withdrawals/{withdrawal}/approve',
+            [
+                WithdrawalController::class,
+                'approve'
+            ]
+        )
+        ->name('withdrawals.approve');
+        
+        Route::post(
+            '/withdrawals/{withdrawal}/reject',
+            [
+                WithdrawalController::class,
+                'reject'
+            ]
+        )
+        ->name('withdrawals.reject');
+
     });
 
 
@@ -950,6 +984,71 @@ Route::middleware('auth')
                 '/staff/{encryptedId}',
                 [StaffController::class, 'destroy']
             )->name('staff.destroy');
+
+            // ==================================================================
+            // KEUANGAN
+            // ==================================================================
+            Route::get(
+                '/finance',
+                [FinanceController::class, 'index']
+            )->name('finance.index');
+
+            Route::get(
+                '/finance/pdf',
+                [FinanceController::class,'pdf']
+            )
+            ->name('finance.pdf');
+
+            Route::post(
+                '/finance/withdraw',
+                [FinanceController::class,'withdraw']
+            )->name('finance.withdraw');
+            Route::get(
+                '/finance/data',
+                [
+                    FinanceController::class,
+                    'data'
+                ]
+            )
+            ->name('finance.data');
+
+             Route::get(
+                '/bank-account/create',
+                [
+                    MerchantBankAccountController::class,
+                    'create'
+                ]
+            )
+            ->name(
+                'bank-account.create'
+            );
+
+            Route::post(
+                '/bank-account',
+                [
+                    MerchantBankAccountController::class,
+                    'store'
+                ]
+            )
+            ->name(
+                'bank-account.store'
+            );
+            Route::get(
+                '/withdrawals',
+                [
+                    MerchantWithdrawalController::class,
+                    'index'
+                ]
+            )->name('withdrawals.index');
+
+
+            Route::post(
+                '/withdrawals',
+                [
+                    MerchantWithdrawalController::class,
+                    'store'
+                ]
+            )->name('withdrawals.store');
 
             // ==================================================================
             // VOUCHER
