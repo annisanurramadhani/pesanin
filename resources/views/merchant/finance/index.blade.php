@@ -1,935 +1,653 @@
 @extends('layouts.merchant')
 
-@section('header')
-<div>
-    <h1 class="text-2xl font-black text-slate-800">
-        Keuangan
-    </h1>
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/merchant/finance.css') }}">
+@endpush
 
-    <p class="text-sm text-slate-500 mt-1">
-        Kelola saldo, transaksi, dan laporan keuangan merchant
-    </p>
-</div>
+@section('header')
+    <div>
+
+        <h1 class="text-2xl font-black text-slate-800">
+            Keuangan
+        </h1>
+
+        <p class="text-sm text-slate-500 mt-1">
+            Kelola saldo, transaksi, dan laporan keuangan merchant
+        </p>
+
+    </div>
 @endsection
 
 
+
 @section('content')
+    <div class="space-y-6">
 
-<div class="space-y-5">
 
+        {{-- ================= SUMMARY ================= --}}
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 
 
-<div class="bg-white border rounded-2xl p-5 shadow-sm">
+            <div class="finance-card">
 
-<p class="text-xs font-black text-slate-400 uppercase">
-Saldo Tersedia
-</p>
+                <p class="finance-label">
+                    Saldo Tersedia
+                </p>
 
-<h2 
-id="walletBalance"
-class="mt-2 text-3xl font-black">
+                <h2 id="walletBalance" class="text-3xl font-black text-slate-800 mt-2">
 
-Rp {{ number_format($balance,0,',','.') }}
+                    Rp {{ number_format($balance, 0, ',', '.') }}
 
-</h2>
+                </h2>
 
-<p class="text-sm text-slate-500">
-Saldo yang dapat ditarik
-</p>
 
-</div>
+                <p class="text-sm text-slate-500">
+                    Saldo yang dapat ditarik
+                </p>
 
 
+            </div>
 
 
-<div class="bg-white border rounded-2xl p-5 shadow-sm">
 
-<p class="text-xs font-black text-slate-400 uppercase">
-Total Pendapatan
-</p>
+            <div class="finance-card">
 
-<h2 
-id="totalIncome"
-class="mt-2 text-3xl font-black text-emerald-600">
 
-Rp {{ number_format($totalIncome,0,',','.') }}
+                <p class="finance-label">
+                    Total Pendapatan
+                </p>
 
-</h2>
 
-<p class="text-sm text-slate-500">
-Total pembayaran masuk
-</p>
+                <h2 id="totalIncome" class="text-3xl font-black text-emerald-600 mt-2">
 
-</div>
+                    Rp {{ number_format($totalIncome, 0, ',', '.') }}
 
+                </h2>
 
 
+                <p class="text-sm text-slate-500">
+                    Total pembayaran masuk
+                </p>
 
-<div class="bg-white border rounded-2xl p-5 shadow-sm">
 
-<p class="text-xs font-black text-slate-400 uppercase">
-Total Penarikan
-</p>
+            </div>
 
-<h2 
-id="totalWithdraw"
-class="mt-2 text-3xl font-black text-rose-600">
 
-Rp {{ number_format($totalWithdraw,0,',','.') }}
 
-</h2>
 
-<p class="text-sm text-slate-500">
-Saldo yang sudah ditarik
-</p>
+            <div class="finance-card">
 
-</div>
 
+                <p class="finance-label">
+                    Total Penarikan
+                </p>
 
-</div>
 
+                <h2 id="totalWithdraw" class="text-3xl font-black text-rose-600 mt-2">
 
+                    Rp {{ number_format($totalWithdraw, 0, ',', '.') }}
 
+                </h2>
 
 
-<div class="flex justify-between items-center">
+                <p class="text-sm text-slate-500">
+                    Saldo yang sudah ditarik
+                </p>
 
-<h2 class="text-xl font-black">
-Laporan Transaksi
-</h2>
 
+            </div>
 
-
-<div class="flex gap-3">
-
-
-@if($bankAccount)
-
-<button
-onclick="openWithdrawModal()"
-class="px-5 h-11 rounded-xl bg-amber-500 text-white font-black">
-
-<i class="fa-solid fa-money-bill-transfer mr-2"></i>
-
-Tarik Saldo
-
-</button>
-
-
-@else
-
-<span class="px-5 h-11 flex items-center rounded-xl bg-slate-200 text-slate-600 font-black">
-
-Rekening Belum Ada
-
-</span>
-
-@endif
-
-
-
-
-<a
-href="{{ route('merchant.finance.pdf') }}"
-class="px-5 h-11 flex items-center rounded-xl bg-slate-900 text-white font-black">
-
-<i class="fa-solid fa-file-pdf mr-2"></i>
-
-Export PDF
-
-</a>
-
-
-</div>
-
-</div>
-
-
-
-
-
-<div class="bg-white border rounded-2xl p-4">
-
-
-<form method="GET"
-class="flex gap-3">
-
-
-<input
-type="date"
-name="date"
-value="{{ request('date') }}"
-class="h-10 border rounded-xl px-4">
-
-
-<select
-name="sort"
-class="h-10 border rounded-xl px-4">
-
-<option value="desc">
-Terbaru
-</option>
-
-<option value="asc">
-Terlama
-</option>
-
-</select>
-
-
-
-<button
-class="px-5 rounded-xl bg-slate-900 text-white font-bold">
-
-Filter
-
-</button>
-
-
-<a
-href="{{ route('merchant.finance.index') }}"
-class="px-4 flex items-center">
-
-Reset
-
-</a>
-
-
-</form>
-
-</div>
-
-
-
-
-
-<div class="bg-white border rounded-2xl p-5">
-
-
-<p class="text-xs uppercase font-black text-slate-400">
-
-Rekening Penarikan
-
-</p>
-
-
-
-@if($bankAccount)
-
-<h3 class="text-lg font-black mt-3">
-{{ $bankAccount->bank_name }}
-</h3>
-
-
-<p>
-{{ $bankAccount->account_number }}
-</p>
-
-
-<p>
-a.n {{ $bankAccount->account_name }}
-</p>
-
-
-
-<span class="inline-block mt-3 px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black">
-
-<i class="fa-solid fa-lock"></i>
-
-Terkunci
-
-</span>
-
-
-@else
-
-<p class="mt-3 text-slate-500">
-Belum ada rekening
-</p>
-
-
-@endif
-
-
-</div>
-
-
-
-
-
-
-<div class="bg-white border rounded-2xl overflow-hidden">
-
-
-<table class="w-full text-sm">
-
-
-<thead class="bg-slate-50">
-
-<tr>
-
-<th class="p-4 text-left">
-Tanggal
-</th>
-
-
-<th class="p-4 text-left">
-Keterangan
-</th>
-
-
-<th class="p-4 text-center">
-Jenis
-</th>
-
-
-<th class="p-4 text-right">
-Nominal
-</th>
-
-</tr>
-
-</thead>
-
-
-
-
-<tbody id="transactionBody">
-
-
-@foreach($transactions as $transaction)
-
-<tr class="border-b">
-
-
-<td class="p-4">
-
-{{ $transaction->created_at->format('d M Y H:i') }}
-
-</td>
-
-
-<td class="p-4 font-bold">
-
-{{ $transaction->description }}
-
-</td>
-
-
-<td class="p-4 text-center">
-
-@if($transaction->type == 'credit')
-
-<span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black">
-
-Pemasukan
-
-</span>
-
-@else
-
-<span class="px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-black">
-
-Penarikan
-
-</span>
-
-@endif
-
-</td>
-
-
-
-<td class="p-4 text-right font-black">
-
-Rp {{ number_format($transaction->amount,0,',','.') }}
-
-</td>
-
-
-</tr>
-
-
-@endforeach
-
-
-</tbody>
-
-
-</table>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-@if($bankAccount)
-
-<div id="withdrawModal"
-class="hidden fixed inset-0 bg-black/40 z-50 items-center justify-center">
-
-
-<div class="bg-white rounded-2xl p-6 w-full max-w-md">
-
-
-<h3 class="text-xl font-black mb-5">
-Tarik Saldo
-</h3>
-
-
-
-<div class="bg-slate-50 rounded-xl p-4 mb-4">
-
-<p class="text-xs font-black text-slate-400 uppercase">
-Rekening Tujuan
-</p>
-
-
-<div class="mt-3 space-y-1">
-
-
-<p class="font-black text-lg">
-{{ $bankAccount->bank_name }}
-</p>
-
-
-<p class="text-slate-700">
-{{ $bankAccount->account_number }}
-</p>
-
-
-<p class="text-slate-700">
-a.n {{ $bankAccount->account_name }}
-</p>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-<div class="bg-amber-50 rounded-xl p-4 mb-4">
-
-
-<div class="flex justify-between text-sm">
-
-<span class="text-slate-600">
-Saldo tersedia
-</span>
-
-
-<span class="font-black">
-Rp {{ number_format($balance,0,',','.') }}
-</span>
-
-
-</div>
-
-
-
-
-<div class="flex justify-between text-sm mt-2">
-
-
-<span class="text-slate-600">
-Minimal penarikan
-</span>
-
-
-<span class="font-black text-amber-600">
-Rp 10.000
-</span>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-<form 
-method="POST"
-action="{{ route('merchant.withdrawals.store') }}"
-onsubmit="return confirmWithdraw()">
-
-
-@csrf
-
-
-
-<label class="text-sm font-bold">
-Jumlah Penarikan
-</label>
-
-
-<input
-id="withdrawAmount"
-type="number"
-name="amount"
-min="10000"
-max="{{ $balance }}"
-required
-placeholder="Masukkan nominal"
-class="w-full h-12 border rounded-xl px-4 mt-2">
-
-
-
-<p 
-id="withdrawError"
-class="hidden text-sm text-red-500 mt-2">
-</p>
-
-
-
-
-<div class="mt-4 bg-slate-100 rounded-xl p-3">
-
-
-<p class="text-xs text-slate-500">
-Dana akan dikirim ke rekening:
-</p>
-
-
-<p class="font-black">
-
-{{ $bankAccount->bank_name }}
--
-{{ $bankAccount->account_number }}
-
-</p>
-
-
-<p class="text-sm">
-
-a.n {{ $bankAccount->account_name }}
-
-</p>
-
-
-</div>
-
-
-
-
-<div class="flex gap-3 mt-5">
-
-
-<button
-type="button"
-onclick="closeWithdrawModal()"
-class="flex-1 h-11 bg-slate-200 rounded-xl font-bold">
-
-Batal
-
-</button>
-
-
-
-<button
-type="submit"
-class="flex-1 h-11 bg-amber-500 text-white rounded-xl font-black">
-
-Ajukan
-
-</button>
-
-
-</div>
-
-
-
-</form>
-
-
-</div>
-
-
-</div>
-
-@endif
-
-
-
-
-
-<script>
-
-function openWithdrawModal()
-{
-    let modal = document.getElementById('withdrawModal');
-
-    modal.classList.remove('hidden');
-
-    modal.classList.add('flex');
-}
-
-
-
-function closeWithdrawModal()
-{
-    let modal = document.getElementById('withdrawModal');
-
-    modal.classList.add('hidden');
-
-    modal.classList.remove('flex');
-}
-
-
-
-function formatRupiah(value)
-{
-    return new Intl.NumberFormat('id-ID')
-    .format(value);
-}
-
-
-
-function confirmWithdraw()
-{
-
-    let amount =
-    document.getElementById('withdrawAmount').value;
-
-
-    let balance =
-    {{ $balance }};
-
-
-    let error =
-    document.getElementById('withdrawError');
-
-
-    error.classList.add('hidden');
-
-
-
-    if(!amount)
-    {
-        error.innerHTML =
-        "Nominal penarikan wajib diisi";
-
-        error.classList.remove('hidden');
-
-        return false;
-    }
-
-
-
-    if(amount < 10000)
-    {
-        error.innerHTML =
-        "Minimal penarikan adalah Rp 10.000";
-
-        error.classList.remove('hidden');
-
-        return false;
-    }
-
-
-
-    if(amount > balance)
-    {
-        error.innerHTML =
-        "Saldo tidak mencukupi";
-
-        error.classList.remove('hidden');
-
-        return false;
-    }
-
-
-
-    Swal.fire({
-
-        title: 'Konfirmasi Penarikan',
-
-        html: `
-        
-        <div class="text-left text-sm">
-
-            <p>
-            Nominal:
-            <b>
-            Rp ${formatRupiah(amount)}
-            </b>
-            </p>
-
-
-            <p class="mt-2">
-            Bank:
-            <b>
-            {{ $bankAccount->bank_name }}
-            </b>
-            </p>
-
-
-            <p>
-            No Rekening:
-            <b>
-            {{ $bankAccount->account_number }}
-            </b>
-            </p>
-
-
-            <p>
-            Penerima:
-            <b>
-            {{ $bankAccount->account_name }}
-            </b>
-            </p>
 
 
         </div>
 
-        `,
 
-        icon: 'warning',
 
-        showCancelButton: true,
 
-        confirmButtonText:
-        'Ya, Ajukan',
 
-        cancelButtonText:
-        'Batal',
+        {{-- ================= HEADER ================= --}}
 
-        confirmButtonColor:
-        '#f59e0b',
 
-        cancelButtonColor:
-        '#64748b'
+        <div class="flex justify-between items-center">
 
 
-    }).then((result)=>{
+            <h2 class="text-xl font-black text-slate-800">
+                Laporan Transaksi
+            </h2>
 
 
-        if(result.isConfirmed)
-        {
 
-            document
-            .querySelector('#withdrawModal form')
-            .submit();
+            <div class="flex gap-3">
 
-        }
 
+                @if ($bankAccount)
+                    <button onclick="openWithdrawModal()" class="finance-btn">
 
-    });
 
+                        <i class="fa-solid fa-money-bill-transfer mr-2"></i>
 
+                        Tarik Saldo
 
-    return false;
 
-}
+                    </button>
+                @else
+                    <button onclick="openBankModal()" class="finance-btn">
 
 
+                        <i class="fa-solid fa-building-columns mr-2"></i>
 
+                        Tambah Rekening
 
 
+                    </button>
+                @endif
 
 
-function loadFinanceData()
-{
 
 
-fetch("{{ route('merchant.finance.data') }}")
+                <a href="{{ route('merchant.finance.pdf') }}" class="finance-btn-dark">
 
 
-.then(response => response.json())
+                    <i class="fa-solid fa-file-pdf mr-2"></i>
 
+                    Export PDF
 
-.then(data => {
 
+                </a>
 
 
-document
-.getElementById('walletBalance')
-.innerHTML =
-"Rp " + formatRupiah(data.balance);
 
+            </div>
 
 
+        </div>
 
-document
-.getElementById('totalIncome')
-.innerHTML =
-"Rp " + formatRupiah(data.income);
 
 
 
 
-document
-.getElementById('totalWithdraw')
-.innerHTML =
-"Rp " + formatRupiah(data.withdraw);
+        {{-- ================= FILTER ================= --}}
 
 
+        <div class="bg-white border rounded-2xl p-4">
 
 
-let html = "";
+            <form method="GET" class="flex gap-3">
 
 
+                <input type="date" name="date" value="{{ request('date') }}" class="h-10 border rounded-xl px-4">
 
-if(data.transactions.length === 0)
-{
 
 
-html = `
+                <select name="sort" class="h-10 border rounded-xl px-4">
 
-<tr>
 
-<td colspan="4"
-class="p-10 text-center text-slate-400">
+                    <option value="desc">
+                        Terbaru
+                    </option>
 
-Belum ada transaksi
 
-</td>
+                    <option value="asc">
+                        Terlama
+                    </option>
 
-</tr>
 
-`;
+                </select>
 
 
 
-}
-else
-{
+                <button class="px-5 rounded-xl bg-slate-900 text-white font-bold">
 
+                    Filter
 
+                </button>
 
-data.transactions.forEach(item => {
 
 
-html += `
+                <a href="{{ route('merchant.finance.index') }}" class="flex items-center px-4">
 
-<tr class="border-b">
+                    Reset
 
+                </a>
 
-<td class="p-4">
 
-${item.date}
+            </form>
 
-</td>
 
+        </div>
 
 
-<td class="p-4 font-bold">
 
-${item.description}
 
-</td>
 
+        {{-- ================= BANK ACCOUNT ================= --}}
 
 
+        <div class="bg-white border rounded-2xl p-5">
 
-<td class="p-4 text-center">
 
+            <p class="finance-label">
+                Rekening Penarikan
+            </p>
 
-${
-item.type === 'credit'
 
-?
 
-`
+            @if ($bankAccount)
+                <div class="mt-4">
 
-<span 
-class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black">
 
-Pemasukan
+                    <h3 class="text-xl font-black">
 
-</span>
+                        {{ $bankAccount->bank_name }}
 
-`
+                    </h3>
 
-:
 
-`
 
-<span 
-class="px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-black">
+                    <p>
+                        {{ $bankAccount->account_number }}
+                    </p>
 
-Penarikan
 
-</span>
 
-`
+                    <p>
+                        a.n {{ $bankAccount->account_name }}
+                    </p>
 
-}
 
 
 
-</td>
+                    <div class="mt-5 flex gap-3 items-center">
 
 
+                        <span class="status-lock">
 
+                            <i class="fa-solid fa-lock"></i>
 
-<td class="p-4 text-right font-black">
+                            Terkunci
 
+                        </span>
 
-Rp ${formatRupiah(item.amount)}
 
 
-</td>
+                        <span class="text-xs text-slate-400 font-bold">
 
+                            Jika ingin mengganti rekening,
+                            hubungi Super Admin
 
+                        </span>
 
-</tr>
 
-`;
 
+                    </div>
 
 
-});
+                </div>
+            @else
+                <div class="bank-empty">
 
 
+                    <h3 class="text-lg font-black">
 
-}
+                        Rekening Penarikan Belum Tersedia
 
+                    </h3>
 
 
-document
-.getElementById('transactionBody')
-.innerHTML = html;
+                    <p class="mt-2 text-sm">
 
+                        Tambahkan rekening bank untuk menerima pencairan saldo merchant.
 
+                    </p>
 
-})
 
-.catch(error => {
 
-console.log(error);
+                    <button onclick="openBankModal()" class="finance-btn mt-5">
 
-});
 
+                        <i class="fa-solid fa-building-columns mr-2"></i>
 
-}
+                        Tambah Rekening Bank
 
 
+                    </button>
 
 
+                </div>
+            @endif
 
 
-setInterval(
-loadFinanceData,
-5000
-);
 
+        </div>
 
 
-</script>
 
 
+
+
+        {{-- ================= TRANSAKSI ================= --}}
+
+
+
+        <div class="bg-white border rounded-2xl overflow-hidden">
+
+
+            <table class="w-full text-sm">
+
+
+                <thead class="bg-slate-50">
+
+
+                    <tr>
+
+
+                        <th class="p-4 text-left">
+                            Tanggal
+                        </th>
+
+
+                        <th class="p-4 text-left">
+                            Keterangan
+                        </th>
+
+
+                        <th class="p-4 text-center">
+                            Jenis
+                        </th>
+
+
+                        <th class="p-4 text-right">
+                            Nominal
+                        </th>
+
+
+                    </tr>
+
+
+                </thead>
+
+
+
+                <tbody id="transactionBody">
+
+
+
+                    @foreach ($transactions as $transaction)
+                        <tr class="border-b">
+
+
+                            <td class="p-4">
+
+                                {{ $transaction->created_at->format('d M Y H:i') }}
+
+                            </td>
+
+
+
+                            <td class="p-4 font-bold">
+
+                                {{ $transaction->description }}
+
+                            </td>
+
+
+
+                            <td class="p-4 text-center">
+
+
+                                @if ($transaction->type == 'credit')
+                                    <span class="badge-success">
+
+                                        Pemasukan
+
+                                    </span>
+                                @else
+                                    <span class="badge-danger">
+
+                                        Penarikan
+
+                                    </span>
+                                @endif
+
+
+                            </td>
+
+
+
+
+                            <td class="p-4 text-right font-black">
+
+                                Rp {{ number_format($transaction->amount, 0, ',', '.') }}
+
+                            </td>
+
+
+
+                        </tr>
+                    @endforeach
+
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    {{-- ================= MODAL TAMBAH REKENING ================= --}}
+
+
+
+    @if (!$bankAccount)
+        <div id="bankModal" class="hidden">
+
+
+            <div class="modal-box">
+
+
+                <h3 class="text-xl font-black mb-5">
+
+                    Tambah Rekening Bank
+
+                </h3>
+
+
+
+                <form method="POST" action="{{ route('merchant.bank-account.store') }}">
+
+
+                    @csrf
+
+
+
+                    <label>
+                        Bank
+                    </label>
+
+
+                    <select name="bank_name" required class="input">
+
+                        <option value="">
+                            Pilih Bank
+                        </option>
+
+                        <option value="BCA">
+                            BCA
+                        </option>
+
+                        <option value="BRI">
+                            BRI
+                        </option>
+
+                        <option value="BNI">
+                            BNI
+                        </option>
+
+                        <option value="MANDIRI">
+                            Mandiri
+                        </option>
+
+                    </select>
+
+
+
+
+                    <label>
+                        Nomor Rekening
+                    </label>
+
+
+                    <input type="text" name="account_number" required class="input">
+
+
+
+
+
+                    <label>
+                        Nama Pemilik Rekening
+                    </label>
+
+
+                    <input type="text" name="account_name" required class="input">
+
+
+
+
+
+                    <div class="flex gap-3 mt-6">
+
+
+                        <button type="button" onclick="closeBankModal()" class="btn-cancel">
+
+                            Batal
+
+                        </button>
+
+
+
+                        <button class="finance-btn flex-1">
+
+                            Simpan
+
+                        </button>
+
+
+                    </div>
+
+
+                </form>
+
+
+            </div>
+
+
+        </div>
+    @endif
+    {{-- ================= MODAL WITHDRAW ================= --}}
+
+
+@if($bankAccount)
+
+
+<div id="withdrawModal" class="hidden">
+
+
+    <div class="modal-box">
+
+
+        <h3 class="text-xl font-black mb-5">
+
+            Tarik Saldo Merchant
+
+        </h3>
+
+
+
+        <form method="POST"
+            action="{{ route('merchant.withdrawals.store') }}">
+
+
+            @csrf
+
+
+
+            <label class="font-bold text-sm">
+                Jumlah Penarikan
+            </label>
+
+
+            <input 
+                type="number"
+                name="amount"
+                max="{{ $balance }}"
+                required
+                class="input"
+                placeholder="Masukkan nominal">
+
+
+
+            <p class="text-xs text-slate-400 mt-2">
+
+                Saldo tersedia:
+                Rp {{ number_format($balance,0,',','.') }}
+
+            </p>
+
+
+
+
+            <div class="flex gap-3 mt-6">
+
+
+                <button 
+                    type="button"
+                    onclick="closeWithdrawModal()"
+                    class="btn-cancel">
+
+                    Batal
+
+                </button>
+
+
+
+
+                <button
+                    type="submit"
+                    class="finance-btn flex-1">
+
+                    Ajukan Penarikan
+
+                </button>
+
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+
+</div>
+
+
+@endif
 @endsection
+
+
+
+@push('scripts')
+    <script src="{{ asset('js/merchant/finance.js') }}"></script>
+@endpush

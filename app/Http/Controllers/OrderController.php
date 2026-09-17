@@ -645,6 +645,7 @@ class OrderController extends Controller
     */
 
     public function markAsPaid(
+        Request $request,
         $id,
         \App\Services\WalletService $walletService
     )
