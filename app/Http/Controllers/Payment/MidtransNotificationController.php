@@ -8,6 +8,7 @@ use App\Mail\OrderReceiptMail;
 use App\Models\Order;
 use App\Models\Subscription;
 use App\Models\Voucher;
+use App\Services\WalletService;
 use App\Notifications\SubscriptionInvoiceNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,10 @@ class MidtransNotificationController extends Controller
     /**
      * Menerima notification dari Midtrans.
      */
-    public function handle(Request $request)
+    public function handle(
+        Request $request,
+        WalletService $walletService
+    )
     {
         try {
 
@@ -402,7 +406,8 @@ class MidtransNotificationController extends Controller
                         function () use (
                             $order,
                             $transactionId,
-                            $transactionStatus
+                            $transactionStatus,
+                            $walletService
                         ) {
 
                             $order->update([
@@ -414,6 +419,17 @@ class MidtransNotificationController extends Controller
                                 // Nanti dapur yang mengubah status.
 
                             ]);
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | TAMBAHKAN SALDO MERCHANT
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $walletService
+                                ->addOrderPayment(
+                                    $order
+                                );
 
                             /*
                             |--------------------------------------------------------------------------
@@ -458,7 +474,7 @@ class MidtransNotificationController extends Controller
                             /*
                             |--------------------------------------------------------------------------
                             | Log Berhasil
-                            |--------------------------------------------------------------------------                         
+                            |--------------------------------------------------------------------------
                             */
 
                             Log::info(
@@ -479,7 +495,7 @@ class MidtransNotificationController extends Controller
 
                                 ]
                             );
-                        }       
+                        }
                     );
 
 

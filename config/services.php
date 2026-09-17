@@ -19,7 +19,34 @@ return [
         'client_key' => env('MIDTRANS_CLIENT_KEY'),
         'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
     ],
+    'midtrans'=>[
 
+        'server_key'=>
+        env('MIDTRANS_SERVER_KEY'),
+
+
+        'client_key'=>
+        env('MIDTRANS_CLIENT_KEY'),
+
+
+        'payout_key'=>
+        env('MIDTRANS_PAYOUT_KEY'),
+
+
+        'payout_enabled'=>
+        env(
+            'MIDTRANS_PAYOUT_ENABLED',
+            false
+        ),
+
+
+        'payout_url'=>
+        env(
+            'MIDTRANS_PAYOUT_URL',
+            'https://app.sandbox.midtrans.com/v2/payouts'
+        ),
+
+    ],
     'recaptcha' => [
         'site_key' => env('RECAPTCHA_SITE_KEY'),
         'secret_key' => env('RECAPTCHA_SECRET_KEY'),

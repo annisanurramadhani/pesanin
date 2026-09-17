@@ -69,4 +69,12 @@ class Merchant extends Model
             ->where('status', 'active')
             ->latestOfMany();
     }
+    public function bankAccount()
+    {
+
+        return $this->hasOne(
+            MerchantBankAccount::class
+        );
+
+    }
 }

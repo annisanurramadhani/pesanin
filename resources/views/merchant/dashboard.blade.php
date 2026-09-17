@@ -40,7 +40,7 @@
          STAT CARDS
     ================================================================ --}}
 
-        <div id="dashboard-stats" class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div id="dashboard-stats" class="grid grid-cols-1 gap-6 md:grid-cols-3">
 
             {{-- Pesanan Hari Ini --}}
 
@@ -106,6 +106,45 @@
                     class="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-xl font-black text-white shadow-lg shadow-blue-500/20">
 
                     <i class="fa-solid fa-wallet"></i>
+
+                </div>
+
+            </div>
+            {{-- Saldo Merchant --}}
+
+            <div
+                class="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">
+
+                <div
+                    class="absolute -bottom-4 -right-4 h-24 w-24 rounded-full bg-violet-500/10 transition duration-300 group-hover:scale-125">
+                </div>
+
+
+                <div class="relative z-10 space-y-1">
+
+                    <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Saldo Tersedia
+                    </p>
+
+
+                    <h3 data-dashboard-wallet class="text-3xl font-black tracking-tight text-violet-600">
+
+                        Rp {{ number_format($wallet->balance ?? 0, 0, ',', '.') }}
+
+                    </h3>
+
+
+                    <p class="pt-1 text-xs font-medium text-slate-500">
+                        Saldo yang dapat ditarik
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 text-xl font-black text-white shadow-lg shadow-violet-500/20">
+
+                    <i class="fa-solid fa-money-bill-transfer"></i>
 
                 </div>
 

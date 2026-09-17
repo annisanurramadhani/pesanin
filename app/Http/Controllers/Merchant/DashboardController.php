@@ -8,6 +8,7 @@ use App\Models\OrderItemUnit;
 use App\Models\Package;
 use App\Models\PackageDuration;
 use Illuminate\Http\Request;
+use App\Models\MerchantWallet;
 
 class DashboardController extends Controller
 {
@@ -19,6 +20,24 @@ class DashboardController extends Controller
         $user = $request->user();
 
         $merchantId = $user->merchant_id;
+
+        /*
+        |--------------------------------------------------------------------------
+        | SALDO MERCHANT
+        |--------------------------------------------------------------------------
+        */
+
+        $wallet = MerchantWallet::firstOrCreate(
+
+            [
+                'merchant_id' => $merchantId
+            ],
+
+            [
+                'balance' => 0
+            ]
+
+        );
 
 
         /*
@@ -441,7 +460,8 @@ class DashboardController extends Controller
                 'subscriptionExpired',
                 'showRenewalModal',
                 'renewalPackage',
-                'renewalDuration'
+                'renewalDuration',
+                'wallet'
             )
         );
 
