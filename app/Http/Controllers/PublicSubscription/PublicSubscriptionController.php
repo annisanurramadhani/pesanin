@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Package;
 use App\Models\PackageDuration;
 use App\Models\Subscription;
+use App\Models\WebsiteSetting;
 use Illuminate\Support\Facades\Auth;
 
 class PublicSubscriptionController extends Controller
@@ -22,9 +23,11 @@ class PublicSubscriptionController extends Controller
             ->orderBy('id')
             ->get();
 
+        $setting = WebsiteSetting::first();
+
         return view(
             'public_subscription.index',
-            compact('packages')
+            compact('packages', 'setting')
         );
     }
 
@@ -58,12 +61,15 @@ class PublicSubscriptionController extends Controller
             )
             ->get();
 
+        $setting = WebsiteSetting::first();
+
 
         return view(
             'public_subscription.duration',
             compact(
                 'package',
-                'durations'
+                'durations',
+                'setting'
             )
         );
     }
@@ -139,11 +145,11 @@ class PublicSubscriptionController extends Controller
 
         $pricing = $duration->getSubscriptionPrice();
 
-$price = $pricing['final_price'];
+        $price = $pricing['final_price'];
 
-$hasDiscount = $price < $pricing['normal_price'];
+        $hasDiscount = $price < $pricing['normal_price'];
 
-$promotion = $pricing['promotion'];
+        $promotion = $pricing['promotion'];
 
         /*
         |--------------------------------------------------------------------------
@@ -163,14 +169,16 @@ $promotion = $pricing['promotion'];
 
         session([
             'subscription.package_id' =>
-                $package->id,
+            $package->id,
 
             'subscription.duration_id' =>
-                $duration->id,
+            $duration->id,
 
             'subscription.from_public' =>
-                true,
+            true,
         ]);
+
+        $setting = WebsiteSetting::first();
 
 
         /*
@@ -180,15 +188,16 @@ $promotion = $pricing['promotion'];
         */
 
         return view(
-    'public_subscription.summary',
-    compact(
-        'package',
-        'duration',
-        'price',
-        'hasDiscount',
-        'promotion'
-    )
-);
+            'public_subscription.summary',
+            compact(
+                'package',
+                'duration',
+                'price',
+                'hasDiscount',
+                'promotion',
+                'setting'
+            )
+        );
     }
 
 
@@ -248,13 +257,13 @@ $promotion = $pricing['promotion'];
 
         session([
             'subscription.package_id' =>
-                $duration->package_id,
+            $duration->package_id,
 
             'subscription.duration_id' =>
-                $duration->id,
+            $duration->id,
 
             'subscription.from_public' =>
-                true,
+            true,
         ]);
 
 
@@ -456,9 +465,9 @@ $promotion = $pricing['promotion'];
 
         $pricing = $duration->getSubscriptionPrice();
 
-$price = $pricing['final_price'];
+        $price = $pricing['final_price'];
 
-$promotion = $pricing['promotion'];
+        $promotion = $pricing['promotion'];
 
 
         /*
@@ -474,27 +483,27 @@ $promotion = $pricing['promotion'];
         */
 
         $existingSubscription = Subscription::where(
-    'merchant_id',
-    $user->merchant_id
-)
-    ->where(
-        'package_duration_id',
-        $duration->id
-    )
-    ->where(
-        'promotion_id',
-        $promotion?->id
-    )
-    ->where(
-        'price',
-        $price
-    )
-    ->where(
-        'status',
-        'pending'
-    )
-    ->latest('id')
-    ->first();
+            'merchant_id',
+            $user->merchant_id
+        )
+            ->where(
+                'package_duration_id',
+                $duration->id
+            )
+            ->where(
+                'promotion_id',
+                $promotion?->id
+            )
+            ->where(
+                'price',
+                $price
+            )
+            ->where(
+                'status',
+                'pending'
+            )
+            ->latest('id')
+            ->first();
 
 
         /*
@@ -542,31 +551,31 @@ $promotion = $pricing['promotion'];
         $subscription = Subscription::create([
 
             'merchant_id' =>
-                $user->merchant_id,
+            $user->merchant_id,
 
             'package_duration_id' =>
-                $duration->id,
+            $duration->id,
 
-                'promotion_id' =>
-        $promotion?->id,
+            'promotion_id' =>
+            $promotion?->id,
 
             'invoice_number' =>
-                null,
+            null,
 
             'start_date' =>
-                null,
+            null,
 
             'end_date' =>
-                null,
+            null,
 
             'price' =>
-                $price,
+            $price,
 
             'paid_at' =>
-                null,
+            null,
 
             'status' =>
-                'pending',
+            'pending',
         ]);
 
 

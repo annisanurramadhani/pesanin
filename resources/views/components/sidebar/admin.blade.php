@@ -5,9 +5,22 @@
 
         <div class="px-6 py-6 flex items-center gap-3 border-b border-slate-800/80">
 
-            <div
-                class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black text-lg shadow-lg shadow-amber-500/30">
-                <i class="fa-solid fa-mug-hot"></i>
+            {{-- LOGO sidebar superadmin --}}
+            <div id="sidebarLogo" class="flex items-center gap-3 overflow-hidden transition-all duration-300">
+
+                @php
+                    $websiteSetting = \App\Models\WebsiteSetting::first();
+                @endphp
+
+
+                <div class="w-10 h-10 shrink-0 flex items-center justify-center">
+
+                    <img src="{{ menuImage($websiteSetting?->logo) }}" alt="PesanIn"
+                        class="w-10 h-10 rounded-lg object-cover">
+
+                </div>
+
+
             </div>
 
             <div>
@@ -91,6 +104,18 @@
                 <i class="fa-solid fa-map-location-dot w-5"></i>
 
                 <span>Lokasi Merchant</span>
+
+            </a>
+
+            <a href="{{ route('super_admin.settings.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+    {{ request()->routeIs('super_admin.settings.*')
+        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+        : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+
+                <i class="fa-solid fa-gear w-5"></i>
+
+                <span>Pengaturan Website</span>
 
             </a>
 
