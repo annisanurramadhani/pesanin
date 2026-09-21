@@ -349,28 +349,6 @@
                 </p>
             </div>
 
-            <div class="text-xs text-slate-500">
-
-                Menampilkan
-
-                <span class="font-semibold text-slate-700">
-                    {{ $auditLogs->firstItem() ?? 0 }}
-                </span>
-
-                -
-
-                <span class="font-semibold text-slate-700">
-                    {{ $auditLogs->lastItem() ?? 0 }}
-                </span>
-
-                dari
-
-                <span class="font-semibold text-slate-700">
-                    {{ $auditLogs->total() }}
-                </span>
-
-            </div>
-
         </div>
 
 
@@ -379,7 +357,7 @@
         ========================================================== --}}
         <div class="overflow-x-auto">
 
-            <table class="w-full min-w-[1050px] text-sm">
+            <table class="w-full min-w-[1000px] table-fixed text-sm">
 
                 {{-- =================================================
                     TABLE HEAD
@@ -389,27 +367,27 @@
                     <tr class="border-b border-slate-100 bg-slate-50/70">
 
                         {{-- Waktu --}}
-                        <th class="w-[130px] px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th class="w-[15%] px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                             Waktu
                         </th>
 
                         {{-- Aksi --}}
-                        <th class="w-[110px] px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th class="w-[15%] px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                             Aksi
                         </th>
 
                         {{-- Data --}}
-                        <th class="w-[170px] px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th class="w-[20%] px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                             Data
                         </th>
 
                         {{-- Oleh --}}
-                        <th class="w-[170px] px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th class="w-[20%] px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                             Oleh
                         </th>
 
                         {{-- Perubahan --}}
-                        <th class="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th class="w-[30%] px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                             Perubahan
                         </th>
 
@@ -465,15 +443,7 @@
                                 default => $log->action ?? '-',
                             };
 
-                            /*
-                             * Action badge
-                             */
-                            $actionBadge = match ($action) {
-                                'create' => 'bg-emerald-50 text-emerald-600',
-                                'update' => 'bg-blue-50 text-blue-600',
-                                'delete' => 'bg-red-50 text-red-600',
-                                default => 'bg-slate-100 text-slate-600',
-                            };
+                            
 
                             /*
                              * Old & New Values
@@ -601,19 +571,9 @@
                             ============================================== --}}
                             <td class="px-5 py-4 align-top">
 
-                                <div class="flex flex-col items-start gap-1.5">
-
-                                    <span class="text-xs font-semibold text-slate-800">
-                                        {{ $actionLabel }}
-                                    </span>
-
-                                    <span
-                                        class="inline-flex rounded-md px-2 py-0.5 text-[10px] font-medium {{ $actionBadge }}"
-                                    >
-                                        {{ ucfirst($actionLabel) }}
-                                    </span>
-
-                                </div>
+                                <span class="text-xs font-semibold text-slate-800">
+                                    {{ $actionLabel }}
+                                </span>
 
                             </td>
 
