@@ -34,3 +34,29 @@ if (!function_exists('menuImage')) {
             : asset('assets/images/menu-default.jpg');
     }
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| Audit Log Helper
+|--------------------------------------------------------------------------
+*/
+
+
+if (!function_exists('audit')) {
+
+    function audit(
+        string $action,
+        $model = null,
+        ?array $old = null,
+        ?array $new = null
+    ) {
+        return app(\App\Services\AuditLogger::class)
+            ->log(
+                $action,
+                $model,
+                $old,
+                $new
+            );
+    }
+}
