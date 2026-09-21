@@ -26,8 +26,8 @@ use App\Http\Controllers\Merchant\WithdrawalController as MerchantWithdrawalCont
 
 use App\Http\Controllers\PublicSubscription\PublicSubscriptionController;
 use App\Http\Controllers\PublicSubscription\PublicSubscriptionHomeController;
-use App\Http\Controllers\Superadmin\PackageController;
-use App\Http\Controllers\Superadmin\PackageDurationController;
+use App\Http\Controllers\SuperAdmin\PackageController;
+use App\Http\Controllers\SuperAdmin\PackageDurationController;
 use App\Http\Controllers\SuperAdmin\MerchantController as SuperAdminMerchantController;
 use App\Http\Controllers\SuperAdmin\MerchantLocationController;
 use App\Http\Controllers\SuperAdmin\SubscriptionController as SuperAdminSubscriptionController;
@@ -35,6 +35,7 @@ use App\Http\Controllers\SuperAdmin\SubscriptionPromotionController;
 use App\Http\Controllers\SuperAdmin\WebsiteSettingController;
 use App\Http\Controllers\SuperAdmin\AccountController;
 use App\Http\Controllers\SuperAdmin\WithdrawalController;
+use App\Http\Controllers\SuperAdmin\MerchantBankAccountController as SuperAdminMerchantBankAccountController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -568,7 +569,7 @@ Route::middleware([
             ]
         )
         ->name('withdrawals.approve');
-        
+
         Route::post(
             '/withdrawals/{withdrawal}/reject',
             [
@@ -577,7 +578,62 @@ Route::middleware([
             ]
         )
         ->name('withdrawals.reject');
+        // ==========================================================================
+        // REKENING MERCHANT
+        // ==========================================================================
 
+        Route::get(
+            '/merchant-bank-accounts',
+            [
+                SuperAdminMerchantBankAccountController::class,
+                'index'
+            ]
+        )->name('merchant_bank_accounts.index');
+
+
+        Route::get(
+            '/merchant-bank-accounts/create',
+            [
+                SuperAdminMerchantBankAccountController::class,
+                'create'
+            ]
+        )->name('merchant_bank_accounts.create');
+
+
+        Route::post(
+            '/merchant-bank-accounts',
+            [
+                SuperAdminMerchantBankAccountController::class,
+                'store'
+            ]
+        )->name('merchant_bank_accounts.store');
+
+
+        Route::get(
+            '/merchant-bank-accounts/{encryptedId}/edit',
+            [
+                SuperAdminMerchantBankAccountController::class,
+                'edit'
+            ]
+        )->name('merchant_bank_accounts.edit');
+
+
+        Route::put(
+            '/merchant-bank-accounts/{encryptedId}',
+            [
+                SuperAdminMerchantBankAccountController::class,
+                'update'
+            ]
+        )->name('merchant_bank_accounts.update');
+
+
+        Route::delete(
+            '/merchant-bank-accounts/{encryptedId}',
+            [
+                SuperAdminMerchantBankAccountController::class,
+                'destroy'
+            ]
+        )->name('merchant_bank_accounts.destroy');
     });
 
 

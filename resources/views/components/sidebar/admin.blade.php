@@ -56,15 +56,84 @@
                 <i class="fa-solid fa-store w-5"></i>
                 <span>Kelola Merchant</span>
             </a>
-            <a href="{{ route('super_admin.withdrawals.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
-                {{ request()->routeIs('admin.withdrawals.*')
-                    ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+            {{-- ==========================================
+                KEUANGAN
+                - Rekening Merchant
+                - Penarikan Saldo
+            ========================================== --}}
 
-                    <i class="fa-solid fa-money-bill-transfer w-5"></i>
-                    <span>Penarikan Saldo</span>
-            </a>
+            @php
+                $isKeuanganActive =
+                    request()->routeIs('super_admin.merchant_bank_accounts.*') ||
+                    request()->routeIs('super_admin.withdrawals.*');
+            @endphp
+
+            <div
+                x-data="{ open: {{ $isKeuanganActive ? 'true' : 'false' }} }"
+                class="space-y-1">
+
+                {{-- PARENT MENU KEUANGAN --}}
+                <button
+                    type="button"
+                    @click="open = !open"
+                    class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                    {{ $isKeuanganActive
+                        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+
+                    <div class="flex items-center gap-3">
+
+                        <i class="fa-solid fa-wallet w-5"></i>
+
+                        <span>Keuangan</span>
+
+                    </div>
+
+                    <i
+                        class="fa-solid fa-chevron-down text-xs transition-transform duration-200"
+                        :class="{ 'rotate-180': open }">
+                    </i>
+
+                </button>
+
+
+                {{-- SUB MENU KEUANGAN --}}
+                <div
+                    x-show="open"
+                    x-transition
+                    class="ml-4 pl-4 border-l border-slate-700 space-y-1">
+
+                    {{-- REKENING MERCHANT --}}
+                    <a href="{{ route('super_admin.merchant_bank_accounts.index') }}"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200
+                        {{ request()->routeIs('super_admin.merchant_bank_accounts.*')
+                            ? 'bg-amber-500/15 text-amber-400'
+                            : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+
+                        <i class="fa-solid fa-building-columns w-4"></i>
+
+                        <span>Rekening Merchant</span>
+
+                    </a>
+
+
+                    {{-- PENARIKAN SALDO --}}
+                    <a href="{{ route('super_admin.withdrawals.index') }}"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200
+                        {{ request()->routeIs('super_admin.withdrawals.*')
+                            ? 'bg-amber-500/15 text-amber-400'
+                            : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+
+                        <i class="fa-solid fa-money-bill-transfer w-4"></i>
+
+                        <span>Penarikan Saldo</span>
+
+                    </a>
+
+                </div>
+
+            </div>
+
             <a href="{{ route('super_admin.packages.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
         {{ request()->routeIs('super_admin.packages.*')
