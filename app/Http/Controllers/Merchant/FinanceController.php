@@ -8,6 +8,7 @@ use App\Models\MerchantWallet;
 use App\Models\WalletTransaction;
 use App\Models\MerchantBankAccount;
 use App\Models\Withdrawal;
+use App\Models\WebsiteSetting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -25,6 +26,7 @@ class FinanceController extends Controller
             $request->user()
             ->merchant_id;
 
+        $websiteSetting = WebsiteSetting::first();
 
 
         /*
@@ -261,7 +263,9 @@ class FinanceController extends Controller
 
                 'balance',
 
-                'bankAccount'
+                'bankAccount',
+
+                'websiteSetting'
 
             )
 

@@ -200,103 +200,115 @@
 
         {{-- ================= BANK ACCOUNT ================= --}}
 
-
-        <div class="bg-white border rounded-2xl p-5">
-
-
-            <p class="finance-label">
-                Rekening Penarikan
-            </p>
-
-
+        <div class="bg-white border border-slate-200 rounded-2xl px-5 py-4">
 
             @if ($bankAccount)
-                <div class="mt-4">
 
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
-                    <h3 class="text-xl font-black">
+                    {{-- INFO REKENING --}}
+                    <div class="flex items-center gap-4 min-w-0">
 
-                        {{ $bankAccount->bank_name }}
+                        {{-- ICON BANK --}}
+                        <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
 
-                    </h3>
+                        <div class="min-w-0">
 
+                            {{-- LABEL --}}
+                            <p class="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                                Rekening Penarikan
+                            </p>
 
+                            {{-- BANK + NOMOR --}}
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
 
-                    <p>
-                        {{ $bankAccount->account_number }}
-                    </p>
+                                <h3 class="text-base font-black text-slate-800">
+                                    {{ $bankAccount->bank_name }}
+                                </h3>
 
+                                <span class="text-sm font-semibold text-slate-500">
+                                    {{ $bankAccount->account_number }}
+                                </span>
 
+                            </div>
 
-                    <p>
-                        a.n {{ $bankAccount->account_name }}
-                    </p>
+                            {{-- PEMILIK --}}
+                            <p class="text-sm text-slate-500 mt-0.5">
+                                a.n {{ $bankAccount->account_name }}
+                            </p>
 
-
-
-
-                    <div class="mt-5 flex gap-3 items-center">
-
-
-                        <span class="status-lock">
-
-                            <i class="fa-solid fa-lock"></i>
-
-                            Terkunci
-
-                        </span>
-
-
-
-                        <span class="text-xs text-slate-400 font-bold">
-
-                            Jika ingin mengganti rekening,
-                            hubungi Super Admin
-
-                        </span>
-
-
+                        </div>
 
                     </div>
 
 
-                </div>
-            @else
-                <div class="bank-empty">
+                    {{-- STATUS & CONTACT --}}
+                    <div class="flex items-center gap-3 md:shrink-0">
 
+                        {{-- STATUS TERKUNCI --}}
+                        <span class="status-lock">
+                            <i class="fa-solid fa-lock"></i>
+                            Terkunci
+                        </span>
 
-                    <h3 class="text-lg font-black">
+                        {{-- HUBUNGI ADMIN --}}
+                        @if ($websiteSetting && $websiteSetting->footer_email)
 
-                        Rekening Penarikan Belum Tersedia
+                            <a
+                                href="mailto:{{ $websiteSetting->footer_email }}?subject={{ rawurlencode('Permintaan Perubahan Rekening Bank') }}"
+                                class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-slate-800"
+                            >
+                                <i class="fa-solid fa-envelope"></i>
+                                Hubungi Admin
+                            </a>
 
-                    </h3>
+                        @endif
 
+                    </div>
 
-                    <p class="mt-2 text-sm">
+                            </div>
 
-                        Tambahkan rekening bank untuk menerima pencairan saldo merchant.
+                        @else
 
-                    </p>
+                            {{-- EMPTY STATE --}}
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
+                                <div class="flex items-center gap-4">
 
+                                    <div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center">
+                                        <i class="fa-solid fa-building-columns"></i>
+                                    </div>
 
-                    <button onclick="openBankModal()" class="finance-btn mt-5">
+                                    <div>
 
+                                        <h3 class="text-base font-black text-slate-800">
+                                            Rekening Penarikan Belum Tersedia
+                                        </h3>
 
-                        <i class="fa-solid fa-building-columns mr-2"></i>
+                                        <p class="text-sm text-slate-500 mt-1">
+                                            Tambahkan rekening untuk menerima pencairan saldo.
+                                        </p>
 
-                        Tambah Rekening Bank
+                                    </div>
 
+                                </div>
 
-                    </button>
+                                <button
+                                    onclick="openBankModal()"
+                                    class="finance-btn w-full md:w-auto justify-center">
 
+                                    <i class="fa-solid fa-building-columns mr-2"></i>
+                                    Tambah Rekening
 
-                </div>
-            @endif
+                                </button>
 
+                            </div>
 
+                        @endif
 
-        </div>
+                    </div>
 
 
 
