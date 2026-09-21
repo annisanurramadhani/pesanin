@@ -28,29 +28,6 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-
-            <div class="finance-card">
-
-                <p class="finance-label">
-                    Saldo Tersedia
-                </p>
-
-                <h2 id="walletBalance" class="text-3xl font-black text-slate-800 mt-2">
-
-                    Rp {{ number_format($balance, 0, ',', '.') }}
-
-                </h2>
-
-
-                <p class="text-sm text-slate-500">
-                    Saldo yang dapat ditarik
-                </p>
-
-
-            </div>
-
-
-
             <div class="finance-card">
 
 
@@ -74,6 +51,25 @@
             </div>
 
 
+            <div class="finance-card">
+
+                <p class="finance-label">
+                    Saldo Tersedia
+                </p>
+
+                <h2 id="walletBalance" class="text-3xl font-black text-slate-800 mt-2">
+
+                    Rp {{ number_format($balance, 0, ',', '.') }}
+
+                </h2>
+
+
+                <p class="text-sm text-slate-500">
+                    Saldo yang dapat ditarik
+                </p>
+
+
+            </div>
 
 
             <div class="finance-card">
@@ -111,109 +107,90 @@
 
         <div class="flex justify-between items-center">
 
-
             <h2 class="text-xl font-black text-slate-800">
                 Laporan Transaksi
             </h2>
 
-
-
-            <div class="flex gap-3">
-
-
-                @if ($bankAccount)
-                    <button onclick="openWithdrawModal()" class="finance-btn">
-
-
-                        <i class="fa-solid fa-money-bill-transfer mr-2"></i>
-
-                        Tarik Saldo
-
-
-                    </button>
-                @else
-                    <button onclick="openBankModal()" class="finance-btn">
-
-
-                        <i class="fa-solid fa-building-columns mr-2"></i>
-
-                        Tambah Rekening
-
-
-                    </button>
-                @endif
-
-
-
-
-                <a href="{{ route('merchant.finance.pdf') }}" class="finance-btn-dark">
-
-
-                    <i class="fa-solid fa-file-pdf mr-2"></i>
-
-                    Export PDF
-
-
-                </a>
-
-
-
-            </div>
-
-
         </div>
-
-
-
 
 
         {{-- ================= FILTER ================= --}}
 
-
         <div class="bg-white border rounded-2xl p-4">
 
+            <form method="GET"
+                class="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center">
 
-            <form method="GET" class="flex gap-3">
+                <input
+                    type="date"
+                    name="date"
+                    value="{{ request('date') }}"
+                    class="h-10 w-full md:w-auto border rounded-xl px-4"
+                >
 
-
-                <input type="date" name="date" value="{{ request('date') }}" class="h-10 border rounded-xl px-4">
-
-
-
-                <select name="sort" class="h-10 border rounded-xl px-4">
-
-
+                <select
+                    name="sort"
+                    class="h-10 w-full md:w-auto border rounded-xl px-7"
+                >
                     <option value="desc">
                         Terbaru
                     </option>
 
-
                     <option value="asc">
                         Terlama
                     </option>
-
-
                 </select>
 
-
-
-                <button class="px-5 rounded-xl bg-slate-900 text-white font-bold">
-
+                <button
+                    class="h-10 w-full md:w-auto px-5 rounded-xl bg-slate-900 text-white font-bold"
+                >
                     Filter
-
                 </button>
 
-
-
-                <a href="{{ route('merchant.finance.index') }}" class="flex items-center px-4">
-
+                <a
+                    href="{{ route('merchant.finance.index') }}"
+                    class="h-10 flex items-center justify-center w-full md:w-auto px-4 rounded-xl bg-slate-900 text-white font-bold"
+                >
                     Reset
-
                 </a>
 
+                <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto md:ml-auto">
+
+                    @if ($bankAccount)
+
+                        <button
+                            type="button"
+                            onclick="openWithdrawModal()"
+                            class="finance-btn w-full md:w-auto justify-center"
+                        >
+                            <i class="fa-solid fa-money-bill-transfer mr-2"></i>
+                            Tarik Saldo
+                        </button>
+
+                    @else
+
+                        <button
+                            type="button"
+                            onclick="openBankModal()"
+                            class="finance-btn w-full md:w-auto justify-center"
+                        >
+                            <i class="fa-solid fa-building-columns mr-2"></i>
+                            Tambah Rekening
+                        </button>
+
+                    @endif
+
+                    <a
+                        href="{{ route('merchant.finance.pdf') }}"
+                        class="finance-btn-dark w-full md:w-auto justify-center"
+                    >
+                        <i class="fa-solid fa-file-pdf mr-2"></i>
+                        Export PDF
+                    </a>
+
+                </div>
 
             </form>
-
 
         </div>
 
@@ -586,7 +563,7 @@
             </label>
 
 
-            <input 
+            <input
                 type="number"
                 name="amount"
                 max="{{ $balance }}"
@@ -609,7 +586,7 @@
             <div class="flex gap-3 mt-6">
 
 
-                <button 
+                <button
                     type="button"
                     onclick="closeWithdrawModal()"
                     class="btn-cancel">

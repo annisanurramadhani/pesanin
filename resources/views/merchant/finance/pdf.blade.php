@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
     <meta charset="utf-8">
@@ -10,7 +11,6 @@
 
 
     <style>
-
         body {
             font-family: Arial, Helvetica, sans-serif;
             font-size: 12px;
@@ -148,7 +148,7 @@
 
         .text-center {
 
-            text-align:center;
+            text-align: center;
 
         }
 
@@ -162,8 +162,6 @@
             color: #64748b;
 
         }
-
-
     </style>
 
 
@@ -173,321 +171,273 @@
 <body>
 
 
-<div class="header">
+    <div class="header">
 
-    <h1>
-        LAPORAN KEUANGAN MERCHANT
-    </h1>
+        <h1>
+            LAPORAN KEUANGAN MERCHANT
+        </h1>
 
 
-    <p>
-        PesanIn Merchant Dashboard
-    </p>
+        <p>
+            PesanIn Merchant Dashboard
+        </p>
 
-</div>
+    </div>
 
 
 
 
-<table class="merchant-info">
+    <table class="merchant-info">
 
-<tr>
+        <tr>
 
 
-<td>
+            <td>
 
-<strong>Merchant</strong>
+                <strong>Merchant</strong>
 
-<br>
+                <br>
 
-{{ auth()->user()->merchant->name ?? '-' }}
+                {{ auth()->user()->merchant->name ?? '-' }}
 
-</td>
+            </td>
 
 
 
-<td style="text-align:right">
+            <td style="text-align:right">
 
-<strong>Tanggal Cetak</strong>
+                <strong>Tanggal Cetak</strong>
 
-<br>
+                <br>
 
-{{ now()->format('d F Y H:i') }}
+                {{ now()->format('d F Y H:i') }}
 
-</td>
+            </td>
 
 
-</tr>
+        </tr>
 
 
-</table>
+    </table>
 
 
 
 
 
-<table class="summary">
+    <table class="summary">
 
 
-<tr>
+        <tr>
 
 
-<td>
+            <td>
 
-<div class="label">
-Saldo Tersedia
-</div>
+                <div class="label">
+                    Total Pendapatan
+                </div>
 
 
-<div class="value blue">
+                <div class="value green">
 
-Rp {{ number_format(
-    $wallet->balance ?? 0,
-    0,
-    ',',
-    '.'
-) }}
+                    Rp
+                    {{ number_format($transactions->where('type', 'credit')->sum('amount'), 0, ',', '.') }}
 
-</div>
+                </div>
 
 
-</td>
+            </td>
+            
 
+            <td>
 
+                <div class="label">
+                    Saldo Tersedia
+                </div>
 
 
-<td>
+                <div class="value blue">
 
-<div class="label">
-Total Pendapatan
-</div>
+                    Rp {{ number_format($wallet->balance ?? 0, 0, ',', '.') }}
 
+                </div>
 
-<div class="value green">
 
-Rp {{ number_format(
-    $transactions
-        ->where('type','credit')
-        ->sum('amount'),
-    0,
-    ',',
-    '.'
-) }}
+            </td>
 
-</div>
 
+            <td>
 
-</td>
+                <div class="label">
+                    Total Penarikan
+                </div>
 
 
+                <div class="value red">
 
+                    Rp
+                    {{ number_format($transactions->where('type', 'debit')->sum('amount'), 0, ',', '.') }}
 
+                </div>
 
-<td>
 
-<div class="label">
-Total Penarikan
-</div>
+            </td>
 
 
-<div class="value red">
 
-Rp {{ number_format(
-    $transactions
-        ->where('type','debit')
-        ->sum('amount'),
-    0,
-    ',',
-    '.'
-) }}
+        </tr>
 
-</div>
 
+    </table>
 
-</td>
 
 
 
-</tr>
 
+    <h3>
+        Riwayat Transaksi
+    </h3>
 
-</table>
 
 
 
+    <table class="transaction">
 
 
-<h3>
-Riwayat Transaksi
-</h3>
+        <thead>
 
+            <tr>
 
+                <th width="20%">
+                    Tanggal
+                </th>
 
 
-<table class="transaction">
+                <th>
+                    Keterangan
+                </th>
 
 
-<thead>
+                <th width="15%">
+                    Jenis
+                </th>
 
-<tr>
 
-<th width="20%">
-Tanggal
-</th>
+                <th width="20%">
+                    Nominal
+                </th>
 
 
-<th>
-Keterangan
-</th>
+            </tr>
 
+        </thead>
 
-<th width="15%">
-Jenis
-</th>
 
 
-<th width="20%">
-Nominal
-</th>
+        <tbody>
 
 
-</tr>
+            @forelse($transactions as $transaction)
+                <tr>
 
-</thead>
 
+                    <td>
 
+                        {{ $transaction->created_at->format('d M Y H:i') }}
 
-<tbody>
+                    </td>
 
 
-@forelse($transactions as $transaction)
 
 
-<tr>
+                    <td>
 
+                        {{ $transaction->description }}
 
-<td>
+                    </td>
 
-{{ $transaction->created_at->format('d M Y H:i') }}
 
-</td>
 
 
+                    <td class="text-center">
 
 
-<td>
+                        @if ($transaction->type === 'credit')
+                            <span class="green">
+                                Pemasukan
+                            </span>
+                        @else
+                            <span class="red">
+                                Penarikan
+                            </span>
+                        @endif
 
-{{ $transaction->description }}
 
-</td>
+                    </td>
 
 
 
 
-<td class="text-center">
 
+                    <td class="text-right">
 
-@if($transaction->type === 'credit')
 
-<span class="green">
-Pemasukan
-</span>
+                        @if ($transaction->type === 'credit')
+                            <span class="green">
 
+                                +
 
-@else
+                                Rp {{ number_format($transaction->amount, 0, ',', '.') }}
 
-<span class="red">
-Penarikan
-</span>
+                            </span>
+                        @else
+                            <span class="red">
 
+                                -
 
-@endif
+                                Rp {{ number_format($transaction->amount, 0, ',', '.') }}
 
+                            </span>
+                        @endif
 
-</td>
 
+                    </td>
 
 
 
+                </tr>
 
-<td class="text-right">
 
 
-@if($transaction->type === 'credit')
+            @empty
 
-<span class="green">
 
-+
+                <tr>
 
-Rp {{ number_format(
-    $transaction->amount,
-    0,
-    ',',
-    '.'
-) }}
+                    <td colspan="4" class="text-center">
 
-</span>
+                        Belum ada transaksi
 
+                    </td>
 
-@else
+                </tr>
+            @endforelse
 
-<span class="red">
 
--
 
-Rp {{ number_format(
-    $transaction->amount,
-    0,
-    ',',
-    '.'
-) }}
+        </tbody>
 
-</span>
 
+    </table>
 
-@endif
 
 
-</td>
 
 
+    <div class="footer">
 
-</tr>
+        Laporan dibuat otomatis oleh sistem PesanIn
 
-
-
-@empty
-
-
-<tr>
-
-<td colspan="4" class="text-center">
-
-Belum ada transaksi
-
-</td>
-
-</tr>
-
-
-@endforelse
-
-
-
-</tbody>
-
-
-</table>
-
-
-
-
-
-<div class="footer">
-
-Laporan dibuat otomatis oleh sistem PesanIn
-
-</div>
+    </div>
 
 
 
