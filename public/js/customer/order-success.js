@@ -248,12 +248,163 @@ document.addEventListener("DOMContentLoaded", function () {
     */
 
     if (
-        !paymentUrl ||
-        paymentStatus !== "pending" ||
-        (paymentMethod !== "qris" && paymentMethod !== "bank")
-    ) {
-        return;
-    }
+    !paymentUrl ||
+    paymentStatus !== "pending"
+        ) {
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CASH PAYMENT
+        |--------------------------------------------------------------------------
+        | Polling khusus pembayaran tunai.
+        | Tidak mengubah mekanisme QRIS / Bank.
+        |--------------------------------------------------------------------------
+        */
+
+        if (paymentMethod === "cash") {
+            let checkingCashPayment = false;
+
+            async function checkCashPaymentStatus() {
+
+                if (checkingCashPayment) {
+                    return;
+                }
+
+                checkingCashPayment = true;
+
+                try {
+
+                    const response = await fetch(paymentUrl, {
+                        method: "GET",
+
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            Accept: "application/json",
+                        },
+
+                        cache: "no-store",
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(
+                            "HTTP error " + response.status
+                        );
+                    }
+
+                    const data = await response.json();
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | CASH PAID
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        data.success &&
+                        data.payment_status === "paid"
+                    ) {
+
+                        clearInterval(
+                            cashPaymentStatusInterval
+                        );
+
+                        Swal.fire({
+                            icon: "success",
+                            title: "Pembayaran Berhasil!",
+                            text: "Pembayaran tunai kamu telah dikonfirmasi oleh kasir.",
+                            confirmButtonText: "OK",
+                            confirmButtonColor: "#f59e0b",
+                        }).then(function () {
+
+                            window.location.reload();
+
+                        });
+
+                        return;
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | CASH FAILED
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        data.success &&
+                        data.payment_status === "failed"
+                    ) {
+
+                        clearInterval(
+                            cashPaymentStatusInterval
+                        );
+
+                        window.location.reload();
+
+                        return;
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "Gagal mengecek status pembayaran cash:",
+                        error
+                    );
+
+                } finally {
+
+                    checkingCashPayment = false;
+
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHECK CASH EVERY 1 SECOND
+            |--------------------------------------------------------------------------
+            */
+
+            const cashPaymentStatusInterval =
+                setInterval(
+                    checkCashPaymentStatus,
+                    1000
+                );
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHECK CASH IMMEDIATELY
+            |--------------------------------------------------------------------------
+            */
+
+            checkCashPaymentStatus();
+
+            /*
+            |--------------------------------------------------------------------------
+            | STOP DI SINI
+            |--------------------------------------------------------------------------
+            | Cash tidak boleh masuk ke polling QRIS / Bank.
+            |--------------------------------------------------------------------------
+            */
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | QRIS / BANK
+        |--------------------------------------------------------------------------
+        | KODE LAMA TETAP DI BAWAH INI
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            paymentMethod !== "qris" &&
+            paymentMethod !== "bank"
+        ) {
+            return;
+        }
 
     let checkingPayment = false;
 
