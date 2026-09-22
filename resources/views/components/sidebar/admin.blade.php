@@ -58,6 +58,7 @@
 
         <nav class="px-4 py-6 space-y-2">
 
+            {{-- dashboard --}}
             <a href="{{ route('super_admin.dashboard') }}"
                 class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.dashboard')
@@ -68,6 +69,7 @@
                     Dashboard</span>
             </a>
 
+            {{-- kelola merchant --}}
             <a href="{{ route('super_admin.merchants.index') }}"
                 class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.merchants.*')
@@ -78,12 +80,12 @@
                     Kelola Merchant
                 </span>
             </a>
-            {{-- ==========================================
-    KEUANGAN
-    - Rekening Merchant
-    - Penarikan Saldo
-========================================== --}}
 
+            {{-- ==========================================
+            KEUANGAN
+            - Rekening Merchant
+            - Penarikan Saldo
+            ========================================== --}}
             @php
                 $isKeuanganActive =
                     request()->routeIs('super_admin.merchant_bank_accounts.*') ||
@@ -155,6 +157,7 @@
 
             </div>
 
+            {{-- kelola paket --}}
             <a href="{{ route('super_admin.packages.index') }}"
                 class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
             {{ request()->routeIs('super_admin.packages.*')
@@ -166,6 +169,7 @@
                 </span>
             </a>
 
+            {{-- kelola langganan --}}
             <a href="{{ route('super_admin.subscriptions.index') }}"
                 class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.subscriptions.*')
@@ -177,6 +181,7 @@
                 </span>
             </a>
 
+            {{-- kelola akun --}}
             <a href="{{ route('super_admin.accounts.index') }}"
                 class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.accounts.*')
@@ -188,6 +193,7 @@
                 </span>
             </a>
 
+            {{-- kelola diskon --}}
             <a href="{{ route('super_admin.subscription_promotions.index') }}"
                 class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.subscription_promotions.*')
@@ -202,6 +208,7 @@
 
             </a>
 
+            {{-- lokasi merchant --}}
             <a href="{{ route('super_admin.merchant_locations.index') }}"
                 class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.merchant_locations.*')
@@ -216,6 +223,7 @@
 
             </a>
 
+            {{-- pengaturan website --}}
             <a href="{{ route('super_admin.settings.index') }}"
                 class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.settings.*')
@@ -230,15 +238,18 @@
 
             </a>
 
+            {{-- Audit Log --}}
             <a href="{{ route('super_admin.audit_logs.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.audit_logs.*')
                     ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
 
-                <i class="fa-solid fa-clock-rotate-left w-5"></i>
+                <i class="fa-solid fa-clock-rotate-left w-5 shrink-0"></i>
 
-                <span>Audit Log</span>
+                <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                    Audit Log
+                </span>
 
             </a>
 
