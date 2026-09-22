@@ -7,6 +7,11 @@
         }
     })();
 </script>
+<style>
+    [x-cloak] {
+        display: none !important;
+    }
+</style>
 
 <aside id="sidebar"
     class="w-64 bg-[#111827] text-slate-300 flex flex-col justify-between shrink-0 min-h-screen border-r border-slate-800 shadow-2xl transition-all duration-300 ease-in-out">
@@ -92,11 +97,18 @@
                     request()->routeIs('super_admin.withdrawals.*');
             @endphp
 
-            <div x-data="{ open: {{ $isKeuanganActive ? 'true' : 'false' }} }" class="relative sidebar-finance">
+            <div
+                x-data="{
+                    open: {{ $isKeuanganActive ? 'true' : 'false' }}
+                }"
+                class="relative sidebar-finance"
+            >
 
-                {{-- BUTTON KEUANGAN --}}
-                <button type="button" @click="open = !open"
-                    class="sidebar-menu w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/60">
+                <button
+                    type="button"
+                    @click="open = !open"
+                    class="sidebar-menu w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/60"
+                >
 
                     <div class="flex items-center gap-3 min-w-0">
 
@@ -108,24 +120,30 @@
 
                     </div>
 
-                    <i class="sidebar-chevron fa-solid fa-chevron-down text-xs shrink-0 transition-transform duration-200"
-                        :class="{ 'rotate-180': open }">
-                    </i>
+                    <i
+                        class="sidebar-chevron fa-solid fa-chevron-down text-xs shrink-0 transition-transform duration-200"
+                        :class="{ 'rotate-180': open }"
+                    ></i>
 
                 </button>
 
 
-                {{-- SUBMENU KEUANGAN --}}
-                <div x-show="open" x-transition class="sidebar-submenu">
+                <div
+                    x-cloak
+                    x-show="open"
+                    class="sidebar-submenu"
+                >
 
                     <div class="sidebar-submenu-inner">
 
                         {{-- REKENING MERCHANT --}}
-                        <a href="{{ route('super_admin.merchant_bank_accounts.index') }}"
+                        <a
+                            href="{{ route('super_admin.merchant_bank_accounts.index') }}"
                             class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-bold text-sm transition-all duration-200
                             {{ request()->routeIs('super_admin.merchant_bank_accounts.*')
                                 ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
-                                : 'text-slate-400 hover:bg-slate-800/60 hover:text-white' }}">
+                                : 'text-slate-400 hover:bg-slate-800/60 hover:text-white' }}"
+                        >
 
                             <i class="fa-solid fa-building-columns w-5 shrink-0"></i>
 
@@ -137,11 +155,13 @@
 
 
                         {{-- PENARIKAN SALDO --}}
-                        <a href="{{ route('super_admin.withdrawals.index') }}"
+                        <a
+                            href="{{ route('super_admin.withdrawals.index') }}"
                             class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-bold text-sm transition-all duration-200
                             {{ request()->routeIs('super_admin.withdrawals.*')
                                 ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
-                                : 'text-slate-400 hover:bg-slate-800/60 hover:text-white' }}">
+                                : 'text-slate-400 hover:bg-slate-800/60 hover:text-white' }}"
+                        >
 
                             <i class="fa-solid fa-money-bill-transfer w-5 shrink-0"></i>
 
