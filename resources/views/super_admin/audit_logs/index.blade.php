@@ -399,7 +399,10 @@
                 {{-- =================================================
                     TABLE BODY
                 ================================================== --}}
-                <tbody class="divide-y divide-slate-100">
+                <tbody
+    id="audit-log-table-body"
+    class="divide-y divide-slate-100"
+>
 
                     @forelse ($auditLogs as $log)
 
@@ -775,5 +778,9 @@
     </div>
 
 </div>
+
+@push('scripts')
+    <script src="{{ asset('js/super_admin/audit_log.js') }}"></script>
+@endpush
 
 @endsection
