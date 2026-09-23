@@ -3,9 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Rankbeam\Seo\Traits\HasSEO;
+
 
 class WebsiteSetting extends Model
 {
+
+    use HasFactory, HasSEO;
 
     protected $fillable = [
 
@@ -34,4 +39,31 @@ class WebsiteSetting extends Model
 
     ];
 
+
+    public function getSEOTitle(): ?string
+    {
+        return 'Solusi Digital untuk Bisnis Kuliner | ' . ($this->website_name ?: 'PesanIn');
+    }
+
+    public function getSEODescription(): ?string
+    {
+        return \Illuminate\Support\Str::limit(
+            trim(strip_tags($this->hero_description ?? $this->tagline ?? '')),
+            155
+        );
+    }
+
+    public function getSEOImage(): ?string
+    {
+        if ($this->logo) {
+            return menuImage($this->logo);
+        }
+
+        return asset('assets/images/menu-default.jpg');
+    }
+
+    public function getUrlForSEO(): string
+    {
+        return route('home');
+    }
 }

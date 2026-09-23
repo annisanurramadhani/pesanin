@@ -25,9 +25,17 @@ class PublicSubscriptionController extends Controller
 
         $setting = WebsiteSetting::first();
 
+        $pageSeo = [
+            'title' => 'Paket Langganan | ' . $setting->website_name,
+            'description' => 'Pilih paket langganan ' . $setting->website_name .
+                ' sesuai kebutuhan bisnis Anda.',
+            'canonical' => route('public.subscription.index'),
+            'robots' => 'index,follow',
+        ];
+
         return view(
             'public_subscription.index',
-            compact('packages', 'setting')
+            compact('packages', 'setting', 'pageSeo')
         );
     }
 
