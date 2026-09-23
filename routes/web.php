@@ -583,7 +583,20 @@ Route::middleware([
             ]
         )
             ->name('withdrawals.index');
-
+            Route::get(
+            '/withdrawals/realtime',
+            [
+                WithdrawalController::class,
+                'realtime'
+            ]
+        )->name('withdrawals.realtime');
+        Route::get(
+            '/withdrawals/pending-count',
+            [
+                WithdrawalController::class,
+                'pendingCount'
+            ]
+        )->name('withdrawals.pending-count');
         Route::post(
             '/withdrawals/{withdrawal}/approve',
             [
@@ -1082,7 +1095,10 @@ Route::middleware('auth')
                 '/finance',
                 [FinanceController::class, 'index']
             )->name('finance.index');
-
+            Route::get(
+                '/finance/withdrawals/realtime',
+                [FinanceController::class, 'withdrawalsRealtime']
+            )->name('finance.withdrawals.realtime');
             Route::get(
                 '/finance/pdf',
                 [FinanceController::class, 'pdf']
