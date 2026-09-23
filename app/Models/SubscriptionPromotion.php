@@ -59,4 +59,12 @@ class SubscriptionPromotion extends Model
         return $this->status === 'active'
             && now()->between($this->starts_at, $this->ends_at);
     }
+
+    /**
+     * Alias untuk relasi durations agar kompatibel dengan seeder/kode terbaru.
+     */
+    public function packageDurations()
+    {
+        return $this->durations();
+    }
 }

@@ -286,6 +286,7 @@ Route::middleware([
             }
         )->name('dashboard');
 
+        Route::get('/dashboard/stats', [SuperAdminMerchantController::class, 'dashboardStats'])->name('dashboard.stats');
 
         // ==================================================================
         // Merchants
