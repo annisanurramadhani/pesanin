@@ -3,27 +3,25 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Withdrawal;
 use App\Models\MerchantWallet;
-use App\Models\WalletTransaction;
+use App\Models\Withdrawal;
 use App\Services\MidtransPayoutService;
-use Illuminate\Support\Facades\DB;
+use App\Services\WithdrawalSettlementService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WithdrawalController extends Controller
 {
-
     public function index()
     {
 
         $withdrawals =
             Withdrawal::with([
                 'merchant',
-                'bankAccount'
+                'bankAccount',
             ])
-            ->latest()
-            ->paginate(10);
-
+                ->latest()
+                ->paginate(10);
 
         return view(
             'super_admin.withdrawals.index',
@@ -32,228 +30,91 @@ class WithdrawalController extends Controller
 
     }
 
-
-
     public function approve(
         Withdrawal $withdrawal,
-        MidtransPayoutService $payoutService
-    )
-    {
+        MidtransPayoutService $payoutService,
+        WithdrawalSettlementService $settlement
+    ) {
 
+        try {
+            $withdrawal = DB::transaction(function () use ($withdrawal) {
+                $lockedWithdrawal = Withdrawal::whereKey($withdrawal->id)->lockForUpdate()->firstOrFail();
 
-        if($withdrawal->status !== 'pending')
-        {
+                if ($lockedWithdrawal->status !== 'pending') {
+                    throw new \DomainException('Withdrawal sudah diproses.');
+                }
 
-            return back()->with(
-                'error',
-                'Withdrawal sudah diproses'
-            );
+                $wallet = MerchantWallet::where('merchant_id', $lockedWithdrawal->merchant_id)->lockForUpdate()->firstOrFail();
 
-        }
+                if ($wallet->balance < $lockedWithdrawal->amount) {
+                    throw new \DomainException('Saldo merchant tidak mencukupi.');
+                }
 
-
-
-        DB::transaction(function() use (
-            $withdrawal,
-            $payoutService
-        ){
-
-
-            $wallet =
-                MerchantWallet::where(
-                    'merchant_id',
-                    $withdrawal->merchant_id
-                )
-                ->firstOrFail();
-
-
-
-            if(
-                $wallet->balance 
-                <
-                $withdrawal->amount
-            ){
-
-                throw new \Exception(
-                    'Saldo merchant tidak mencukupi'
-                );
-
-            }
-
-
-
-            $withdrawal->update([
-
-                'status'=>'processing',
-
-                'approved_by'=>auth()->id(),
-
-                'approved_at'=>now(),
-
-            ]);
-
-
-
-
-            $result =
-                $payoutService->process(
-                    $withdrawal
-                );
-            $withdrawal->update([
-
-                'payout_id' =>
-                    $result['payout_id'],
-
-                'payout_status' =>
-                    $result['status'],
-
-                'payout_response' =>
-                    $result['response'],
-
-            ]);
-
-
-
-
-            if(!$result['success'])
-            {
-
-
-                $withdrawal->update([
-
-                    'status'=>'failed'
-
+                $lockedWithdrawal->update([
+                    'status' => 'processing',
+                    'approved_by' => auth()->id(),
+                    'approved_at' => now(),
+                    'payout_reference' => 'WD-'.$lockedWithdrawal->id,
+                    'payout_attempted_at' => now(),
                 ]);
 
+                return $lockedWithdrawal->fresh(['bankAccount']);
+            });
+        } catch (\DomainException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
 
-                throw new \Exception(
-                    'Payout Midtrans gagal'
-                );
+        // Never hold database locks while performing an external payout request.
+        try {
+            $result = $payoutService->process($withdrawal);
+        } catch (\Throwable $exception) {
+            report($exception);
+            $result = [
+                'status' => 'failed',
+                'payout_status' => 'configuration_or_transport_error',
+                'response' => ['message' => 'Payout tidak dapat dikirim. Periksa konfigurasi dan activation produk payout.'],
+            ];
+        }
 
-
-            }
-
-
-
-
-
-            $wallet->decrement(
-                'balance',
-                $withdrawal->amount
-            );
-
-
-
-
-
-            WalletTransaction::create([
-
-                'merchant_id'=>
-                $withdrawal->merchant_id,
-
-
-                'type'=>
-                'debit',
-
-
-                'status'=>
-                'success',
-
-
-                'amount'=>
-                $withdrawal->amount,
-
-
-                'reference_type'=>
-                Withdrawal::class,
-
-
-                'reference_id'=>
-                $withdrawal->id,
-
-
-                'description'=>
-                'Penarikan saldo merchant',
-
-            ]);
-
-
-
-
-
-
-            $withdrawal->update([
-
-                'status'=>
-                $result['status'],
-
-
-                'payout_id'=>
-                $result['payout_id'],
-
-
-                'paid_at'=>
-                now(),
-
-            ]);
-
-
-
-        });
-
-
-
-
+        $withdrawal = $settlement->recordProviderResult($withdrawal->id, $result);
 
         return back()->with(
             'success',
-            'Penarikan berhasil diproses'
+            $withdrawal->status === 'paid' ? 'Payout terkonfirmasi dan saldo telah didebit.' : 'Withdrawal sedang diproses dengan status: '.$withdrawal->status
         );
 
-
     }
-
-
-
-
-
 
     public function reject(
         Request $request,
         Withdrawal $withdrawal
-    )
-    {
+    ) {
 
+        $request->validate(['note' => ['nullable', 'string', 'max:1000']]);
 
-        if($withdrawal->status !== 'pending')
-        {
+        try {
+            DB::transaction(function () use ($withdrawal, $request) {
+                $lockedWithdrawal = Withdrawal::whereKey($withdrawal->id)->lockForUpdate()->firstOrFail();
 
-            return back();
+                if ($lockedWithdrawal->status !== 'pending') {
+                    throw new \DomainException('Withdrawal sudah diproses.');
+                }
 
+                $lockedWithdrawal->update([
+                    'status' => 'rejected',
+                    'approved_by' => auth()->id(),
+                    'approved_at' => now(),
+                    'note' => $request->note,
+                ]);
+            });
+        } catch (\DomainException $exception) {
+            return back()->with('error', $exception->getMessage());
         }
-
-
-
-        $withdrawal->update([
-
-            'status'=>'rejected',
-
-            'approved_by'=>auth()->id(),
-
-            'approved_at'=>now(),
-
-            'note'=>$request->note,
-
-        ]);
-
-
 
         return back()->with(
             'success',
             'Penarikan ditolak'
         );
 
-
     }
-
 }

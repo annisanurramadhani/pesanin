@@ -240,6 +240,10 @@ class FinanceController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $withdrawals = Withdrawal::where('merchant_id', $merchantId)
+            ->latest()
+            ->get();
+
 
 
 
@@ -265,7 +269,9 @@ class FinanceController extends Controller
 
                 'bankAccount',
 
-                'websiteSetting'
+                'websiteSetting',
+
+                'withdrawals'
 
             )
 
@@ -363,187 +369,4 @@ class FinanceController extends Controller
 
 
     }
-
-
-
-
-
-
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | AJUKAN PENARIKAN SALDO
-    |--------------------------------------------------------------------------
-    */
-
-
-    public function withdraw(Request $request)
-    {
-
-
-        $request->validate([
-
-
-            'amount'
-            =>
-            [
-
-                'required',
-
-                'numeric',
-
-                'min:10000'
-
-            ]
-
-
-        ]);
-
-
-
-
-
-
-
-        $merchantId =
-            $request->user()
-            ->merchant_id;
-
-
-
-
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK REKENING
-        |--------------------------------------------------------------------------
-        */
-
-
-        $bankAccount =
-            MerchantBankAccount::where(
-                'merchant_id',
-                $merchantId
-            )
-            ->where(
-                'status',
-                'active'
-            )
-            ->first();
-
-
-
-
-
-
-        if(!$bankAccount)
-        {
-
-            return back()->with(
-
-                'error',
-
-                'Silahkan tambahkan rekening penarikan terlebih dahulu'
-
-            );
-
-        }
-
-
-
-
-
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK WALLET
-        |--------------------------------------------------------------------------
-        */
-
-
-        $wallet =
-            MerchantWallet::where(
-                'merchant_id',
-                $merchantId
-            )
-            ->first();
-
-
-
-
-
-
-        if(!$wallet)
-        {
-
-            return back()->with(
-
-                'error',
-
-                'Wallet tidak ditemukan'
-
-            );
-
-        }
-
-
-
-
-
-
-
-        if($wallet->balance < $request->amount)
-        {
-
-
-            return back()->with(
-
-                'error',
-
-                'Saldo tidak mencukupi'
-
-            );
-
-
-        }
-
-
-
-
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SEMENTARA
-        |--------------------------------------------------------------------------
-        |
-        | Nanti bagian ini pindah ke withdrawals table
-        |
-        | Tidak langsung mengurangi saldo
-        |
-        */
-
-
-        return back()->with(
-
-            'success',
-
-            'Permintaan penarikan berhasil dikirim ke admin'
-
-        );
-
-
-    }
-
-
 }

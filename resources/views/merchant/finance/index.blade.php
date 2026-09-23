@@ -315,6 +315,36 @@
 
 
 
+        {{-- ================= RIWAYAT WITHDRAWAL ================= --}}
+
+        <div class="bg-white border rounded-2xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100">
+                <h2 class="text-lg font-black text-slate-800">Riwayat Penarikan</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50"><tr>
+                        <th class="p-4 text-left">Tanggal</th>
+                        <th class="p-4 text-right">Nominal</th>
+                        <th class="p-4 text-center">Status</th>
+                        <th class="p-4 text-left">Keterangan</th>
+                    </tr></thead>
+                    <tbody>
+                        @forelse ($withdrawals as $withdrawal)
+                            <tr class="border-b">
+                                <td class="p-4">{{ $withdrawal->created_at->format('d M Y H:i') }}</td>
+                                <td class="p-4 text-right font-black">Rp {{ number_format($withdrawal->amount, 0, ',', '.') }}</td>
+                                <td class="p-4 text-center font-bold">{{ ucfirst($withdrawal->status) }}</td>
+                                <td class="p-4 text-slate-500">{{ $withdrawal->note ?: ($withdrawal->payout_status ?: '-') }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="p-6 text-center text-slate-400">Belum ada pengajuan penarikan.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         {{-- ================= TRANSAKSI ================= --}}
 
 

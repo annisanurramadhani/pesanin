@@ -2,148 +2,56 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MidtransPayoutService
 {
-
-    public function process($withdrawal)
+    public function process($withdrawal): array
     {
-
-        if(
-            !config('services.midtrans.payout_enabled')
-        ){
-
-            return $this->sandboxSimulation(
-                $withdrawal
-            );
-
+        if (! config('services.midtrans.payout_enabled') || config('services.midtrans.payout_mode') === 'simulation') {
+            return $this->sandboxSimulation($withdrawal);
         }
 
-
-        return $this->sendToMidtrans(
-            $withdrawal
-        );
-
+        return $this->sendToMidtrans($withdrawal);
     }
 
-
-
-    private function sandboxSimulation($withdrawal)
+    private function sandboxSimulation($withdrawal): array
     {
+        $status = config('services.midtrans.payout_simulation_status', 'paid');
+
+        if (! in_array($status, ['paid', 'processing', 'failed'], true)) {
+            throw new \InvalidArgumentException('MIDTRANS_PAYOUT_SIMULATION_STATUS harus paid, processing, atau failed.');
+        }
+
+        Log::info('PesanIn sandbox payout simulation', [
+            'withdrawal_id' => $withdrawal->id,
+            'merchant_id' => $withdrawal->merchant_id,
+            'amount' => $withdrawal->amount,
+            'bank' => $withdrawal->bankAccount?->bank_name,
+        ]);
 
         return [
+            'status' => $status,
+            'payout_status' => 'simulation_'.$status,
 
-            'success'=>true,
+            /*
+             * Ini BUKAN payout ID Midtrans asli.
+             * Hanya ID simulasi internal.
+             */
+            'payout_id' => 'SANDBOX-WD-'.$withdrawal->id.'-'.time(),
 
-            'status'=>'paid',
-
-            'payout_id'=>
-            'SANDBOX-'.time(),
-
-            'response'=>[
-
-                'message'=>
-                'Sandbox payout simulation'
-
-            ]
-
+            'response' => [
+                'message' => 'Local payout simulation; this is not a Midtrans payout.',
+                'withdrawal_id' => $withdrawal->id,
+                'amount' => $withdrawal->amount,
+            ],
         ];
-
     }
 
-
-
-    private function sendToMidtrans($withdrawal)
+    private function sendToMidtrans($withdrawal): array
     {
-
-
-        $response = Http::withHeaders([
-
-            'Authorization'=>
-            'Basic '
-            .
-            base64_encode(
-                config('services.midtrans.payout_key')
-                . ':'
-            ),
-
-            'Content-Type'=>
-            'application/json'
-
-        ])
-        ->post(
-
-            config('services.midtrans.payout_url'),
-
-            [
-
-                'payouts'=>[
-
-                    [
-
-                        'beneficiary_name'=>
-                        $withdrawal
-                        ->bankAccount
-                        ->account_name,
-
-
-                        'beneficiary_account'=>
-                        $withdrawal
-                        ->bankAccount
-                        ->account_number,
-
-
-                        'beneficiary_bank'=>
-                        strtolower(
-                            $withdrawal
-                            ->bankAccount
-                            ->bank_name
-                        ),
-
-
-                        'amount'=>
-                        $withdrawal
-                        ->amount,
-
-
-                        'notes'=>
-                        'Withdrawal PesanIn'
-
-                    ]
-
-                ]
-
-            ]
-
+        throw new \RuntimeException(
+            'Payout Midtrans live belum dapat dijalankan: endpoint, credential, callback signature, dan activation produk resmi belum dikonfigurasi.'
         );
-
-
-        return [
-
-            'success'=>
-            $response->successful(),
-
-
-            'status'=>
-            $response->successful()
-            ?
-            'processing'
-            :
-            'failed',
-
-
-            'payout_id'=>
-            $response['payouts'][0]['payout_id']
-            ??
-            null,
-
-
-            'response'=>
-            $response->json()
-
-        ];
-
     }
-
 }

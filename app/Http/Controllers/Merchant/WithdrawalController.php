@@ -3,114 +3,80 @@
 namespace App\Http\Controllers\Merchant;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Withdrawal;
+use App\Models\MerchantBankAccount;
 use App\Models\MerchantWallet;
+use App\Models\Withdrawal;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WithdrawalController extends Controller
 {
+    public function index()
+    {
+        return redirect()->route('merchant.finance.index');
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'amount' => [
                 'required',
                 'numeric',
-                'min:10000'
-            ]
+                'min:10000',
+            ],
         ]);
 
-        $user = Auth::user();
+        $merchant = $request->user()->merchant;
 
-        $merchant = $user->merchant;
-
-        if(!$merchant){
-
+        if (! $merchant) {
             return back()->with(
                 'error',
-                'Merchant tidak ditemukan'
+                'Merchant tidak ditemukan.'
             );
-
         }
 
+        try {
+            DB::transaction(function () use ($merchant, $request) {
+                // This row lock serializes withdrawal requests for one merchant.
+                $wallet = MerchantWallet::where('merchant_id', $merchant->id)->lockForUpdate()->firstOrFail();
+                $amount = (float) $request->amount;
 
-        $wallet = MerchantWallet::where(
-            'merchant_id',
-            $merchant->id
-        )
-        ->first();
+                if ($amount > $wallet->balance) {
+                    throw new \DomainException('Saldo tidak mencukupi.');
+                }
 
+                $bankAccount = MerchantBankAccount::where('merchant_id', $merchant->id)
+                    ->where('status', 'active')
+                    ->lockForUpdate()
+                    ->first();
 
-        if(!$wallet){
+                if (! $bankAccount) {
+                    throw new \DomainException('Rekening bank aktif belum tersedia.');
+                }
 
-            return back()->with(
-                'error',
-                'Wallet merchant tidak ditemukan'
-            );
+                if (Withdrawal::where('merchant_id', $merchant->id)
+                    ->whereIn('status', ['pending', 'processing'])
+                    ->exists()) {
+                    throw new \DomainException('Masih ada pengajuan penarikan yang sedang diproses.');
+                }
 
+                Withdrawal::create([
+                    'merchant_id' => $merchant->id,
+                    'merchant_bank_account_id' => $bankAccount->id,
+                    'amount' => $amount,
+                    'status' => 'pending',
+                ]);
+            });
+        } catch (\DomainException $exception) {
+            return back()->with('error', $exception->getMessage());
+        } catch (ModelNotFoundException) {
+            return back()->with('error', 'Wallet merchant tidak ditemukan.');
         }
-
-
-        if($request->amount > $wallet->balance){
-
-            return back()->with(
-                'error',
-                'Saldo tidak mencukupi'
-            );
-
-        }
-
-
-        $bankAccount = $merchant->bankAccount;
-
-
-        if(!$bankAccount){
-
-            return back()->with(
-                'error',
-                'Rekening bank belum tersedia'
-            );
-
-        }
-
-
-        $pending = Withdrawal::where(
-            'merchant_id',
-            $merchant->id
-        )
-        ->where(
-            'status',
-            'pending'
-        )
-        ->exists();
-
-
-        if($pending){
-
-            return back()->with(
-                'error',
-                'Masih ada pengajuan penarikan yang sedang diproses'
-            );
-
-        }
-
-
-        Withdrawal::create([
-
-            'merchant_id' => $merchant->id,
-
-            'merchant_bank_account_id' => $bankAccount->id,
-
-            'amount' => $request->amount,
-
-            'status' => 'pending',
-
-        ]);
-
 
         return back()->with(
             'success',
-            'Pengajuan penarikan berhasil dikirim ke admin'
+            'Pengajuan penarikan berhasil dikirim ke admin.'
         );
     }
 }

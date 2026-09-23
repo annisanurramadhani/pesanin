@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Withdrawal extends Model
 {
-
     protected $fillable = [
 
         'merchant_id',
@@ -19,6 +18,8 @@ class Withdrawal extends Model
 
         'payout_id',
 
+        'payout_reference',
+
         'payout_status',
 
         'payout_response',
@@ -29,23 +30,23 @@ class Withdrawal extends Model
 
         'paid_at',
 
-        'note'
+        'payout_attempted_at',
+
+        'note',
 
     ];
-
-
 
     protected $casts = [
 
-        'approved_at'=>'datetime',
+        'approved_at' => 'datetime',
 
-        'paid_at'=>'datetime',
+        'paid_at' => 'datetime',
 
-        'payout_response'=>'array',
+        'payout_attempted_at' => 'datetime',
+
+        'payout_response' => 'array',
 
     ];
-
-
 
     public function merchant()
     {
@@ -53,8 +54,6 @@ class Withdrawal extends Model
             Merchant::class
         );
     }
-
-
 
     public function bankAccount()
     {
@@ -64,7 +63,6 @@ class Withdrawal extends Model
         );
     }
 
-
     public function approver()
     {
         return $this->belongsTo(
@@ -72,5 +70,4 @@ class Withdrawal extends Model
             'approved_by'
         );
     }
-
 }

@@ -50,6 +50,10 @@ Rekening
 Status
 </th>
 
+<th class="px-6 py-4 text-left font-black text-slate-500">
+Payout
+</th>
+
 <th class="px-6 py-4 text-center font-black text-slate-500">
 Aksi
 </th>
@@ -122,8 +126,6 @@ Rekening tidak ditemukan
 </td>
 
 
-
-
 <td class="px-6 py-5 text-center">
 
 
@@ -176,6 +178,19 @@ Ditolak
 
 </td>
 
+<td class="px-6 py-5 text-xs text-slate-500">
+{{ $withdrawal->payout_status ?? '-' }}
+@if($withdrawal->payout_id)
+<p class="mt-1 break-all text-[10px] text-slate-400">{{ $withdrawal->payout_id }}</p>
+@endif
+@if($withdrawal->status === 'failed' && data_get($withdrawal->payout_response, 'message'))
+<p class="mt-1 text-red-600">{{ data_get($withdrawal->payout_response, 'message') }}</p>
+@endif
+@if($withdrawal->note)
+<p class="mt-1 text-rose-600">{{ $withdrawal->note }}</p>
+@endif
+</td>
+
 
 
 
@@ -212,6 +227,9 @@ Setujui
 action="{{ route('super_admin.withdrawals.reject',$withdrawal->id) }}">
 
 @csrf
+
+<input name="note" required maxlength="1000" placeholder="Alasan penolakan"
+class="mb-2 w-full rounded border px-2 py-1 text-xs">
 
 
 <button
@@ -284,7 +302,7 @@ Selesai
 
 <tr>
 
-<td colspan="5"
+<td colspan="6"
 class="py-10 text-center text-slate-400">
 
 Belum ada permintaan penarikan
