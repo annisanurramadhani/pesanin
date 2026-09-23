@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3388c2568fa251727e8a23d000a13f0e",
+    "content-hash": "54ee772fc634bcab8e10d6550c204b49",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -3769,6 +3769,93 @@
                 "source": "https://github.com/ramsey/uuid/tree/4.9.3"
             },
             "time": "2026-06-18T03:57:49+00:00"
+        },
+        {
+            "name": "rankbeam/laravel-seo",
+            "version": "v3.21.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rankbeam/laravel-seo.git",
+                "reference": "54565aac8497b9a96346de0f50dd792d89221dc7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rankbeam/laravel-seo/zipball/54565aac8497b9a96346de0f50dd792d89221dc7",
+                "reference": "54565aac8497b9a96346de0f50dd792d89221dc7",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/cache": "^11.0|^12.0|^13.0",
+                "illuminate/console": "^11.0|^12.0|^13.0",
+                "illuminate/database": "^11.0|^12.0|^13.0",
+                "illuminate/filesystem": "^11.0|^12.0|^13.0",
+                "illuminate/http": "^11.0|^12.0|^13.0",
+                "illuminate/routing": "^11.0|^12.0|^13.0",
+                "illuminate/support": "^11.0|^12.0|^13.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "orchestra/testbench": "^9.0|^10.0|^11.0",
+                "pestphp/pest": "^2.0|^3.0",
+                "spatie/browsershot": "^4.0|^5.0",
+                "spatie/laravel-sitemap": "^7.0|^8.0"
+            },
+            "suggest": {
+                "spatie/browsershot": "Generate 1200x630 OG images with a real browser (config seo.og_image)",
+                "spatie/laravel-sitemap": "Generate XML sitemaps for your models (^7.0|^8.0)"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "SEO": "Rankbeam\\Seo\\Facades\\SEO"
+                    },
+                    "providers": [
+                        "Rankbeam\\Seo\\SEOServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-master": "3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Rankbeam\\Seo\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Valentin Goxhaj",
+                    "email": "valentinogoxhaj@gmail.com"
+                }
+            ],
+            "description": "Laravel SEO package for metadata, canonical URLs, Open Graph, linked JSON-LD, XML sitemaps and crawler controls - free and MIT licensed.",
+            "homepage": "https://rankbeam.dev",
+            "keywords": [
+                "JSON-LD",
+                "Sitemap",
+                "canonical",
+                "laravel",
+                "meta-tags",
+                "open-graph",
+                "php",
+                "schema",
+                "seo",
+                "structured-data",
+                "twitter-cards"
+            ],
+            "support": {
+                "docs": "https://docs.rankbeam.dev",
+                "email": "hello@rankbeam.dev",
+                "issues": "https://github.com/rankbeam/laravel-seo/issues",
+                "source": "https://github.com/rankbeam/laravel-seo"
+            },
+            "time": "2026-09-11T13:53:11+00:00"
         },
         {
             "name": "sabberworm/php-css-parser",
@@ -9513,5 +9600,5 @@
         "php": "^8.3"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }

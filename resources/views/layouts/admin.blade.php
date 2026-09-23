@@ -1,5 +1,34 @@
 @extends('layouts.app')
 
+@push('styles')
+<style>
+    html.sidebar-precollapsed #sidebar {
+        width: 5rem !important;
+    }
+
+    html.sidebar-precollapsed #sidebarBrand,
+    html.sidebar-precollapsed .sidebar-text,
+    html.sidebar-precollapsed .sidebar-user-info {
+        opacity: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    html.sidebar-precollapsed .sidebar-menu {
+        justify-content: center !important;
+    }
+
+    html.sidebar-precollapsed .sidebar-menu > i {
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    html.sidebar-precollapsed .sidebar-chevron {
+        display: none !important;
+    }
+</style>
+@endpush
+
 @section('body')
 
     <div class="min-h-screen flex">

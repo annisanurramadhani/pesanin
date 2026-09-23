@@ -1,0 +1,110 @@
+/* =========================================
+   SIDEBAR FINANCE DROPDOWN
+========================================= */
+
+.sidebar-finance {
+    position: relative;
+}
+
+
+/* -----------------------------------------
+   NORMAL SIDEBAR
+----------------------------------------- */
+
+.sidebar-submenu {
+    margin-left: 0.75rem;
+    padding-left: 1.5rem;
+    border-left: 1px solid rgb(51 65 85);
+    margin-top: 0.25rem;
+}
+
+.sidebar-submenu-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.sidebar-submenu-inner > a {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: rgb(148 163 184);
+    transition: all 0.2s ease;
+}
+
+.sidebar-submenu-inner > a:hover {
+    background-color: rgb(30 41 59 / 0.6);
+    color: white;
+}
+.sidebar-submenu-inner > a > i {
+    width: 1.25rem;
+    min-width: 1.25rem;
+    text-align: center;
+}
+
+
+/* -----------------------------------------
+   COLLAPSED SIDEBAR
+----------------------------------------- */
+
+#sidebar.w-20 .sidebar-finance .sidebar-submenu {
+    position: absolute;
+    left: 100%;
+    top: 0;
+
+    margin-left: 0;
+    padding-left: 0;
+
+    width: 220px;
+
+    background: #111827;
+
+    border: 1px solid rgb(51 65 85);
+
+    border-radius: 0.75rem;
+
+    padding: 0.5rem;
+
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.35);
+
+    z-index: 100;
+}
+
+
+/* Hilangkan garis kiri ketika collapsed */
+#sidebar.w-20 .sidebar-finance .sidebar-submenu {
+    border-left: none;
+}
+
+
+/* Anak menu */
+#sidebar.w-20 .sidebar-finance .sidebar-submenu-inner {
+    gap: 0.25rem;
+}
+
+
+/* Tampilkan text submenu */
+#sidebar.w-20
+.sidebar-finance
+.sidebar-submenu
+.sidebar-text {
+
+    opacity: 1 !important;
+    width: auto !important;
+    overflow: visible !important;
+}
+
+
+/* Icon submenu */
+#sidebar.w-20
+.sidebar-finance
+.sidebar-submenu
+i {
+
+    margin-left: 0 !important;
+}
+
+
+/* Chevron jangan ditampilkan ketika collapsed */
+#sidebar.w-20 .sidebar-finance .sidebar-chevron {
+    display: none;
+}

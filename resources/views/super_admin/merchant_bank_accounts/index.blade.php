@@ -1,70 +1,23 @@
 @extends('layouts.admin')
 
-@section('content')
-    <div class="space-y-6">
+@section('header')
+    <div class="flex items-center justify-between">
 
-        {{-- ==========================================================
-        HEADER
-    =========================================================== --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+                Rekening Merchant
+            </h1>
 
-            <div>
-                <h1 class="text-2xl font-black text-slate-800">
-                    Rekening Merchant
-                </h1>
-
-                <p class="text-sm text-slate-500 mt-1">
-                    Kelola rekening bank yang digunakan merchant untuk penarikan saldo.
-                </p>
-            </div>
-
-
-            <a href="{{ route('super_admin.merchant_bank_accounts.create') }}"
-                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl
-                   bg-amber-500 text-slate-950 font-bold text-sm
-                   hover:bg-amber-400 transition shadow-lg shadow-amber-500/20">
-
-                <i class="fa-solid fa-plus"></i>
-
-                <span>Tambah Rekening</span>
-
-            </a>
-
+            <p class="mt-1 text-sm text-slate-500">
+                Kelola rekening bank yang digunakan merchant untuk penarikan saldo.
+            </p>
         </div>
 
+    </div>
+@endsection
 
-        {{-- ==========================================================
-        FLASH MESSAGE
-    =========================================================== --}}
-        @if (session('success'))
-            <div
-                class="flex items-center gap-3 px-4 py-3 rounded-xl
-                   bg-emerald-50 border border-emerald-200 text-emerald-700">
-
-                <i class="fa-solid fa-circle-check"></i>
-
-                <span class="text-sm font-semibold">
-                    {{ session('success') }}
-                </span>
-
-            </div>
-        @endif
-
-
-        @if (session('error'))
-            <div
-                class="flex items-center gap-3 px-4 py-3 rounded-xl
-                   bg-rose-50 border border-rose-200 text-rose-700">
-
-                <i class="fa-solid fa-circle-exclamation"></i>
-
-                <span class="text-sm font-semibold">
-                    {{ session('error') }}
-                </span>
-
-            </div>
-        @endif
-
+@section('content')
+    <div class="space-y-6">
 
         {{-- ==========================================================
         FILTER
@@ -157,7 +110,8 @@
         {{-- ==========================================================
         TABLE
     =========================================================== --}}
-        <div class="bg-white rounded-2xl border border-slate-200
+        <div
+            class="bg-white rounded-2xl border border-slate-200
                shadow-sm overflow-hidden">
 
             <div class="overflow-x-auto">

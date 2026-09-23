@@ -36,6 +36,7 @@ use App\Http\Controllers\SuperAdmin\WebsiteSettingController;
 use App\Http\Controllers\SuperAdmin\AccountController;
 use App\Http\Controllers\SuperAdmin\WithdrawalController;
 use App\Http\Controllers\SuperAdmin\MerchantBankAccountController as SuperAdminMerchantBankAccountController;
+use App\Http\Controllers\SuperAdmin\AuditLogController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -559,7 +560,7 @@ Route::middleware([
                 'index'
             ]
         )
-        ->name('withdrawals.index');
+            ->name('withdrawals.index');
 
         Route::post(
             '/withdrawals/{withdrawal}/approve',
@@ -568,7 +569,7 @@ Route::middleware([
                 'approve'
             ]
         )
-        ->name('withdrawals.approve');
+            ->name('withdrawals.approve');
 
         Route::post(
             '/withdrawals/{withdrawal}/reject',
@@ -577,7 +578,7 @@ Route::middleware([
                 'reject'
             ]
         )
-        ->name('withdrawals.reject');
+            ->name('withdrawals.reject');
         // ==========================================================================
         // REKENING MERCHANT
         // ==========================================================================
@@ -634,6 +635,17 @@ Route::middleware([
                 'destroy'
             ]
         )->name('merchant_bank_accounts.destroy');
+
+
+
+        // ==================================================================
+        // Audit Log
+        // ==================================================================
+
+        Route::get('/audit_logs', [
+            AuditLogController::class,
+            'index'
+        ])->name('audit_logs.index');
     });
 
 
@@ -1051,13 +1063,13 @@ Route::middleware('auth')
 
             Route::get(
                 '/finance/pdf',
-                [FinanceController::class,'pdf']
+                [FinanceController::class, 'pdf']
             )
-            ->name('finance.pdf');
+                ->name('finance.pdf');
 
             Route::post(
                 '/finance/withdraw',
-                [FinanceController::class,'withdraw']
+                [FinanceController::class, 'withdraw']
             )->name('finance.withdraw');
             Route::get(
                 '/finance/data',
@@ -1066,18 +1078,18 @@ Route::middleware('auth')
                     'data'
                 ]
             )
-            ->name('finance.data');
+                ->name('finance.data');
 
-             Route::get(
+            Route::get(
                 '/bank-account/create',
                 [
                     MerchantBankAccountController::class,
                     'create'
                 ]
             )
-            ->name(
-                'bank-account.create'
-            );
+                ->name(
+                    'bank-account.create'
+                );
 
             Route::post(
                 '/bank-account',
@@ -1086,9 +1098,9 @@ Route::middleware('auth')
                     'store'
                 ]
             )
-            ->name(
-                'bank-account.store'
-            );
+                ->name(
+                    'bank-account.store'
+                );
             Route::get(
                 '/withdrawals',
                 [

@@ -87,7 +87,8 @@ class CustomerOrderController extends Controller
      */
     public function menu(string $code, Request $request)
     {
-        // Jika tidak datang dari tombol "+ Tambah Menu" (artinya user klik "Kembali" dari header keranjang), hapus voucher
+        // Jika tidak datang dari tombol "+ Tambah Menu",
+        // hapus voucher dari session
         if (!$request->has('keep_voucher')) {
             session()->forget('cart_voucher');
         }
@@ -102,10 +103,7 @@ class CustomerOrderController extends Controller
             'merchant_id',
             $merchant->id
         )
-            ->where(
-                'status',
-                'active'
-            )
+            ->where('status', 'active')
             ->with([
                 'menus' => function ($query) {
                     $query->orderBy('name');
@@ -122,17 +120,54 @@ class CustomerOrderController extends Controller
             ->orderBy('name')
             ->get();
 
+        /*
+    |--------------------------------------------------------------------------
+    | SEO
+    |--------------------------------------------------------------------------
+    */
+
+        $siteName = config('app.name');
+
+        $seoMenus = $menus
+            ->where('status', 'available')
+            ->pluck('name')
+            ->filter()
+            ->unique()
+            ->take(8)
+            ->implode(', ');
+
+        $seoDescription = $seoMenus
+            ? $merchant->name . ' — ' . $seoMenus
+            : $merchant->name;
+
+        $pageSeo = [
+            'title' => $merchant->name . ' | Menu ' . $siteName,
+
+            'description' => \Illuminate\Support\Str::limit(
+                $seoDescription,
+                155
+            ),
+
+            'canonical' => route('customer.menu', [
+                'code' => $qrCode->code,
+            ]),
+
+            'robots' => $qrCode->type === 'menu'
+                ? 'index,follow'
+                : 'noindex,nofollow',
+        ];
+
         return view(
             'customer.menu',
             compact(
                 'qrCode',
                 'merchant',
                 'categories',
-                'menus'
+                'menus',
+                'pageSeo'
             )
         );
     }
-
 
     /**
      * =========================================================
@@ -2883,49 +2918,49 @@ class CustomerOrderController extends Controller
 
 
     /**
- * =========================================================
- * CUSTOMER PROFILE
- * =========================================================
- *
- * Mengambil data customer berdasarkan token browser.
- */
-public function customerProfile(Request $request)
-{
-    $validated = $request->validate([
-        'customer_token' => [
-            'required',
-            'uuid',
-        ],
-    ]);
+     * =========================================================
+     * CUSTOMER PROFILE
+     * =========================================================
+     *
+     * Mengambil data customer berdasarkan token browser.
+     */
+    public function customerProfile(Request $request)
+    {
+        $validated = $request->validate([
+            'customer_token' => [
+                'required',
+                'uuid',
+            ],
+        ]);
 
-    $customer = Customer::where(
-        'customer_token',
-        $validated['customer_token']
-    )->first();
+        $customer = Customer::where(
+            'customer_token',
+            $validated['customer_token']
+        )->first();
 
-    if (!$customer) {
+        if (!$customer) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Data customer tidak ditemukan.',
+            ], 404);
+        }
 
         return response()->json([
-            'success' => false,
-            'message' => 'Data customer tidak ditemukan.',
-        ], 404);
+            'success' => true,
+
+            'customer' => [
+                'name' =>
+                $customer->name,
+
+                'phone' =>
+                $customer->phone,
+
+                'email' =>
+                $customer->email,
+            ],
+        ]);
     }
-
-    return response()->json([
-        'success' => true,
-
-        'customer' => [
-            'name' =>
-            $customer->name,
-
-            'phone' =>
-            $customer->phone,
-
-            'email' =>
-            $customer->email,
-        ],
-    ]);
-}
 
 
     /**
@@ -3484,9 +3519,7 @@ public function customerProfile(Request $request)
                 if ($unit['status'] === 'cancelled') {
                     $hasCancelledItem = true;
                 }
-
             }
-
         }
 
 
@@ -3495,16 +3528,16 @@ public function customerProfile(Request $request)
             'success' => true,
 
             'payment_status' =>
-                $order->payment_status,
+            $order->payment_status,
 
             'order_status' =>
-                $order->status,
+            $order->status,
 
             'has_cancelled_item' =>
-                $hasCancelledItem,
+            $hasCancelledItem,
 
             'items' =>
-                $items,
+            $items,
         ]);
     }
 

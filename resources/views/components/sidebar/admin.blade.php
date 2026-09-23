@@ -1,17 +1,31 @@
-<aside
-    class="w-64 bg-[#111827] text-slate-300 flex flex-col justify-between shrink-0 min-h-screen border-r border-slate-800 shadow-2xl">
+<script>
+    (function() {
+        if (
+            localStorage.getItem('pesanin_admin_sidebar_collapsed') === 'true'
+        ) {
+            document.documentElement.classList.add('sidebar-precollapsed');
+        }
+    })();
+</script>
+<style>
+    [x-cloak] {
+        display: none !important;
+    }
+</style>
+
+<aside id="sidebar"
+    class="w-64 bg-[#111827] text-slate-300 flex flex-col justify-between shrink-0 min-h-screen border-r border-slate-800 shadow-2xl transition-all duration-300 ease-in-out">
 
     <div>
 
-        <div class="px-6 py-6 flex items-center gap-3 border-b border-slate-800/80">
+        <div class="px-5 py-5 flex items-center justify-between border-b border-slate-800/80">
 
-            {{-- LOGO sidebar superadmin --}}
+            {{-- LOGO + BRAND --}}
             <div id="sidebarLogo" class="flex items-center gap-3 overflow-hidden transition-all duration-300">
 
                 @php
                     $websiteSetting = \App\Models\WebsiteSetting::first();
                 @endphp
-
 
                 <div class="w-10 h-10 shrink-0 flex items-center justify-center">
 
@@ -20,48 +34,63 @@
 
                 </div>
 
+                <div id="sidebarBrand" class="whitespace-nowrap transition-all duration-300">
+
+                    <h1 class="font-bold text-white text-base tracking-wide">
+                        Command Center
+                    </h1>
+
+                    <p class="text-[10px] text-slate-400 tracking-wider uppercase font-semibold">
+                        PesanIn Dashboard
+                    </p>
+
+                </div>
 
             </div>
 
-            <div>
 
-                <h1 class="font-bold text-white text-base tracking-wide">
-                    Command Center
-                </h1>
+            {{-- HAMBURGER --}}
+            <button type="button" id="sidebarToggle"
+                class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200"
+                title="Toggle Sidebar">
 
-                <p class="text-[10px] text-slate-400 tracking-wider uppercase font-semibold">
-                    PesanIn Dashboard
-                </p>
+                <i id="sidebarToggleIcon" class="fa-solid fa-bars text-lg transition-transform duration-300">
+                </i>
 
-            </div>
+            </button>
 
         </div>
 
         <nav class="px-4 py-6 space-y-2">
 
+            {{-- dashboard --}}
             <a href="{{ route('super_admin.dashboard') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.dashboard')
                     ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
-                <i class="fa-solid fa-chart-pie w-5"></i>
-                <span>Dashboard</span>
+                <i class="fa-solid fa-chart-pie w-5 shrink-0"></i>
+                <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                    Dashboard</span>
             </a>
 
+            {{-- kelola merchant --}}
             <a href="{{ route('super_admin.merchants.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.merchants.*')
                     ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
-                <i class="fa-solid fa-store w-5"></i>
-                <span>Kelola Merchant</span>
+                <i class="fa-solid fa-store w-5 shrink-0"></i>
+                <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                    Kelola Merchant
+                </span>
             </a>
-            {{-- ==========================================
-                KEUANGAN
-                - Rekening Merchant
-                - Penarikan Saldo
-            ========================================== --}}
 
+            {{-- ==========================================
+            KEUANGAN
+            - Rekening Merchant
+            - Penarikan Saldo
+            ========================================== --}}
             @php
                 $isKeuanganActive =
                     request()->routeIs('super_admin.merchant_bank_accounts.*') ||
@@ -69,131 +98,178 @@
             @endphp
 
             <div
-                x-data="{ open: {{ $isKeuanganActive ? 'true' : 'false' }} }"
-                class="space-y-1">
+                x-data="{
+                    open: {{ $isKeuanganActive ? 'true' : 'false' }}
+                }"
+                class="relative sidebar-finance"
+            >
 
-                {{-- PARENT MENU KEUANGAN --}}
                 <button
                     type="button"
                     @click="open = !open"
-                    class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
-                    {{ $isKeuanganActive
-                        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                    class="sidebar-menu w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/60"
+                >
 
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
 
-                        <i class="fa-solid fa-wallet w-5"></i>
+                        <i class="fa-solid fa-wallet w-5 shrink-0"></i>
 
-                        <span>Keuangan</span>
+                        <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                            Keuangan
+                        </span>
 
                     </div>
 
                     <i
-                        class="fa-solid fa-chevron-down text-xs transition-transform duration-200"
-                        :class="{ 'rotate-180': open }">
-                    </i>
+                        class="sidebar-chevron fa-solid fa-chevron-down text-xs shrink-0 transition-transform duration-200"
+                        :class="{ 'rotate-180': open }"
+                    ></i>
 
                 </button>
 
 
-                {{-- SUB MENU KEUANGAN --}}
                 <div
+                    x-cloak
                     x-show="open"
-                    x-transition
-                    class="ml-4 pl-4 border-l border-slate-700 space-y-1">
+                    class="sidebar-submenu"
+                >
 
-                    {{-- REKENING MERCHANT --}}
-                    <a href="{{ route('super_admin.merchant_bank_accounts.index') }}"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200
-                        {{ request()->routeIs('super_admin.merchant_bank_accounts.*')
-                            ? 'bg-amber-500/15 text-amber-400'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                    <div class="sidebar-submenu-inner">
 
-                        <i class="fa-solid fa-building-columns w-4"></i>
+                        {{-- REKENING MERCHANT --}}
+                        <a
+                            href="{{ route('super_admin.merchant_bank_accounts.index') }}"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-bold text-sm transition-all duration-200
+                            {{ request()->routeIs('super_admin.merchant_bank_accounts.*')
+                                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
+                                : 'text-slate-400 hover:bg-slate-800/60 hover:text-white' }}"
+                        >
 
-                        <span>Rekening Merchant</span>
+                            <i class="fa-solid fa-building-columns w-5 shrink-0"></i>
 
-                    </a>
+                            <span class="sidebar-text whitespace-nowrap">
+                                Rekening Merchant
+                            </span>
+
+                        </a>
 
 
-                    {{-- PENARIKAN SALDO --}}
-                    <a href="{{ route('super_admin.withdrawals.index') }}"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200
-                        {{ request()->routeIs('super_admin.withdrawals.*')
-                            ? 'bg-amber-500/15 text-amber-400'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                        {{-- PENARIKAN SALDO --}}
+                        <a
+                            href="{{ route('super_admin.withdrawals.index') }}"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-bold text-sm transition-all duration-200
+                            {{ request()->routeIs('super_admin.withdrawals.*')
+                                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
+                                : 'text-slate-400 hover:bg-slate-800/60 hover:text-white' }}"
+                        >
 
-                        <i class="fa-solid fa-money-bill-transfer w-4"></i>
+                            <i class="fa-solid fa-money-bill-transfer w-5 shrink-0"></i>
 
-                        <span>Penarikan Saldo</span>
+                            <span class="sidebar-text whitespace-nowrap">
+                                Penarikan Saldo
+                            </span>
 
-                    </a>
+                        </a>
+
+                    </div>
 
                 </div>
 
             </div>
 
+            {{-- kelola paket --}}
             <a href="{{ route('super_admin.packages.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
-        {{ request()->routeIs('super_admin.packages.*')
-            ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
-            : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
-                <i class="fa-solid fa-box-open w-5"></i>
-                <span>Kelola Paket</span>
+                class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+            {{ request()->routeIs('super_admin.packages.*')
+                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                <i class="fa-solid fa-box-open w-5 shrink-0"></i>
+                <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                    Kelola Paket
+                </span>
             </a>
 
+            {{-- kelola langganan --}}
             <a href="{{ route('super_admin.subscriptions.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.subscriptions.*')
                     ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
-                <i class="fa-solid fa-credit-card w-5"></i>
-                <span>Kelola Langganan</span>
+                <i class="fa-solid fa-credit-card w-5 shrink-0"></i>
+                <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                    Kelola Langganan
+                </span>
             </a>
 
+            {{-- kelola akun --}}
             <a href="{{ route('super_admin.accounts.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.accounts.*')
                     ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
-                <i class="fa-solid fa-users w-5"></i>
-                <span>Kelola Akun</span>
+                <i class="fa-solid fa-users w-5 shrink-0"></i>
+                <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                    Kelola Akun
+                </span>
             </a>
 
+            {{-- kelola diskon --}}
             <a href="{{ route('super_admin.subscription_promotions.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.subscription_promotions.*')
                     ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
 
-                <i class="fa-solid fa-percent w-5"></i>
+                <i class="fa-solid fa-percent w-5 shrink-0"></i>
 
-                <span>Kelola Diskon</span>
+                <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                    Kelola Diskon
+                </span>
 
             </a>
 
+            {{-- lokasi merchant --}}
             <a href="{{ route('super_admin.merchant_locations.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                 {{ request()->routeIs('super_admin.merchant_locations.*')
                     ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
 
-                <i class="fa-solid fa-map-location-dot w-5"></i>
+                <i class="fa-solid fa-map-location-dot w-5 shrink-0"></i>
 
-                <span>Lokasi Merchant</span>
+                <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                    Lokasi Merchant
+                </span>
 
             </a>
 
+            {{-- pengaturan website --}}
             <a href="{{ route('super_admin.settings.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
-    {{ request()->routeIs('super_admin.settings.*')
-        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
-        : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                {{ request()->routeIs('super_admin.settings.*')
+                    ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
 
-                <i class="fa-solid fa-gear w-5"></i>
+                <i class="fa-solid fa-gear w-5 shrink-0"></i>
 
-                <span>Pengaturan Website</span>
+                <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                    Pengaturan Website
+                </span>
+
+            </a>
+
+            {{-- Audit Log --}}
+            <a href="{{ route('super_admin.audit_logs.index') }}"
+                class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                {{ request()->routeIs('super_admin.audit_logs.*')
+                    ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+
+                <i class="fa-solid fa-clock-rotate-left w-5 shrink-0"></i>
+
+                <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                    Audit Log
+                </span>
 
             </a>
 
@@ -212,7 +288,7 @@
                     <i class="fa-solid fa-user"></i>
                 </div>
 
-                <div class="truncate">
+                <div class="truncate sidebar-user-info">
 
                     <p class="text-xs font-bold text-white truncate">
                         {{ Auth::user()->name }}
@@ -241,3 +317,4 @@
     </div>
 
 </aside>
+<script src="{{ asset('js/super_admin/sidebar.js') }}"></script>
