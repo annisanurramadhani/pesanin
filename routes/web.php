@@ -4,6 +4,9 @@ use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Seo\SitemapController;
+use App\Http\Controllers\Seo\RobotsController;
+
 
 use App\Http\Controllers\Auth\VerifyEmailController;
 
@@ -11,7 +14,7 @@ use App\Http\Controllers\Merchant\StaffController;
 
 use App\Http\Controllers\Payment\PaymentController;
 use App\Http\Controllers\Payment\MidtransNotificationController;
-use App\Http\Controllers\Payment\MidtransOrderNotificationController;
+// use App\Http\Controllers\Payment\MidtransOrderNotificationController;
 use App\Http\Controllers\PayoutCallbackController;
 use App\Http\Controllers\Customer\CustomerOrderController;
 
@@ -48,6 +51,20 @@ use Illuminate\Support\Facades\Route;
 // ==========================================================================
 
 Route::get('/', [PublicSubscriptionHomeController::class, 'index'])->name('home');
+
+
+// ==========================================================================
+// FOR SEO
+// ==========================================================================
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])
+    ->name('sitemap');
+
+    Route::get('/sitemap.xml', [SitemapController::class, 'index'])
+    ->name('sitemap');
+
+Route::get('/robots.txt', [RobotsController::class, 'index'])
+    ->name('robots');
 
 
 // ==========================================================================
