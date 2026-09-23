@@ -97,18 +97,14 @@
                     request()->routeIs('super_admin.withdrawals.*');
             @endphp
 
-            <div
-                x-data="{
-                    open: {{ $isKeuanganActive ? 'true' : 'false' }}
-                }"
-                class="relative sidebar-finance"
-            >
+            <div x-data="{ open: @js($isKeuanganActive) }" class="relative">
 
-                <button
-                    type="button"
-                    @click="open = !open"
-                    class="sidebar-menu w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/60"
-                >
+                {{-- PARENT MENU KEUANGAN --}}
+                <button type="button" @click="open = !open"
+                    class="sidebar-menu w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+                    {{ $isKeuanganActive
+                        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
 
                     <div class="flex items-center gap-3 min-w-0">
 
@@ -120,58 +116,45 @@
 
                     </div>
 
-                    <i
-                        class="sidebar-chevron fa-solid fa-chevron-down text-xs shrink-0 transition-transform duration-200"
-                        :class="{ 'rotate-180': open }"
-                    ></i>
+                    <i class="sidebar-chevron fa-solid fa-chevron-down text-xs shrink-0 transition-transform duration-200"
+                        :class="{ 'rotate-180': open }"></i>
 
                 </button>
 
 
-                <div
-                    x-cloak
-                    x-show="open"
-                    class="sidebar-submenu"
-                >
+                {{-- SUB MENU KEUANGAN --}}
+                <div x-cloak x-show="open" x-transition class="ml-4 pl-4 border-l border-slate-700 space-y-1">
 
-                    <div class="sidebar-submenu-inner">
+                    {{-- REKENING MERCHANT --}}
+                    <a href="{{ route('super_admin.merchant_bank_accounts.index') }}"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200
+                    {{ request()->routeIs('super_admin.merchant_bank_accounts.*')
+                        ? 'bg-amber-500/15 text-amber-400'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
 
-                        {{-- REKENING MERCHANT --}}
-                        <a
-                            href="{{ route('super_admin.merchant_bank_accounts.index') }}"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-bold text-sm transition-all duration-200
-                            {{ request()->routeIs('super_admin.merchant_bank_accounts.*')
-                                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
-                                : 'text-slate-400 hover:bg-slate-800/60 hover:text-white' }}"
-                        >
+                        <i class="fa-solid fa-building-columns w-4 shrink-0"></i>
 
-                            <i class="fa-solid fa-building-columns w-5 shrink-0"></i>
+                        <span class="sidebar-text whitespace-nowrap">
+                            Rekening Merchant
+                        </span>
 
-                            <span class="sidebar-text whitespace-nowrap">
-                                Rekening Merchant
-                            </span>
-
-                        </a>
+                    </a>
 
 
-                        {{-- PENARIKAN SALDO --}}
-                        <a
-                            href="{{ route('super_admin.withdrawals.index') }}"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-bold text-sm transition-all duration-200
-                            {{ request()->routeIs('super_admin.withdrawals.*')
-                                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
-                                : 'text-slate-400 hover:bg-slate-800/60 hover:text-white' }}"
-                        >
+                    {{-- PENARIKAN SALDO --}}
+                    <a href="{{ route('super_admin.withdrawals.index') }}"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200
+                        {{ request()->routeIs('super_admin.withdrawals.*')
+                            ? 'bg-amber-500/15 text-amber-400'
+                            : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
 
-                            <i class="fa-solid fa-money-bill-transfer w-5 shrink-0"></i>
+                        <i class="fa-solid fa-money-bill-transfer w-4 shrink-0"></i>
 
-                            <span class="sidebar-text whitespace-nowrap">
-                                Penarikan Saldo
-                            </span>
+                        <span class="sidebar-text whitespace-nowrap">
+                            Penarikan Saldo
+                        </span>
 
-                        </a>
-
-                    </div>
+                    </a>
 
                 </div>
 
