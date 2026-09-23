@@ -4,8 +4,12 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Merchant;
+use App\Models\User;
+use App\Models\Order;
+use App\Models\Withdrawal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Auth;
 use App\Rules\SecureText;
 use Illuminate\Support\Str;
 
@@ -86,7 +90,7 @@ class MerchantController extends Controller
 
     public function edit(string $encryptedId)
     {
-        abort_unless(auth()->user()->role === 'super_admin', 403);
+        abort_unless(Auth::user()->role === 'super_admin', 403);
 
         try {
             $merchantId = Crypt::decryptString($encryptedId);
@@ -101,7 +105,7 @@ class MerchantController extends Controller
 
     public function update(Request $request, string $encryptedId)
     {
-        abort_unless(auth()->user()->role === 'super_admin', 403);
+        abort_unless(Auth::user()->role === 'super_admin', 403);
 
         try {
             $merchantId = Crypt::decryptString($encryptedId);
@@ -167,7 +171,7 @@ class MerchantController extends Controller
 
     public function destroy(string $encryptedId)
     {
-        abort_unless(auth()->user()->role === 'super_admin', 403);
+        abort_unless(Auth::user()->role === 'super_admin', 403);
 
         try {
             $merchantId = Crypt::decryptString($encryptedId);
@@ -182,5 +186,42 @@ class MerchantController extends Controller
         return redirect()
             ->route('super_admin.merchants.index')
             ->with('success', 'Merchant berhasil dihapus.');
+    }
+
+    /**
+     * Endpoint untuk mengambil statistik dashboard Super Admin secara real-time.
+     */
+    public function dashboard()
+    {
+        $totalMerchant = Merchant::count();
+        $activeMerchant = Merchant::where('status', 'active')->count();
+        $inactiveMerchant = Merchant::where('status', 'inactive')->count();
+        $totalUsers = User::count();
+        $totalOrder = Order::count();
+        $totalPendapatan = Order::sum('total_amount');
+        $totalSaldo = Merchant::sum('balance');
+        $pendingWithdrawal = Withdrawal::where('status', 'pending')->count();
+
+        $recentWithdrawals = Withdrawal::with('merchant')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $recentMerchants = Merchant::latest()
+            ->take(5)
+            ->get();
+
+        return view('super_admin.dashboard', compact(
+            'totalMerchant',
+            'activeMerchant',
+            'inactiveMerchant',
+            'totalUsers',
+            'totalOrder',
+            'totalPendapatan',
+            'totalSaldo',
+            'pendingWithdrawal',
+            'recentWithdrawals',
+            'recentMerchants'
+        ));
     }
 }
