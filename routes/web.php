@@ -12,6 +12,7 @@ use App\Http\Controllers\Merchant\StaffController;
 use App\Http\Controllers\Payment\PaymentController;
 use App\Http\Controllers\Payment\MidtransNotificationController;
 use App\Http\Controllers\Payment\MidtransOrderNotificationController;
+use App\Http\Controllers\PayoutCallbackController;
 use App\Http\Controllers\Customer\CustomerOrderController;
 
 use App\Http\Controllers\Auth\EmailVerificationController;
@@ -223,6 +224,9 @@ Route::post(
     '/payment/midtrans/order/notification',
     [MidtransNotificationController::class, 'handle']
 )->name('payment.midtrans.order.notification');
+
+Route::post('/payouts/provider/callback', [PayoutCallbackController::class, 'handle'])
+    ->name('payouts.provider.callback');
 
 
 // ==========================================================================
