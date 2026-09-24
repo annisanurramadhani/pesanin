@@ -32,6 +32,8 @@ use App\Models\Package;
 use App\Models\PackageDuration;
 use App\Observers\PackageObserver;
 use App\Observers\PackageDurationObserver;
+use App\Models\SubscriptionPromotion;
+use App\Observers\SubscriptionPromotionObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -104,6 +106,10 @@ class AppServiceProvider extends ServiceProvider
 
         PackageDuration::observe(
             PackageDurationObserver::class
+        );
+
+        SubscriptionPromotion::observe(
+            SubscriptionPromotionObserver::class
         );
     }
 }
