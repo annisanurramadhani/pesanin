@@ -189,7 +189,7 @@ class MerchantController extends Controller
     }
 
     /**
-     * Endpoint untuk mengambil statistik dashboard Super Admin secara real-time.
+     * Menampilkan halaman Dashboard Super Admin.
      */
     public function dashboard()
     {
@@ -198,8 +198,6 @@ class MerchantController extends Controller
         $inactiveMerchant = Merchant::where('status', 'inactive')->count();
         $totalUsers = User::count();
         $totalOrder = Order::count();
-        $totalPendapatan = Order::sum('total_amount');
-        $totalSaldo = Merchant::sum('balance');
         $pendingWithdrawal = Withdrawal::where('status', 'pending')->count();
 
         $recentWithdrawals = Withdrawal::with('merchant')
@@ -217,11 +215,24 @@ class MerchantController extends Controller
             'inactiveMerchant',
             'totalUsers',
             'totalOrder',
-            'totalPendapatan',
-            'totalSaldo',
             'pendingWithdrawal',
             'recentWithdrawals',
             'recentMerchants'
         ));
+    }
+
+    /**
+     * Endpoint untuk mengirim data statistik terbaru secara JSON (Real-time update).
+     */
+    public function dashboardStats()
+    {
+        return response()->json([
+            'total_merchant' => Merchant::count(),
+            'merchant_active_count' => Merchant::where('status', 'active')->count(),
+            'merchant_inactive_count' => Merchant::where('status', 'inactive')->count(),
+            'total_users' => User::count(),
+            'total_transaksi' => Order::count(),
+            'penarikan_pending' => Withdrawal::where('status', 'pending')->count(),
+        ]);
     }
 }

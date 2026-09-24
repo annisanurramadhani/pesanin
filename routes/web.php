@@ -60,7 +60,7 @@ Route::get('/', [PublicSubscriptionHomeController::class, 'index'])->name('home'
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])
     ->name('sitemap');
 
-    Route::get('/sitemap.xml', [SitemapController::class, 'index'])
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])
     ->name('sitemap');
 
 Route::get('/robots.txt', [RobotsController::class, 'index'])
@@ -296,13 +296,10 @@ Route::middleware([
         // Dashboard
         // ==================================================================
 
-        Route::get(
-            '/dashboard',
-            function () {
-                return view('super_admin.dashboard');
-            }
-        )->name('dashboard');
+        // Rute Dashboard menggunakan Controller (Sudah benar)
+        Route::get('/dashboard', [SuperAdminMerchantController::class, 'dashboard'])->name('dashboard');
 
+        // Rute Statistik Real-time (Sudah benar)
         Route::get('/dashboard/stats', [SuperAdminMerchantController::class, 'dashboardStats'])->name('dashboard.stats');
 
         // ==================================================================
