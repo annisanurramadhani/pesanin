@@ -14,7 +14,7 @@
 @section('content')
     <div class="space-y-6">
 
-        <!-- ================= 1. KARTU STATISTIK ATAS (6 GRID) ================= -->
+        <!-- ================= 1. KARTU STATISTIK ATAS (4 GRID) ================= -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
             <!-- Card 1 -->
@@ -56,42 +56,13 @@
                 <p class="text-[10px] text-emerald-600 font-semibold mt-2">Keseluruhan pesanan</p>
             </div>
 
-            {{-- ========================================================== --}}
-            {{-- KARTU PENDAPATAN PLATFORM & SALDO MERCHANT DIKOMENTARI SEMENTARA --}}
-            {{-- Karena akan diambil langsung dari integrasi Midtrans --}}
-            {{-- ========================================================== --}}
-            {{-- 
-            <!-- Card 4 (Pendapatan Platform) -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pendapatan Platform</span>
-                <div class="flex items-baseline justify-between mt-2">
-                    <h3 class="text-base font-black text-slate-900 truncate">Rp 0</h3>
-                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold shrink-0">
-                        <i class="fa-solid fa-wallet"></i>
-                    </div>
-                </div>
-                <p class="text-[10px] text-emerald-600 font-semibold mt-2">Akumulasi total</p>
-            </div>
-
-            <!-- Card 5 (Total Saldo Merchant) -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Saldo Merchant</span>
-                <div class="flex items-baseline justify-between mt-2">
-                    <h3 class="text-base font-black text-slate-900 truncate">Rp 0</h3>
-                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold shrink-0">
-                        <i class="fa-solid fa-vault"></i>
-                    </div>
-                </div>
-                <p class="text-[10px] text-emerald-600 font-semibold mt-2">Saldo keseluruhan</p>
-            </div>
-            --}}
-
-            <!-- Card 6 -->
+            <!-- Card 4 (Penarikan Pending - Realtime ID Ditambahkan) -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Penarikan Pending</span>
                 <div class="flex items-baseline justify-between mt-2">
-                    <h3 class="text-2xl font-black text-orange-500">
-                        {{ \App\Models\Withdrawal::where('status', 'pending')->count() }}</h3>
+                    <h3 id="stat-penarikan-pending" class="text-2xl font-black text-orange-500">
+                        {{ \App\Models\Withdrawal::where('status', 'pending')->count() }}
+                    </h3>
                     <div
                         class="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center font-bold">
                         <i class="fa-solid fa-clock"></i>
@@ -297,7 +268,7 @@
             }
         };
 
-        // Data Grafik Pendapatan Platform (Diperbaiki agar 30 Hari tidak menampilkan dari Januari, melainkan tanggal-tanggal aktif)
+        // Data Grafik Pendapatan Platform
         const revenueDataSets = {
             '7days': {
                 labels: ['18 Sep', '19 Sep', '20 Sep', '21 Sep', '22 Sep', '23 Sep', 'Hari Ini'],
@@ -305,8 +276,7 @@
             },
             '30days': {
                 labels: ['1 Sep', '5 Sep', '10 Sep', '15 Sep', '20 Sep', '25 Sep', '30 Sep'],
-                data: [0.5, 0.8, 1.2, 1.0, 1.5, 1.8,
-                    2.2] // Mengikuti pola tanggal seperti transaksi, bukan bulan Januari-September
+                data: [0.5, 0.8, 1.2, 1.0, 1.5, 1.8, 2.2]
             },
             '3months': {
                 labels: dynamicMonths,
@@ -332,23 +302,10 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#f1f5f9'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
@@ -368,23 +325,10 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#f1f5f9'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
@@ -409,5 +353,23 @@
                 revenueChart.update();
             }
         }
+
+        // ==========================================================
+        // FITUR REAL-TIME: Update Data di Background Tanpa Refresh
+        // ==========================================================
+        function fetchRealtimeStats() {
+            fetch('/super_admin/dashboard/stats')
+                .then(response => response.json())
+                .then(data => {
+                    const pendingEl = document.getElementById('stat-penarikan-pending');
+                    if (pendingEl && data.penarikan_pending !== undefined) {
+                        pendingEl.innerText = data.penarikan_pending;
+                    }
+                })
+                .catch(error => console.error('Gagal mengambil data real-time:', error));
+        }
+
+        // Jalankan pengecekan otomatis setiap 5 detik di latar belakang
+        setInterval(fetchRealtimeStats, 5000);
     </script>
 @endpush
