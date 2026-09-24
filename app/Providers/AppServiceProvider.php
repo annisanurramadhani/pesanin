@@ -28,6 +28,10 @@ use App\Models\MerchantBankAccount;
 use App\Observers\MerchantBankAccountObserver;
 use App\Models\QrCode;
 use App\Observers\QrCodeObserver;
+use App\Models\Package;
+use App\Models\PackageDuration;
+use App\Observers\PackageObserver;
+use App\Observers\PackageDurationObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -90,6 +94,16 @@ class AppServiceProvider extends ServiceProvider
 
         QrCode::observe(
             QrCodeObserver::class
+        );
+
+
+        Package::observe(
+            PackageObserver::class
+        );
+
+
+        PackageDuration::observe(
+            PackageDurationObserver::class
         );
     }
 }
