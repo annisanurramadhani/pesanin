@@ -20,7 +20,7 @@ class FinanceController extends Controller
 
     public function index(Request $request)
     {
-        
+
 
         $merchantId =
             $request->user()
@@ -53,21 +53,6 @@ class FinanceController extends Controller
 
             );
 
-
-            
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | REKENING PENARIKAN
-        |--------------------------------------------------------------------------
-        |
-        | Rekening hanya satu
-        | Merchant tidak bisa edit
-        |
-        */
-
-
         $bankAccount =
             MerchantBankAccount::where(
                 'merchant_id',
@@ -78,12 +63,6 @@ class FinanceController extends Controller
                 'active'
             )
             ->first();
-
-
-
-
-
-
 
         /*
         |--------------------------------------------------------------------------
@@ -103,13 +82,6 @@ class FinanceController extends Controller
             )
             ->sum('amount');
 
-
-
-
-
-
-
-
         /*
         |--------------------------------------------------------------------------
         | TOTAL PENARIKAN
@@ -128,13 +100,6 @@ class FinanceController extends Controller
             )
             ->sum('amount');
 
-
-
-
-
-
-
-
         /*
         |--------------------------------------------------------------------------
         | SALDO TERSEDIA
@@ -144,13 +109,6 @@ class FinanceController extends Controller
 
         $balance =
             $wallet->balance;
-
-
-
-
-
-
-
 
         /*
         |--------------------------------------------------------------------------
@@ -164,10 +122,6 @@ class FinanceController extends Controller
                 'merchant_id',
                 $merchantId
             );
-
-
-
-
 
         if($request->filled('date'))
         {
@@ -280,12 +234,124 @@ class FinanceController extends Controller
     }
 
 
+    public function withdrawalsRealtime(Request $request)
+    {
+        $merchantId =
+            $request->user()
+            ->merchant_id;
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | WITHDRAWAL
+        |--------------------------------------------------------------------------
+        */
+
+        $withdrawals =
+            Withdrawal::where(
+                'merchant_id',
+                $merchantId
+            )
+            ->latest()
+            ->take(10)
+            ->get([
+                'id',
+                'merchant_id',
+                'amount',
+                'status',
+                'note',
+                'payout_status',
+                'created_at',
+                'updated_at',
+            ]);
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | WALLET
+        |--------------------------------------------------------------------------
+        */
+
+        $wallet =
+            MerchantWallet::firstOrCreate(
+
+                [
+                    'merchant_id'
+                    =>
+                    $merchantId
+                ],
+
+                [
+                    'balance'
+                    =>
+                    0
+                ]
+
+            );
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL PEMASUKAN
+        |--------------------------------------------------------------------------
+        */
+
+        $totalIncome =
+            WalletTransaction::where(
+                'merchant_id',
+                $merchantId
+            )
+            ->where(
+                'type',
+                'credit'
+            )
+            ->sum('amount');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL PENARIKAN
+        |--------------------------------------------------------------------------
+        */
+
+        $totalWithdraw =
+            WalletTransaction::where(
+                'merchant_id',
+                $merchantId
+            )
+            ->where(
+                'type',
+                'debit'
+            )
+            ->sum('amount');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE
+        |--------------------------------------------------------------------------
+        */
+
+        return response()->json([
+
+            'data' =>
+                $withdrawals,
+
+            'summary' => [
+
+                'total_income' =>
+                    $totalIncome,
+
+                'balance' =>
+                    $wallet->balance,
+
+                'total_withdraw' =>
+                    $totalWithdraw,
+
+            ],
+
+        ]);
+    }
 
     /*
     |--------------------------------------------------------------------------
