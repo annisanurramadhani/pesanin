@@ -123,40 +123,34 @@ class FinanceController extends Controller
                 $merchantId
             );
 
-        if($request->filled('date'))
-        {
+        if ($request->filled('date')) {
 
             $query->whereDate(
                 'created_at',
                 $request->date
             );
-
         }
 
 
 
 
-        if($request->filled('month'))
-        {
+        if ($request->filled('month')) {
 
             $query->whereMonth(
                 'created_at',
                 $request->month
             );
-
         }
 
 
 
 
-        if($request->filled('year'))
-        {
+        if ($request->filled('year')) {
 
             $query->whereYear(
                 'created_at',
                 $request->year
             );
-
         }
 
 
@@ -191,12 +185,66 @@ class FinanceController extends Controller
 
         $transactions =
             $query
-            ->paginate(10)
+            ->paginate(
+                5,
+                ['*'],
+                'transaction_page'
+            )
             ->withQueryString();
 
-        $withdrawals = Withdrawal::where('merchant_id', $merchantId)
-            ->latest()
-            ->get();
+        $withdrawalQuery =
+            Withdrawal::where(
+                'merchant_id',
+                $merchantId
+            );
+
+
+
+        if ($request->filled('date')) {
+
+            $withdrawalQuery->whereDate(
+                'created_at',
+                $request->date
+            );
+        }
+
+
+
+        if ($request->filled('month')) {
+
+            $withdrawalQuery->whereMonth(
+                'created_at',
+                $request->month
+            );
+        }
+
+
+
+        if ($request->filled('year')) {
+
+            $withdrawalQuery->whereYear(
+                'created_at',
+                $request->year
+            );
+        }
+
+
+
+        $withdrawalQuery->orderBy(
+            'created_at',
+            $sort
+        );
+
+
+
+        $withdrawals =
+            $withdrawalQuery
+            ->paginate(
+                5,
+                ['*'],
+                'withdraw_page'
+            )
+            ->withQueryString();
 
 
 
@@ -230,7 +278,6 @@ class FinanceController extends Controller
             )
 
         );
-
     }
 
 
@@ -335,18 +382,18 @@ class FinanceController extends Controller
         return response()->json([
 
             'data' =>
-                $withdrawals,
+            $withdrawals,
 
             'summary' => [
 
                 'total_income' =>
-                    $totalIncome,
+                $totalIncome,
 
                 'balance' =>
-                    $wallet->balance,
+                $wallet->balance,
 
                 'total_withdraw' =>
-                    $totalWithdraw,
+                $totalWithdraw,
 
             ],
 
@@ -432,7 +479,5 @@ class FinanceController extends Controller
             'laporan-keuangan.pdf'
 
         );
-
-
     }
 }

@@ -645,10 +645,10 @@ document.addEventListener(
                     </td>
 
 
-                    <td class="p-4 text-slate-500">
-                        ${escapeHtml(
-                            note
-                        )}
+                    <td class="p-4 text-slate-500 max-w-xs">
+                        <div class="max-w-xs whitespace-normal break-words leading-relaxed">
+                            ${escapeHtml(note)}
+                        </div>
                     </td>
 
                 </tr>
@@ -738,6 +738,69 @@ document.addEventListener(
 
             withdrawalHistoryBody.innerHTML =
                 html;
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE STATUS REALTIME
+        |--------------------------------------------------------------------------
+        */
+
+        function updateWithdrawalStatus(withdrawals)
+        {
+
+            withdrawals.forEach(
+                function(withdrawal){
+
+                    const row =
+                        document.querySelector(
+                            `[data-withdrawal-id="${withdrawal.id}"]`
+                        );
+
+
+                    if(!row){
+                        return;
+                    }
+
+
+                    const statusCell =
+                        row.children[2];
+
+
+                    const noteCell =
+                        row.children[3];
+
+
+                    if(statusCell){
+
+                        statusCell.innerHTML =
+                            getStatusBadge(
+                                withdrawal.status
+                            );
+
+                    }
+
+
+                    if(noteCell){
+
+                        noteCell.innerHTML =
+                            escapeHtml(
+                                withdrawal.note ||
+                                withdrawal.payout_status ||
+                                getStatusText(
+                                    withdrawal.status
+                                )
+                            );
+
+                    }
+
+
+                    row.dataset.status =
+                        withdrawal.status;
+
+                }
+            );
 
         }
 
@@ -853,7 +916,7 @@ document.addEventListener(
                 );
 
 
-                renderWithdrawals(
+                updateWithdrawalStatus(
                     result.data || []
                 );
 

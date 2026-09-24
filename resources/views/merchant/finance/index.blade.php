@@ -111,6 +111,10 @@
 
             <form method="GET" class="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center">
 
+                {{-- tambahan --}}
+                <input type="hidden" name="withdraw_page" value="1">
+                <input type="hidden" name="transaction_page" value="1">
+
                 <input type="date" name="date" value="{{ request('date') }}"
                     class="h-10 w-full rounded-xl border px-4 md:w-auto">
 
@@ -347,7 +351,7 @@
                                 Status
                             </th>
 
-                            <th class="p-4 text-left">
+                            <th class="p-4 text-left w-80">
                                 Keterangan
                             </th>
 
@@ -427,15 +431,19 @@
                                 </td>
 
 
-                                <td class="p-4 text-slate-500">
+                                <td class="p-4 text-slate-500 max-w-xs">
 
-                                    @if ($withdrawal->note)
-                                        {{ $withdrawal->note }}
-                                    @elseif($withdrawal->payout_status)
-                                        {{ $withdrawal->payout_status }}
-                                    @else
-                                        Pengajuan penarikan sedang diproses.
-                                    @endif
+                                    <div class="max-w-xs whitespace-normal break-words leading-relaxed">
+
+                                        @if ($withdrawal->note)
+                                            {{ $withdrawal->note }}
+                                        @elseif($withdrawal->payout_status)
+                                            {{ $withdrawal->payout_status }}
+                                        @else
+                                            Pengajuan penarikan sedang diproses.
+                                        @endif
+
+                                    </div>
 
                                 </td>
 
@@ -465,6 +473,13 @@
                     </tbody>
 
                 </table>
+
+                {{-- PAGINATION WITHDRAWAL --}}
+                <div class="border-t border-slate-100 px-5 py-4">
+
+                    {{ $withdrawals->appends(request()->except('withdraw_page'))->links() }}
+
+                </div>
 
             </div>
 
@@ -548,6 +563,13 @@
                 </tbody>
 
             </table>
+
+            {{-- PAGINATION TRANSAKSI --}}
+            <div class="border-t border-slate-100 px-5 py-4">
+
+                {{ $transactions->appends(request()->except('transaction_page'))->links() }}
+
+            </div>
 
         </div>
 
