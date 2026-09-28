@@ -137,7 +137,6 @@ class PaymentController extends Controller
         Subscription $subscription
     ): array {
         return [
-
             [
                 'id' =>
                     'SUB-' .
@@ -157,21 +156,39 @@ class PaymentController extends Controller
                     $subscription->packageDuration
                         ->name,
             ],
-
         ];
     }
 
 
-    /**
-     * ---------------------------------------------------------------
-     * DEFAULT PAYMENT
-     * ---------------------------------------------------------------
-     *
-     * Pembayaran utama menggunakan Midtrans Snap.
-     *
-     * User dapat memilih metode pembayaran
-     * yang tersedia di Midtrans Snap.
-     */
+    public function method(string $encryptedSubscription)
+    {
+        $data = $this->getSubscription($encryptedSubscription);
+
+        if (isset($data['error'])) {
+            return $data['error'];
+        }
+
+        $subscription = $data['subscription'];
+
+        if ($subscription->status === 'active') {
+            return redirect()
+                ->route('dashboard')
+                ->with('info', 'Subscription Anda sudah aktif.');
+        }
+
+        if ($subscription->status !== 'pending') {
+            return redirect()
+                ->route('public.subscription.index')
+                ->with('error', 'Subscription ini tidak dapat dibayar.');
+        }
+
+        return view(
+            'public_subscription.payment_method',
+            compact('subscription')
+        );
+    }
+
+
     public function show(
         string $encryptedSubscription
     ) {
@@ -183,18 +200,9 @@ class PaymentController extends Controller
             return $data['error'];
         }
 
-        $user = $data['user'];
         $subscription = $data['subscription'];
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Pastikan Subscription Bisa Dibayar
-        |--------------------------------------------------------------------------
-        */
-
         if ($subscription->status === 'active') {
-
             return redirect()
                 ->route('dashboard')
                 ->with(
@@ -203,9 +211,7 @@ class PaymentController extends Controller
                 );
         }
 
-
         if ($subscription->status !== 'pending') {
-
             return redirect()
                 ->route('public.subscription.index')
                 ->with(
@@ -214,148 +220,13 @@ class PaymentController extends Controller
                 );
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Konfigurasi Midtrans
-        |--------------------------------------------------------------------------
-        */
-
-        $this->configureMidtrans();
-
-
-        if (empty(Config::$serverKey)) {
-
-            Log::error(
-                'Midtrans Server Key belum dikonfigurasi.'
-            );
-
-            return back()->with(
-                'error',
-                'Konfigurasi Midtrans belum lengkap.'
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Generate Order ID
-        |--------------------------------------------------------------------------
-        */
-
-        $orderId =
-            $this->generateOrderId(
-                $subscription
-            );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Parameter Snap
-        |--------------------------------------------------------------------------
-        */
-
-        $params = [
-
-            'transaction_details' => [
-
-                'order_id' =>
-                    $orderId,
-
-                'gross_amount' =>
-                    (int) $subscription->price,
-
-            ],
-
-            'item_details' =>
-                $this->getItemDetails(
-                    $subscription
-                ),
-
-            'customer_details' => [
-
-                'first_name' =>
-                    $user->name,
-
-                'email' =>
-                    $user->email,
-
-            ],
-
-        ];
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Generate Snap Token
-        |--------------------------------------------------------------------------
-        */
-
-        try {
-
-            $snapToken =
-                Snap::getSnapToken(
-                    $params
-                );
-
-        } catch (Throwable $e) {
-
-            Log::error(
-                'Midtrans Snap Token Error',
-                [
-
-                    'subscription_id' =>
-                        $subscription->id,
-
-                    'order_id' =>
-                        $orderId,
-
-                    'message' =>
-                        $e->getMessage(),
-
-                    'file' =>
-                        $e->getFile(),
-
-                    'line' =>
-                        $e->getLine(),
-
-                ]
-            );
-
-            return back()->with(
-                'error',
-                'Gagal membuat pembayaran Midtrans.'
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Tampilkan Payment Snap
-        |--------------------------------------------------------------------------
-        */
-
         return view(
             'payment.show',
-            compact(
-                'subscription',
-                'snapToken',
-                'orderId'
-            )
+            compact('subscription')
         );
     }
 
 
-    /**
-     * ---------------------------------------------------------------
-     * QRIS PAYMENT
-     * ---------------------------------------------------------------
-     *
-     * QRIS dibuat melalui Midtrans Core API.
-     *
-     * Fungsi ini hanya dipanggil ketika user
-     * memilih pembayaran QRIS custom.
-     */
     public function qris(
         string $encryptedSubscription
     ) {
@@ -613,17 +484,6 @@ class PaymentController extends Controller
     }
 
 
-    /**
-     * ---------------------------------------------------------------
-     * QRIS PAYMENT STATUS
-     * ---------------------------------------------------------------
-     *
-     * Endpoint ini dipanggil otomatis oleh JavaScript
-     * pada halaman payment.qris.
-     *
-     * Parameter yang diterima adalah encryptedSubscription,
-     * BUKAN orderId.
-     */
     public function qrisStatus(
         string $encryptedSubscription
     ) {
@@ -1154,6 +1014,291 @@ class PaymentController extends Controller
     }
 
 
+    public function bankStatus(
+        string $encryptedSubscription
+    ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil Subscription
+        |--------------------------------------------------------------------------
+        */
+
+        $data = $this->getSubscription(
+            $encryptedSubscription
+        );
+
+
+        if (isset($data['error'])) {
+
+            return response()->json([
+
+                'success' => false,
+                'paid' => false,
+                'message' => 'Subscription tidak valid.'
+
+            ], 404);
+
+        }
+
+
+        $subscription = $data['subscription'];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jika sudah aktif
+        |--------------------------------------------------------------------------
+        */
+
+        if ($subscription->status === 'active') {
+
+            return response()->json([
+
+                'success' => true,
+
+                'paid' => true,
+
+                'status' => 'settlement',
+
+                'redirect' => route('dashboard')
+
+            ]);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pastikan Invoice Ada
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$subscription->invoice_number) {
+
+            return response()->json([
+
+                'success' => true,
+
+                'paid' => false,
+
+                'status' => 'pending',
+
+                'message' => 'Invoice belum tersedia.'
+
+            ]);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Cek Midtrans
+        |--------------------------------------------------------------------------
+        */
+
+        $this->configureMidtrans();
+
+
+        try {
+
+
+            $status = Transaction::status(
+                $subscription->invoice_number
+            );
+
+
+            $transactionStatus =
+                $status->transaction_status
+                ?? 'unknown';
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Pembayaran berhasil
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $transactionStatus === 'settlement'
+            ) {
+
+
+                if ($subscription->status !== 'active') {
+
+
+                    $startDate = today();
+
+
+                    $durationDays =
+                        (int)
+                        $subscription
+                            ->packageDuration
+                            ->duration_days;
+
+
+                    $endDate =
+                        $startDate->copy()
+                            ->addDays(
+                                max(
+                                    0,
+                                    $durationDays - 1
+                                )
+                            );
+
+
+                    $subscription->update([
+
+                        'start_date' => $startDate,
+
+                        'end_date' => $endDate,
+
+                        'paid_at' => now(),
+
+                        'status' => 'active',
+
+                        'payment_status' => 'paid',
+
+                    ]);
+
+                }
+
+
+                return response()->json([
+
+                    'success' => true,
+
+                    'paid' => true,
+
+                    'status' => 'settlement',
+
+                    'message' =>
+                        'Pembayaran berhasil.',
+
+                    'redirect' =>
+                        route('dashboard'),
+
+                ]);
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Pending
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $transactionStatus === 'pending'
+            ) {
+
+                return response()->json([
+
+                    'success' => true,
+
+                    'paid' => false,
+
+                    'status' => 'pending',
+
+                    'message' =>
+                        'Menunggu pembayaran.'
+
+                ]);
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Expired
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $transactionStatus === 'expire'
+            ) {
+
+
+                $subscription->update([
+
+                    'payment_status' =>
+                        'expired'
+
+                ]);
+
+
+                return response()->json([
+
+                    'success' => true,
+
+                    'paid' => false,
+
+                    'status' => 'expire',
+
+                    'message' =>
+                        'Pembayaran expired.'
+
+                ]);
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Status lainnya
+            |--------------------------------------------------------------------------
+            */
+
+            return response()->json([
+
+                'success' => true,
+
+                'paid' => false,
+
+                'status' =>
+                    $transactionStatus,
+
+            ]);
+
+
+        } catch (Throwable $e) {
+
+
+            Log::error(
+                'Bank Status Check Error',
+                [
+
+                    'subscription_id'
+                        => $subscription->id,
+
+                    'order_id'
+                        => $subscription->invoice_number,
+
+                    'message'
+                        => $e->getMessage(),
+
+                ]
+            );
+
+
+            return response()->json([
+
+                'success' => false,
+
+                'paid' => false,
+
+                'message' =>
+                    'Gagal mengecek pembayaran.'
+
+            ], 500);
+
+
+        }
+
+    }
+
+
     /**
      * Redirect ke halaman pembayaran default.
      */
@@ -1164,6 +1309,230 @@ class PaymentController extends Controller
         return redirect()->route(
             'public.subscription.payment',
             $encryptedSubscription
+        );
+    }
+
+
+    /**
+     * Halaman pilihan bank transfer.
+     */
+    public function bank(
+        string $encryptedSubscription
+    ) {
+        $data = $this->getSubscription($encryptedSubscription);
+
+        if (isset($data['error'])) {
+            return $data['error'];
+        }
+
+        $subscription = $data['subscription'];
+
+        if ($subscription->status === 'active') {
+            return redirect()
+                ->route('dashboard')
+                ->with(
+                    'info',
+                    'Subscription Anda sudah aktif.'
+                );
+        }
+
+        if ($subscription->status !== 'pending') {
+            return redirect()
+                ->route('public.subscription.index')
+                ->with(
+                    'error',
+                    'Subscription ini tidak dapat dibayar.'
+                );
+        }
+
+        return view(
+            'public_subscription.payment_method',
+            compact('subscription')
+        );
+    }
+
+
+    /**
+     * Membuat pembayaran Transfer Bank.
+     */
+    public function createBankPayment(
+        Request $request,
+        string $encryptedSubscription
+    ) {
+        $data = $this->getSubscription($encryptedSubscription);
+
+        if (isset($data['error'])) {
+            return $data['error'];
+        }
+
+        $user = $data['user'];
+        $subscription = $data['subscription'];
+
+        if ($subscription->status === 'active') {
+            return redirect()
+                ->route('dashboard')
+                ->with(
+                    'info',
+                    'Subscription Anda sudah aktif.'
+                );
+        }
+
+        if ($subscription->status !== 'pending') {
+            return redirect()
+                ->route('public.subscription.index')
+                ->with(
+                    'error',
+                    'Subscription ini tidak dapat dibayar.'
+                );
+        }
+
+        $request->validate([
+            'bank' => [
+                'required',
+                'in:bca,bni,bri,mandiri,permata,cimb',
+            ],
+        ]);
+
+        $this->configureMidtrans();
+
+        $orderId = $this->generateOrderId($subscription);
+
+        $params = [
+            'payment_type' => 'bank_transfer',
+
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => (int) $subscription->price,
+            ],
+
+            'bank_transfer' => [
+                'bank' => $request->bank,
+            ],
+
+            'item_details' => $this->getItemDetails(
+                $subscription
+            ),
+
+            'customer_details' => [
+                'first_name' => $user->name,
+                'email' => $user->email,
+            ],
+        ];
+
+        try {
+            $response = CoreApi::charge($params);
+
+        } catch (Throwable $e) {
+
+            Log::error(
+                'Midtrans Bank Transfer Error',
+                [
+                    'subscription_id' => $subscription->id,
+                    'bank' => $request->bank,
+                    'message' => $e->getMessage(),
+                ]
+            );
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Gagal membuat pembayaran.'
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil Virtual Account
+        |--------------------------------------------------------------------------
+        */
+
+        $vaNumber = null;
+        $bank = null;
+
+        if (isset($response->va_numbers[0])) {
+
+            $vaNumber =
+                $response->va_numbers[0]->va_number
+                ?? null;
+
+            $bank =
+                $response->va_numbers[0]->bank
+                ?? null;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Fallback Permata
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !$vaNumber &&
+            isset($response->permata_va_number)
+        ) {
+
+            $vaNumber =
+                $response->permata_va_number;
+
+            $bank = 'permata';
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Fallback Mandiri
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !$vaNumber &&
+            isset($response->bill_key) &&
+            isset($response->biller_code)
+        ) {
+
+            $vaNumber =
+                $response->biller_code .
+                $response->bill_key;
+
+            $bank = 'mandiri';
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Fallback Bank
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$bank) {
+
+            $bank =
+                $request->bank;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Simpan Data Pembayaran
+        |--------------------------------------------------------------------------
+        */
+
+        $subscription->update([
+            'invoice_number' => $orderId,
+            'payment_type' => 'bank_transfer',
+            'payment_bank' => $bank,
+            'va_number' => $vaNumber,
+            'expired_at' => $response->expiry_time ?? null,
+            'payment_status' => 'pending',
+        ]);
+
+
+        return view(
+            'public_subscription.bank',
+            compact('subscription')
         );
     }
 }

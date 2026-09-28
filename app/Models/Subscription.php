@@ -11,10 +11,19 @@ class Subscription extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+
         'merchant_id',
         'package_duration_id',
         'promotion_id',
         'invoice_number',
+
+        // payment
+        'payment_type',
+        'payment_bank',
+        'va_number',
+        'expired_at',
+        'payment_status',
+
         'start_date',
         'end_date',
         'price',
@@ -23,9 +32,13 @@ class Subscription extends Model
     ];
 
     protected $casts = [
+
         'start_date' => 'date',
         'end_date' => 'date',
         'paid_at' => 'datetime',
+
+        'expired_at' => 'datetime',
+
         'price' => 'decimal:2',
     ];
 

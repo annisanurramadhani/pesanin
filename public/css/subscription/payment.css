@@ -1,0 +1,111 @@
+/* ==========================================
+   SWEET ALERT TOAST CUSTOM
+========================================== */
+
+
+.swal2-container.swal2-top-end {
+
+    padding-top: 18px !important;
+    padding-right: 20px !important;
+
+}
+
+
+
+.swal2-popup.swal2-toast {
+
+    width: auto !important;
+    min-width: 350px !important;
+    height: 55px !important;
+
+    border-radius: 18px !important;
+
+    padding: 0 22px !important;
+
+    background: #10B981 !important;
+
+    box-shadow:
+        0 10px 25px rgba(16,185,129,0.25) !important;
+
+    display: flex !important;
+    align-items: center !important;
+
+}
+
+
+
+
+
+/* Icon */
+
+.swal2-toast .swal2-icon {
+
+    width: 22px !important;
+    height: 22px !important;
+
+    margin: 0 12px 0 0 !important;
+
+    border: none !important;
+
+    background: transparent !important;
+
+}
+
+
+
+.swal2-toast .swal2-icon.swal2-success {
+
+    color: white !important;
+
+}
+
+
+
+.swal2-toast .swal2-success-ring {
+
+    display:none !important;
+
+}
+
+
+
+.swal2-toast .swal2-success-line-tip,
+.swal2-toast .swal2-success-line-long {
+
+    background-color:white !important;
+
+}
+
+
+
+
+
+/* Text */
+
+.swal2-toast .swal2-title {
+
+    margin:0 !important;
+
+    padding:0 !important;
+
+    color:white !important;
+
+    font-size:15px !important;
+
+    font-weight:700 !important;
+
+    line-height:1 !important;
+
+}
+
+
+
+
+
+/* Hilangkan timer bar */
+
+.swal2-timer-progress-bar {
+
+    display:none !important;
+
+}

@@ -695,17 +695,6 @@ Route::post(
 // ==========================================================================
 // 8. SUBSCRIPTION PAYMENT
 // ==========================================================================
-//
-// PENTING:
-// Nama route utama harus:
-// public.subscription.payment
-//
-// Jangan menggunakan:
-// public.subscription.payment.show
-//
-// karena PublicSubscriptionController memanggil:
-// route('public.subscription.payment', ...)
-//
 
 Route::middleware('auth')
     ->prefix('subscription/payment')
@@ -714,14 +703,50 @@ Route::middleware('auth')
 
         /*
         |--------------------------------------------------------------------------
-        | QRIS STATUS
+        | PILIH METODE PEMBAYARAN
         |--------------------------------------------------------------------------
         */
 
         Route::get(
-            '/qris/{encryptedSubscription}/status',
-            [PaymentController::class, 'qrisStatus']
-        )->name('public.subscription.payment.qris.status');
+            '/{encryptedSubscription}/method',
+            [PaymentController::class, 'method']
+        )->name('public.subscription.payment.method');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PILIH BANK
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/{encryptedSubscription}/bank',
+            [PaymentController::class, 'bank']
+        )->name('public.subscription.payment.bank');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GENERATE VIRTUAL ACCOUNT
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            '/{encryptedSubscription}/bank',
+            [PaymentController::class, 'createBankPayment']
+        )->name('public.subscription.payment.bank.create');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BANK PAYMENT STATUS
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/bank/{encryptedSubscription}/status',
+            [PaymentController::class, 'bankStatus']
+        )->name('public.subscription.payment.bank.status');
 
 
         /*
@@ -738,12 +763,15 @@ Route::middleware('auth')
 
         /*
         |--------------------------------------------------------------------------
-        | SNAP MIDTRANS
+        | QRIS PAYMENT STATUS
         |--------------------------------------------------------------------------
-        |
-        | INI ROUTE UTAMA PAYMENT
-        |
         */
+
+        Route::get(
+            '/qris/{encryptedSubscription}/status',
+            [PaymentController::class, 'qrisStatus']
+        )->name('public.subscription.payment.qris.status');
+
 
         Route::get(
             '/{encryptedSubscription}',
@@ -751,23 +779,12 @@ Route::middleware('auth')
         )->name('public.subscription.payment');
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Process
-        |--------------------------------------------------------------------------
-        */
-
         Route::post(
             '/{encryptedSubscription}',
             [PaymentController::class, 'process']
         )->name('public.subscription.payment.process');
+
     });
-
-
-// EMAIL VERIFICATION
-Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
-    ->name('verification.verify');
-
 
 // ==========================================================================
 // 9. AUTHENTICATED BASIC ROUTES

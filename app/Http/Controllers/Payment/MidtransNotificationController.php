@@ -1011,6 +1011,9 @@ class MidtransNotificationController extends Controller
                             'status' =>
                             'active',
 
+                            'payment_status' =>
+                            'paid',
+
                         ]);
 
 
@@ -1210,8 +1213,25 @@ class MidtransNotificationController extends Controller
                 )
             ) {
 
+
+                $paymentStatus =
+                    $transactionStatus === 'expire'
+                        ? 'expired'
+                        : 'failed';
+
+
+
+                $subscription->update([
+
+                    'payment_status' =>
+                    $paymentStatus
+
+                ]);
+
+
+
                 Log::info(
-                    'PAYMENT GAGAL / EXPIRED',
+                    'PAYMENT SUBSCRIPTION GAGAL / EXPIRED',
                     [
 
                         'subscription_id' =>
@@ -1226,11 +1246,17 @@ class MidtransNotificationController extends Controller
                     ]
                 );
 
+
+
                 return response()->json([
+
                     'message' =>
-                    'Payment not successful',
-                ], 200);
+                    'Subscription payment failed',
+
+                ],200);
+
             }
+
 
 
             /*
