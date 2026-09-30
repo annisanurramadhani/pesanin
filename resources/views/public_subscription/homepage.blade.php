@@ -57,7 +57,7 @@
                         <div
                             class="hero-content max-w-2xl text-4xl font-black leading-[1.08] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
 
-                            {!! $setting->hero_content !!}
+                            {{ strip_tags($setting->hero_content) }}
 
                         </div>
 
@@ -65,7 +65,7 @@
                         {{-- Description --}}
                         <div class="mt-6 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
 
-                            {!! $setting->hero_description !!}
+                            {{ strip_tags($setting->hero_description) }}
 
                         </div>
 
@@ -526,15 +526,14 @@
 
                     <div class="text-3xl font-black tracking-tight text-white sm:text-4xl">
 
-                        {!! $setting->cta_content !!}
+                        {{ strip_tags($setting->cta_content) }}
 
                     </div>
 
 
                     <div class="mx-auto mt-4 max-w-xl text-sm leading-6 text-slate-400">
 
-                        {!! $setting->cta_description !!}
-
+                        {{ strip_tags($setting->cta_description) }}
                     </div>
 
 
@@ -576,14 +575,14 @@
                     </div>
 
                     <span class="text-sm font-extrabold text-slate-900">
-                        {{ $setting->website_name }}
+                        {{ strip_tags($setting->website_name) }}
                     </span>
 
                 </div>
 
 
                 <p class="text-xs text-slate-400">
-                    © {{ date('Y') }} {{ $setting->website_name }}.
+                    © {{ date('Y') }} {{ strip_tags($setting->website_name) }}.
                     {{ $setting->footer_text }}
                 </p>
 
