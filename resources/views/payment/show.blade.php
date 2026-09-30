@@ -10,7 +10,7 @@
 
             <div>
                 <h1 class="text-xl font-extrabold text-slate-900">
-                    {{ $setting?->website_name ?? 'PesanIn' }}
+                    {{ $setting?->website_name ?? 'PesanYuk' }}
                 </h1>
 
                 <p class="text-xs text-slate-500">
@@ -48,7 +48,7 @@
 
                 <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-500">
                     Silakan pilih metode pembayaran untuk mengaktifkan
-                    langganan PesanIn Anda.
+                    langganan PesanYuk Anda.
                 </p>
 
             </div>

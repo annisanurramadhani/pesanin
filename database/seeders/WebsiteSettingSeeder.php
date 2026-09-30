@@ -22,7 +22,7 @@ class WebsiteSettingSeeder extends Seeder
                 |--------------------------------------------------------------------------
                 */
 
-                'website_name' => 'PesanIn',
+                'website_name' => 'PesanYuk',
 
                 'tagline' => 'Solusi digital untuk bisnis Anda',
 
@@ -40,7 +40,7 @@ class WebsiteSettingSeeder extends Seeder
                 'Kelola Bisnis Kuliner Anda dengan Lebih Mudah & Efisien',
 
                 'hero_description' =>
-                'PesanIn membantu Anda mengelola menu, pesanan, QR Code, hingga laporan penjualan dalam satu platform yang praktis dan terintegrasi.',
+                'PesanYuk membantu Anda mengelola menu, pesanan, QR Code, hingga laporan penjualan dalam satu platform yang praktis dan terintegrasi.',
 
 
 
@@ -54,7 +54,7 @@ class WebsiteSettingSeeder extends Seeder
                 'Siap Membuat Bisnis Anda Lebih Mudah?',
 
                 'cta_description' =>
-                'Bergabung dengan PesanIn dan nikmati cara yang lebih praktis untuk mengelola bisnis kuliner Anda.',
+                'Bergabung dengan PesanYuk dan nikmati cara yang lebih praktis untuk mengelola bisnis kuliner Anda.',
 
                 'cta_button_text' =>
                 'Mulai Sekarang',
@@ -71,7 +71,7 @@ class WebsiteSettingSeeder extends Seeder
                 'Semua hak dilindungi.',
 
                 'footer_email' =>
-                'support@pesanin.id',
+                'support@pesanyuk.id',
 
                 'footer_whatsapp' =>
                 '081234567890',
@@ -85,7 +85,7 @@ class WebsiteSettingSeeder extends Seeder
                 */
 
                 'instagram_url' =>
-                'https://instagram.com/pesanin.id',
+                'https://instagram.com/pesanyuk.id',
 
 
             ]

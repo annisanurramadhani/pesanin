@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ config('app.name', 'PesanIn') }}</title>
+    <title>{{ config('app.name', 'PesanYuk') }}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -46,11 +46,11 @@
                 </div>
 
                 <h1 class="text-2xl font-extrabold text-[#111827] tracking-tight">
-                    PesanIn
+                    PesanYuk
                 </h1>
 
                 <p class="mt-1 text-[11px] text-slate-500 tracking-widest uppercase font-bold">
-                    PesanIn Dashboard
+                    PesanYuk Dashboard
                 </p>
 
             </div>
@@ -67,7 +67,7 @@
             <footer class="border-t border-slate-200 pt-8 pb-2 text-center">
 
                 <p class="text-xs text-slate-400">
-                    © {{ date('Y') }} PesanIn. Semua hak dilindungi.
+                    © {{ date('Y') }} PesanYuk. Semua hak dilindungi.
                 </p>
             </footer>
 

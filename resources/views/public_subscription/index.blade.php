@@ -61,7 +61,7 @@
             </h2>
 
             <p class="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-500">
-                Gunakan PesanIn untuk mengelola menu, pesanan, QR Code,
+                Gunakan PesanYuk untuk mengelola menu, pesanan, QR Code,
                 dan operasional toko dengan lebih mudah.
             </p>
 
@@ -226,7 +226,7 @@
 
             <p class="text-xs text-slate-400">
                 © {{ date('Y') }}
-                {{ $setting?->website_name ?? 'PesanIn' }}.
+                {{ $setting?->website_name ?? 'PesanYuk' }}.
                 {{ $setting?->footer_text ?? 'Semua hak dilindungi.' }}
             </p>
         </footer>

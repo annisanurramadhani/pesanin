@@ -12,12 +12,12 @@ class SubscriptionPromotionDurationSeeder extends Seeder
     {
         $promotion = SubscriptionPromotion::where(
             'name',
-            'Promo Spesial PesanIn'
+            'Promo Spesial PesanYuk'
         )->first();
 
         if (!$promotion) {
             $this->command->warn(
-                'Promo Spesial PesanIn tidak ditemukan. Jalankan SubscriptionPromotionSeeder terlebih dahulu.'
+                'Promo Spesial PesanYuk tidak ditemukan. Jalankan SubscriptionPromotionSeeder terlebih dahulu.'
             );
 
             return;

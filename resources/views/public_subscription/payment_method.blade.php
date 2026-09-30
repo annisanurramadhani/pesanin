@@ -14,7 +14,7 @@
                 {{-- Brand --}}
                 <div>
                     <h1 class="text-xl font-black tracking-tight text-slate-950">
-                        PesanIn
+                        PesanYuk
                     </h1>
 
                     <p class="mt-0.5 text-xs text-slate-500">

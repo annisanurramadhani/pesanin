@@ -21,7 +21,7 @@
                     {{-- Brand --}}
                     <div>
                         <h1 class="text-xl font-extrabold text-slate-900">
-                            PesanIn
+                            PesanYuk
                         </h1>
 
                         <p class="text-xs text-slate-500">
@@ -67,11 +67,11 @@
                     </span>
 
                     <h2 class="mt-4 text-4xl font-black tracking-tight text-slate-900">
-                        Buat Akun PesanIn
+                        Buat Akun PesanYuk
                     </h2>
 
                     <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
-                        Daftarkan akun Anda untuk melanjutkan proses berlangganan PesanIn.
+                        Daftarkan akun Anda untuk melanjutkan proses berlangganan PesanYuk.
                     </p>
 
                 </div>

@@ -12,7 +12,7 @@
             <div>
 
                 <h1 class="text-xl font-extrabold text-slate-900">
-                            {{ $setting?->website_name ?? 'PesanIn' }}
+                            {{ $setting?->website_name ?? 'PesanYuk' }}
                         </h1>
 
                         <p class="text-xs text-slate-500">
@@ -51,7 +51,7 @@
 
 
                 <h2 class="mt-5 text-3xl font-black tracking-tight text-slate-900 md:text-4xl">
-                    Sudah punya akun PesanIn?
+                    Sudah punya akun PesanYuk?
                 </h2>
 
 
@@ -91,7 +91,7 @@
 
                     <p class="mt-3 text-sm leading-6 text-slate-500">
 
-                        Saya sudah memiliki akun PesanIn dan ingin melanjutkan
+                        Saya sudah memiliki akun PesanYuk dan ingin melanjutkan
                         menggunakan akun yang sudah ada.
 
                     </p>
@@ -139,7 +139,7 @@
 
                     <p class="mt-3 text-sm leading-6 text-slate-500">
 
-                        Saya belum memiliki akun PesanIn dan ingin membuat
+                        Saya belum memiliki akun PesanYuk dan ingin membuat
                         akun baru untuk melanjutkan langganan.
 
                     </p>

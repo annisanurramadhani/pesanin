@@ -10,7 +10,7 @@
 
                 <div>
                     <h1 class="text-xl font-extrabold text-slate-900">
-                        PesanIn
+                        PesanYuk
                     </h1>
 
                     <p class="text-xs text-slate-500">
