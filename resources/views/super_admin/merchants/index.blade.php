@@ -8,7 +8,7 @@
     </h1>
 
     <p class="mt-1 text-sm text-slate-500">
-        Kelola seluruh merchant yang terdaftar di platform PesanIn.
+        Kelola seluruh merchant yang terdaftar di platform {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
     </p>
 </div>
 
@@ -280,7 +280,7 @@
                                 </h3>
 
                                 <p class="mt-1 text-xs text-slate-400">
-                                    Belum ada merchant yang terdaftar di platform PesanIn.
+                                    Belum ada merchant yang terdaftar di platform {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
                                 </p>
 
                             </td>

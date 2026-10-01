@@ -92,7 +92,7 @@
                 </div>
 
                 <h3 class="text-lg font-black text-slate-900">
-                    {{ $order->merchant->name ?? 'PESANIN' }}
+                    {{ $order->merchant->name ?? 'PESANYUK' }}
                 </h3>
 
                 @if ($order->merchant?->address)
@@ -334,7 +334,7 @@
                 </p>
 
                 <p class="mt-1 text-[9px] text-slate-400">
-                    Pesanan diproses melalui PesanIn
+                    Pesanan diproses melalui {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}
                 </p>
 
                  @if ($order->merchant?->settings?->cs_phone)

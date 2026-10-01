@@ -97,7 +97,7 @@
 
 
             <h3>
-                {{ $order->merchant->name ?? 'PESANIN' }}
+                {{ $order->merchant->name ?? 'PESANYUK' }}
             </h3>
 
 
@@ -399,7 +399,7 @@
 
 
             <p class="small">
-                Pesanan diproses melalui PesanIn
+                Pesanan diproses melalui {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}
             </p>
 
 

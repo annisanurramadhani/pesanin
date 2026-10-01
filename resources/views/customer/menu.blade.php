@@ -20,7 +20,7 @@
                     <div class="min-w-0">
 
                         <h1 class="truncate text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
-                            {{ $merchant->name ?? 'PesanIn' }}
+                            {{ $merchant->name ?? 'PesanYuk' }}
                         </h1>
 
                         <p class="mt-1 truncate text-xs text-slate-500 sm:text-sm">
@@ -402,7 +402,7 @@
             <footer class="border-t border-slate-200 pt-6 pb-4 text-center">
 
                 <p class="text-xs text-slate-400">
-                    © {{ date('Y') }} PesanIn. Semua hak dilindungi.
+                    © {{ date('Y') }} PesanYuk. Semua hak dilindungi.
                 </p>
             </footer>
 

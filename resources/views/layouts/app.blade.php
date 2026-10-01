@@ -20,7 +20,7 @@
         <meta property="og:title" content="{{ $pageSeo['title'] }}">
         <meta property="og:description" content="{{ $pageSeo['description'] }}">
         <meta property="og:type" content="website">
-        <meta property="og:site_name" content="PesanIn">
+        <meta property="og:site_name" content="PesanYuk">
         <meta property="og:url" content="{{ $pageSeo['canonical'] }}">
     @elseif (isset($setting) && $setting instanceof \App\Models\WebsiteSetting)
         @php
@@ -77,7 +77,7 @@
             <meta name="twitter:image" content="{{ $seo->twitterImage ?: $seo->ogImage }}">
         @endif
     @else
-        <title>{{ $title ?? 'PesanIn' }}</title>
+        <title>{{ $title ?? 'PesanYuk' }}</title>
 
     @endif
 

@@ -17,7 +17,7 @@
             </h1>
 
             <p class="mt-1 text-sm text-slate-500">
-                Pantau seluruh aktivitas dan perubahan yang terjadi di sistem PesanIn.
+                Pantau seluruh aktivitas dan perubahan yang terjadi di sistem {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
             </p>
         </div>
 

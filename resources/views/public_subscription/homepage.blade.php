@@ -301,7 +301,7 @@
                 <div class="mb-10 text-center">
 
                     <p class="text-sm font-extrabold uppercase tracking-widest text-amber-500">
-                        Kenapa PesanYuk?
+                        Kenapa {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}?
                     </p>
 
                     <h2 class="mt-2 text-3xl font-black tracking-tight text-slate-900">
@@ -446,7 +446,7 @@
                         </h3>
 
                         <p class="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500">
-                            Daftarkan bisnis Anda dan mulai menggunakan PesanYuk.
+                            Daftarkan bisnis Anda dan mulai menggunakan {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
                         </p>
 
                     </div>

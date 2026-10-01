@@ -51,7 +51,7 @@
 
 
                 <h2 class="mt-5 text-3xl font-black tracking-tight text-slate-900 md:text-4xl">
-                    Sudah punya akun PesanYuk?
+                    Sudah punya akun {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}?
                 </h2>
 
 
@@ -91,7 +91,7 @@
 
                     <p class="mt-3 text-sm leading-6 text-slate-500">
 
-                        Saya sudah memiliki akun PesanYuk dan ingin melanjutkan
+                        Saya sudah memiliki akun {{ strip_tags($setting?->website_name ?? 'PesanYuk') }} dan ingin melanjutkan
                         menggunakan akun yang sudah ada.
 
                     </p>
@@ -139,7 +139,7 @@
 
                     <p class="mt-3 text-sm leading-6 text-slate-500">
 
-                        Saya belum memiliki akun PesanYuk dan ingin membuat
+                        Saya belum memiliki akun {{ strip_tags($setting?->website_name ?? 'PesanYuk') }} dan ingin membuat
                         akun baru untuk melanjutkan langganan.
 
                     </p>

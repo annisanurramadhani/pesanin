@@ -35,6 +35,9 @@ use App\Observers\PackageDurationObserver;
 use App\Models\SubscriptionPromotion;
 use App\Observers\SubscriptionPromotionObserver;
 
+use App\Models\WebsiteSetting;
+use Illuminate\Support\Facades\View;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -110,6 +113,23 @@ class AppServiceProvider extends ServiceProvider
 
         SubscriptionPromotion::observe(
             SubscriptionPromotionObserver::class
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Global Website Setting
+        |--------------------------------------------------------------------------
+        |
+        | Semua blade dapat langsung menggunakan:
+        | $setting->website_name
+        | $setting->logo
+        | $setting->footer_text
+        |
+        */
+
+        View::share(
+            'setting',
+            WebsiteSetting::first()
         );
     }
 }

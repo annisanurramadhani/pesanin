@@ -11,17 +11,14 @@
 
                     {{-- Logo PesanIn --}}
                     <div class="flex h-12 w-12 items-center justify-center">
-                        <img
-                            src="{{ asset('assets/images/logo-regis.jpg') }}"
-                            alt="PesanIn"
-                            class="h-12 w-12 rounded-xl object-cover"
-                        >
+                        <img src="{{ menuImage($setting->logo) }}" alt="{{ $setting->website_name }}"
+                            class="h-12 w-12 rounded-xl object-cover">
                     </div>
 
                     {{-- Brand --}}
                     <div>
                         <h1 class="text-xl font-extrabold text-slate-900">
-                            PesanYuk
+                            {{ strip_tags($setting->website_name) }}
                         </h1>
 
                         <p class="text-xs text-slate-500">
@@ -323,12 +320,13 @@
         {{-- ======================================================
                 FOOTER
             ======================================================= --}}
-            <footer class="border-t border-slate-200 pt-6 pb-8 text-center">
+        <footer class="border-t border-slate-200 pt-6 pb-8 text-center">
 
-                <p class="text-xs text-slate-400">
-                    © {{ date('Y') }} PesanIn. Semua hak dilindungi.
-                </p>
-            </footer>
+            <p class="text-xs text-slate-400">
+                © {{ date('Y') }} {{ strip_tags($setting->website_name) }}.
+                {{ $setting->footer_text }}
+            </p>
+        </footer>
 
     </div>
 

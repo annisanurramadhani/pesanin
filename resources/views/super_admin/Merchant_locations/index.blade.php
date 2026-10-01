@@ -8,7 +8,7 @@
         </h1>
 
         <p class="mt-1 text-sm text-slate-500">
-            Pantau lokasi seluruh merchant yang terdaftar di platform PesanIn.
+            Pantau lokasi seluruh merchant yang terdaftar di platform {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
         </p>
     </div>
 

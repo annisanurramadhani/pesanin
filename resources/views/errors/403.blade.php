@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akses Ditolak | PesanIn</title>
+    <title>Akses Ditolak | {{ strip_tags($setting->website_name ?? 'PesanYuk') }}</title>
 
     <style>
         * {
@@ -117,6 +118,7 @@
         }
 
         @keyframes floating {
+
             0%,
             100% {
                 transform: translateY(0);
@@ -224,10 +226,7 @@
     <main class="page">
 
         <div class="illustration">
-            <img
-                src="{{ asset('images/error-403.jpeg') }}"
-                alt="Ilustrasi akses ditolak"
-            >
+            <img src="{{ asset('images/error-403.jpeg') }}" alt="Ilustrasi akses ditolak">
         </div>
 
         <h1 class="title">
@@ -245,16 +244,12 @@
             detik...
         </div>
 
-        <button
-            type="button"
-            class="back-button"
-            onclick="goBack()"
-        >
+        <button type="button" class="back-button" onclick="goBack()">
             ← Kembali Sekarang
         </button>
 
         <div class="footer">
-            PesanIn • Pesan Lebih Mudah • Cepat • Praktis
+            {{ strip_tags($setting->website_name ?? 'PesanYuk') }} • Pesan Lebih Mudah • Cepat • Praktis
         </div>
 
     </main>
@@ -283,4 +278,5 @@
     </script>
 
 </body>
+
 </html>

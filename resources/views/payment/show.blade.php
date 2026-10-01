@@ -48,7 +48,7 @@
 
                 <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-500">
                     Silakan pilih metode pembayaran untuk mengaktifkan
-                    langganan PesanYuk Anda.
+                    langganan {{ strip_tags($setting?->website_name ?? 'PesanYuk') }} Anda.
                 </p>
 
             </div>

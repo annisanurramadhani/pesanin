@@ -14,7 +14,7 @@
 
                     {{-- Logo PesanIn --}}
                     <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
-                        <img src="{{ menuImage($setting?->logo) }}" alt="{{ $setting?->website_name ?? 'PesanIn' }}"
+                        <img src="{{ menuImage($setting?->logo) }}" alt="{{ $setting?->website_name ?? 'PesanYuk' }}"
                             class="h-full w-full object-contain">
                     </div>
 
@@ -22,7 +22,7 @@
                     <div>
 
                         <h1 class="text-xl font-extrabold text-slate-900">
-                            {{ $setting?->website_name ?? 'PesanIn' }}
+                            {{ $setting?->website_name ?? 'PesanYuk' }}
                         </h1>
 
                         <p class="text-xs text-slate-500">
@@ -61,7 +61,7 @@
             </h2>
 
             <p class="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-500">
-                Gunakan PesanYuk untuk mengelola menu, pesanan, QR Code,
+                Gunakan {{ strip_tags($setting?->website_name ?? 'PesanYuk') }} untuk mengelola menu, pesanan, QR Code,
                 dan operasional toko dengan lebih mudah.
             </p>
 

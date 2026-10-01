@@ -40,7 +40,7 @@
                     <div class="w-10 h-10 shrink-0 flex items-center justify-center">
                         <img
                             src="{{ menuImage($websiteSetting?->logo) }}"
-                            alt="PesanIn"
+                            alt="PesanYuk"
                             class="w-10 h-10 rounded-lg object-cover">
                     </div>
 
@@ -53,7 +53,7 @@
                         </h1>
 
                         <p class="text-[10px] text-slate-400 tracking-wider uppercase font-semibold">
-                            PesanIn Dashboard
+                            PesanYuk Dashboard
                         </p>
 
                     </div>

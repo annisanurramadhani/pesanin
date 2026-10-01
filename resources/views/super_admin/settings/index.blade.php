@@ -9,7 +9,7 @@
         </h1>
 
         <p class="mt-1 text-sm text-slate-500">
-            Kelola informasi dan tampilan website PesanIn.
+            Kelola informasi dan tampilan website {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
         </p>
 
     </div>
@@ -63,7 +63,7 @@
 
 
                                 <p class="text-xs text-slate-400">
-                                    Lengkapi identitas utama website PesanIn.
+                                    Lengkapi identitas utama website {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
                                 </p>
 
 
@@ -93,7 +93,7 @@
 
 
                                 <input type="text" name="website_name"
-                                    value="{{ old('website_name', $setting->website_name) }}" placeholder="Contoh: PesanIn"
+                                    value="{{ old('website_name', $setting->website_name) }}" placeholder="Contoh: PesanYuk"
                                     class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10">
 
 

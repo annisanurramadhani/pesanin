@@ -10,7 +10,7 @@
                             ☕
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-black text-lg text-slate-800 tracking-tight leading-none group-hover:text-blue-600 transition">PesanIn<span class="text-blue-600">.</span></span>
+                            <span class="font-black text-lg text-slate-800 tracking-tight leading-none group-hover:text-blue-600 transition">{{ strip_tags($setting->website_name ?? 'PesanYuk') }}<span class="text-blue-600">.</span></span>
                             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 leading-none mt-1">Merchant Hub</span>
                         </div>
                     </a>

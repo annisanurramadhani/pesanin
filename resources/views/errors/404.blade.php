@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halaman Tidak Ditemukan | PesanIn</title>
+    <title>Halaman Tidak Ditemukan | {{ strip_tags($setting->website_name ?? 'PesanYuk') }}</title>
 
     <style>
         * {
@@ -254,7 +254,7 @@
         </button>
 
         <div class="footer">
-            PesanIn • Pesan Lebih Mudah • Cepat • Praktis
+            {{ strip_tags($setting->website_name ?? 'PesanYuk') }} • Pesan Lebih Mudah • Cepat • Praktis
         </div>
 
     </main>

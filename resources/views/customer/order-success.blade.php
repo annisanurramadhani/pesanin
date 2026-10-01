@@ -1201,13 +1201,13 @@ ACTION
 
             <p class="text-xs text-slate-400">
 
-                {{ $merchant->name ?? 'PesanIn' }}
+                {{ $merchant->name ?? 'PesanYuk' }}
 
             </p>
 
             <p class="text-[11px] text-slate-300 mt-1">
 
-                Terima kasih telah memesan melalui PesanIn
+                Terima kasih telah memesan melalui {{ strip_tags($setting->website_name ?? 'PesanYuk') }}
 
             </p>
 

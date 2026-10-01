@@ -10,7 +10,7 @@
             </h1>
 
             <p class="mt-1 text-sm text-slate-500">
-                Kelola akun pengguna yang terdaftar di platform PesanIn.
+                Kelola akun pengguna yang terdaftar di platform {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
             </p>
 
         </div>

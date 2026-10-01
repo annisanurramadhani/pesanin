@@ -42,7 +42,7 @@ class WebsiteSetting extends Model
 
     public function getSEOTitle(): ?string
     {
-        return 'Solusi Digital untuk Bisnis Kuliner | ' . ($this->website_name ?: 'PesanIn');
+        return 'Solusi Digital untuk Bisnis Kuliner | ' . ($this->website_name ?: 'PesanYuk');
     }
 
     public function getSEODescription(): ?string

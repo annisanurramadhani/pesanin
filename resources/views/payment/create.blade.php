@@ -10,7 +10,7 @@
 
                 <div>
                     <h1 class="text-xl font-extrabold text-slate-900">
-                        PesanYuk
+                        {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}
                     </h1>
 
                     <p class="text-xs text-slate-500">

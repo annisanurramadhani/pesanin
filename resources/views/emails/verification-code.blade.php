@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Verifikasi Email PesanIn</title>
+    <title>Verifikasi Email {{ strip_tags($setting->website_name ?? 'PesanYuk') }}</title>
 </head>
 
 <body
@@ -37,7 +37,7 @@
                         font-size: 28px;
                     "
                 >
-                    PesanIn
+                    {{ strip_tags($setting->website_name ?? 'PesanYuk') }}
                 </h1>
 
                 <p
@@ -71,7 +71,7 @@
                         line-height: 1.7;
                     "
                 >
-                    Terima kasih telah membuat akun PesanIn.
+                    Terima kasih telah membuat akun {{ strip_tags($setting->website_name ?? 'PesanYuk') }}.
                     Gunakan kode berikut untuk memverifikasi alamat email Anda:
                 </p>
 
@@ -120,7 +120,7 @@
                     line-height: 1.7;
                 "
             >
-                Masukkan kode tersebut pada halaman verifikasi PesanIn
+                Masukkan kode tersebut pada halaman verifikasi {{ strip_tags($setting->website_name ?? 'PesanYuk') }}
                 untuk melanjutkan proses pendaftaran.
             </p>
 
@@ -132,7 +132,7 @@
                     font-size: 13px;
                 "
             >
-                Jika Anda tidak merasa membuat akun PesanIn,
+                Jika Anda tidak merasa membuat akun {{ strip_tags($setting->website_name ?? 'PesanYuk') }},
                 abaikan email ini.
             </p>
 

@@ -7,7 +7,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
 
-    <title>Invoice PesanIn</title>
+    <title>Invoice {{ $setting->website_name }}</title>
 </head>
 
 <body
@@ -68,7 +68,7 @@
                                             color:#111827;
                                         "
                                     >
-                                        ☕ PesanIn
+                                        ☕  {{ $setting->website_name }}
                                     </div>
 
                                 </td>
@@ -124,7 +124,7 @@
                                 line-height:1.6;
                             "
                         >
-                            Pembayaran langganan PesanIn Anda telah berhasil.
+                            Pembayaran langganan {{ $setting->website_name }} Anda telah berhasil.
                             Berikut adalah detail invoice pembayaran Anda.
                         </p>
 
@@ -353,7 +353,7 @@
                         >
                             Terima kasih telah menggunakan
                             <strong style="color:#111827;">
-                                PesanIn
+                                 {{ $setting->website_name }}
                             </strong>.
                             Invoice ini merupakan bukti pembayaran
                             langganan Anda.
@@ -381,7 +381,7 @@
                                 color:#94a3b8;
                             "
                         >
-                            © {{ date('Y') }} PesanIn
+                            © {{ date('Y') }}  {{ $setting->website_name }}
                         </p>
 
                         <p

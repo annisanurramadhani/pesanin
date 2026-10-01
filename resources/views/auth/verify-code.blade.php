@@ -10,12 +10,11 @@
 
                 <div>
                     <h1 class="text-xl font-extrabold text-slate-900">
-                        PesanIn
+                        {{ strip_tags($setting->website_name) }}
                     </h1>
 
                     <p class="text-xs text-slate-500">
-                        Solusi digital untuk bisnis Anda
-                    </p>
+                        {{ $setting->website_description }}
                 </div>
 
                 <form method="POST" action="{{ route('logout') }}">

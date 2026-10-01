@@ -179,7 +179,7 @@
 
 
         <p>
-            PesanIn Merchant Dashboard
+            {{ strip_tags($setting?->website_name ?? 'PesanYuk') }} Merchant Dashboard
         </p>
 
     </div>
@@ -435,7 +435,7 @@
 
     <div class="footer">
 
-        Laporan dibuat otomatis oleh sistem PesanIn
+        Laporan dibuat otomatis oleh sistem {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}
 
     </div>
 

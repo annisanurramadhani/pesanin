@@ -26,7 +26,7 @@
                             </h1>
 
                             <p class="text-xs sm:text-sm text-slate-500 mt-0.5 truncate">
-                                {{ $merchant->name ?? 'PesanIn' }}
+                                {{ $merchant->name ?? 'PesanYuk' }}
                             </p>
                         </div>
 
