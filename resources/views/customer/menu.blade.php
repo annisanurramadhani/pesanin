@@ -149,23 +149,33 @@
             {{-- ======================================================
                 HERO / INTRO
             ======================================================= --}}
-            <section class="pb-8 pt-4 text-center sm:pb-10">
+            <section class="relative mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white px-5 py-8 text-center shadow-sm sm:px-8 sm:py-10">
 
-                <span
-                    class="inline-flex rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-[10px] font-extrabold uppercase tracking-widest text-amber-600 sm:text-xs"
-                >
-                    Menu
-                </span>
+    {{-- Decorative background --}}
+    <div class="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-amber-50"></div>
+    <div class="pointer-events-none absolute -bottom-20 -left-16 h-40 w-40 rounded-full bg-amber-50/70"></div>
 
-                <h2 class="mx-auto mt-4 max-w-2xl text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
-                    Mau pesan apa hari ini?
-                </h2>
+    <div class="relative z-10">
 
-                <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
-                    Pilih menu favoritmu dan tambahkan ke keranjang.
-                </p>
+        {{-- Label --}}
+        <span class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.18em] text-amber-600">
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+            Menu
+        </span>
 
-            </section>
+        {{-- Title --}}
+        <h2 class="mx-auto mt-4 max-w-2xl text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+            Mau pesan apa hari ini?
+        </h2>
+
+        {{-- Description --}}
+        <p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
+            Pilih menu favoritmu dan tambahkan ke keranjang.
+        </p>
+
+    </div>
+
+</section>
 
 
             {{-- ======================================================
@@ -181,7 +191,7 @@
 
                             <a
                                 href="#category-{{ $category->id }}"
-                                class="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 shadow-sm transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600"
+                                class="rounded-full border border-amber-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 shadow-sm transition hover:border-amber-400 hover:bg-amber-50 hover:text-amber-600"
                             >
                                 {{ $category->name }}
                             </a>
@@ -201,28 +211,29 @@
             @forelse ($categories as $category)
 
                 <section
-                    id="category-{{ $category->id }}"
-                    class="mb-10 scroll-mt-28"
-                >
+    id="category-{{ $category->id }}"
+    class="mb-8 scroll-mt-28 rounded-3xl border border-amber-100 bg-amber-50/60 p-4 shadow-sm sm:p-5"
+>
 
                     {{-- Category Header --}}
-                    <div class="mb-5 flex items-center gap-3">
+                    {{-- Category Header --}}
+                    <div class="mb-5 flex items-center justify-between px-1">
 
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+                        <div class="flex items-center gap-3">
 
-                            <i class="fa-solid fa-utensils text-sm"></i>
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-500 ring-1 ring-amber-100">
+                                <i class="fa-solid fa-utensils text-xs"></i>
+                            </div>
 
-                        </div>
+                            <div>
+                                <h2 class="text-base font-black tracking-tight text-slate-900 sm:text-lg">
+                                    {{ $category->name }}
+                                </h2>
 
-                        <div>
-
-                            <h2 class="text-lg font-black text-slate-900 sm:text-xl">
-                                {{ $category->name }}
-                            </h2>
-
-                            <p class="mt-0.5 text-xs text-slate-500">
-                                {{ $category->menus->count() }} menu
-                            </p>
+                                <p class="mt-0.5 text-[10px] font-medium text-slate-400">
+                                    {{ $category->menus->count() }} menu
+                                </p>
+                            </div>
 
                         </div>
 
@@ -235,8 +246,8 @@
                         @forelse ($category->menus as $menu)
 
                             <article
-                                class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-                            >
+    class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/40 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-amber-200 hover:shadow-md"
+>
 
                                 {{-- ==================================================
                                     IMAGE

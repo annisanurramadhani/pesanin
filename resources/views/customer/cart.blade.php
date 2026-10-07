@@ -116,27 +116,30 @@
                 </div>
             @else
                 {{-- Cart Information --}}
-                <div class="flex items-center justify-between mb-4">
+                <div class="mb-5 flex items-center justify-between gap-4 rounded-2xl border border-amber-100 bg-amber-50/60 px-4 py-3.5">
 
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                            Pesanan Kamu
-                        </p>
+                    {{-- Order Info --}}
+                    <div class="flex items-center gap-3 min-w-0">
 
-                        <h2 class="text-lg font-extrabold text-slate-900 mt-1">
-                            {{ count($cartItems) }} Menu
-                        </h2>
+                        <div class="min-w-0">
+                            <p class="text-[10px] font-extrabold uppercase tracking-widest text-amber-600">
+                                Pesanan Kamu
+                            </p>
+
+                            <h2 class="mt-0.5 text-base font-black tracking-tight text-slate-900">
+                                {{ count($cartItems) }} Menu
+                            </h2>
+                        </div>
+
                     </div>
 
-                    <a href="{{ route('customer.menu', $qrCode->code) }}?keep_voucher=1"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-600 hover:bg-amber-100 transition">
-
-                        <i class="fa-solid fa-plus text-xs"></i>
-
-                        <span class="text-xs sm:text-sm font-extrabold">
-                            Tambah Menu
-                        </span>
-
+                    {{-- Add Menu --}}
+                    <a
+                        href="{{ route('customer.menu', $qrCode->code) }}?keep_voucher=1"
+                        class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-3.5 py-2.5 text-xs font-extrabold text-amber-600 shadow-sm ring-1 ring-amber-200 transition hover:bg-amber-500 hover:text-white hover:ring-amber-500 sm:px-4 sm:text-sm"
+                    >
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                        <span>Tambah Menu</span>
                     </a>
 
                 </div>
@@ -153,7 +156,7 @@
                         @endphp
 
                         <div data-cart-item="{{ $menu->id }}"
-                            class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition overflow-hidden">
+                            class="group bg-white rounded-2xl border border-amber-100 shadow-sm hover:border-amber-200 hover:shadow-md transition overflow-hidden">
 
                             <div class="p-4">
 
