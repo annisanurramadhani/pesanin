@@ -162,7 +162,7 @@
                                 </div>
 
                                 <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">
-                                    Total: {{ count($qrCodes) }} QR
+                                    Total: {{ $qrCodes->total() }} QR
                                 </span>
 
                             </div>
@@ -335,8 +335,33 @@
                                         @endforelse
 
                                     </tbody>
+                            </table>
 
-                                </table>
+                            @if ($qrCodes->hasPages())
+                                <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between gap-4">
+
+                                    <div class="text-xs font-medium text-slate-500">
+                                        Menampilkan
+                                        <span class="font-bold text-slate-700">
+                                            {{ $qrCodes->firstItem() }}
+                                        </span>
+                                        -
+                                        <span class="font-bold text-slate-700">
+                                            {{ $qrCodes->lastItem() }}
+                                        </span>
+                                        dari
+                                        <span class="font-bold text-slate-700">
+                                            {{ $qrCodes->total() }}
+                                        </span>
+                                        QR Code
+                                    </div>
+
+                                    <div>
+                                        {{ $qrCodes->links() }}
+                                    </div>
+
+                                </div>
+                            @endif
 
                             </div>
 

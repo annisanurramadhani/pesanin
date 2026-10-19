@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const originalContent = button.innerHTML;
+            const originalWidth = button.offsetWidth;
 
             // ================================================================
             // UPDATE COUNT LANGSUNG - OPTIMISTIC UI
@@ -39,10 +40,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Loading
             button.disabled = true;
+            button.style.width = `${originalWidth}px`;
+            button.style.justifyContent = 'center';
 
             button.innerHTML = `
                 <i class="fa-solid fa-spinner fa-spin text-[10px]"></i>
-                Menambahkan...
             `;
 
             try {
@@ -77,6 +79,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 button.disabled = false;
 
                 button.innerHTML = originalContent;
+                button.style.width = '';
+                button.style.justifyContent = '';
 
                 // Update jumlah keranjang
                 if (typeof data.cart_count !== 'undefined') {
@@ -102,6 +106,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 button.disabled = false;
 
                 button.innerHTML = originalContent;
+                button.style.width = '';
+                button.style.justifyContent = '';
 
                 showErrorNotification(
                     error.message || 'Terjadi kesalahan.'
