@@ -16,11 +16,34 @@ class AccountController extends Controller
     /**
      * Menampilkan seluruh akun.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('merchant')
+        $query = User::with('merchant');
+
+        // Pencarian nama atau email
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filter role
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Filter status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $users = $query
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('super_admin.accounts.index', compact('users'));
     }
