@@ -13,24 +13,18 @@ class PublicSubscriptionHomeController extends Controller
      */
     public function index()
     {
-        /*
-    |--------------------------------------------------------------------------
-    | Ambil Setting Website
-    |--------------------------------------------------------------------------
-    */
-        $setting=WebsiteSetting::first();
-
+        $setting = WebsiteSetting::first();
 
         /*
         |--------------------------------------------------------------------------
-        | Ambil Promo Subscription Aktif
+        | Ambil Campaign Diskon Aktif Terbaru
         |--------------------------------------------------------------------------
         |
-        | Promo hanya ditampilkan apabila:
-        |
-        | 1. Status promo active
-        | 2. Waktu sekarang sudah melewati starts_at
-        | 3. Waktu sekarang belum melewati ends_at
+        | Campaign ditampilkan jika:
+        | 1. Status active.
+        | 2. Waktu mulai sudah tercapai.
+        | 3. Waktu berakhir belum terlewati.
+        | 4. Jika ada beberapa campaign, pilih yang terbaru dibuat.
         |
         */
 
@@ -40,13 +34,6 @@ class PublicSubscriptionHomeController extends Controller
             ->where('ends_at', '>=', now())
             ->latest('created_at')
             ->first();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Homepage
-        |--------------------------------------------------------------------------
-        */
 
         return view(
             'public_subscription.homepage',

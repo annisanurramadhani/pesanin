@@ -106,13 +106,6 @@
                                             {{ $package->name }}
                                         </h3>
 
-                                        @if ($package->badge)
-                                            <span
-                                                class="mt-2 inline-block rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-600">
-                                                {{ $package->badge }}
-                                            </span>
-                                        @endif
-
                                     </div>
 
                                     <div
