@@ -27,3 +27,8 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Local face-service AI model binaries
+/face-service/models/face-detection-retail-0004/FP32/face-detection-retail-0004.bin
+/face-service/models/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
+/face-service/models/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
+/face-service/models/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
