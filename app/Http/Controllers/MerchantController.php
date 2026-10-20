@@ -48,19 +48,20 @@ class MerchantController extends Controller
 
     // 2. Tampilan Kelola QR Code
     public function qrIndex(Request $request)
-    {
-        $merchantId = $request->user()->merchant_id;
+{
+    $merchantId = $request->user()->merchant_id;
 
-        $qrCodes = QrCode::where(
-            'merchant_id',
-            $merchantId
-        )->get();
+    $qrCodes = QrCode::where(
+        'merchant_id',
+        $merchantId
+    )
+        ->paginate(5);
 
-        return view(
-            'merchant.qr.index',
-            compact('qrCodes')
-        );
-    }
+    return view(
+        'merchant.qr.index',
+        compact('qrCodes')
+    );
+}
 
     // 3. Simpan QR Code Baru
     public function qrStore(

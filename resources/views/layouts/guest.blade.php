@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ config('app.name', 'PesanIn') }}</title>
+    <title>{{ config('app.name', 'PesanYuk') }}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -40,17 +40,17 @@
                 <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-900/10 overflow-hidden">
                     <img
                         src="{{ asset('assets/images/logo-login.png') }}"
-                        alt="PesanIn"
+                        alt="PesanYuk"
                         class="h-full w-full object-contain p-1"
                     >
                 </div>
 
                 <h1 class="text-2xl font-extrabold text-[#111827] tracking-tight">
-                    PesanIn
+                   {{ strip_tags($setting->website_name ?? 'PesanYuk') }}
                 </h1>
 
                 <p class="mt-1 text-[11px] text-slate-500 tracking-widest uppercase font-bold">
-                    PesanIn Dashboard
+                    {{ strip_tags($setting->website_name ?? 'PesanYuk') }} Dashboard
                 </p>
 
             </div>
@@ -67,7 +67,7 @@
             <footer class="border-t border-slate-200 pt-8 pb-2 text-center">
 
                 <p class="text-xs text-slate-400">
-                    © {{ date('Y') }} PesanIn. Semua hak dilindungi.
+                    © {{ date('Y') }} {{ strip_tags($setting->website_name ?? 'PesanYuk') }}. Semua hak dilindungi.
                 </p>
             </footer>
 

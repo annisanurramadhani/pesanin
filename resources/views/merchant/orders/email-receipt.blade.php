@@ -89,7 +89,7 @@
                                 color:#111827;
                             "
                         >
-                            PesanIn
+                            {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}
                         </h1>
 
                         <p
@@ -136,7 +136,7 @@
                             "
                         >
                             Terima kasih telah melakukan pemesanan
-                            melalui PesanIn. Berikut adalah detail transaksi Anda.
+                            melalui {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}. Berikut adalah detail transaksi Anda.
                         </p>
 
 
@@ -159,7 +159,7 @@
                                     color:#111827;
                                 "
                             >
-                                {{ $order->merchant->name ?? 'PESANIN' }}
+                                {{ $order->merchant->name ?? 'PESANYUK' }}
                             </p>
 
                             @if($order->merchant->address)
@@ -744,7 +744,7 @@
                                     line-height:1.6;
                                 "
                             >
-                                Pesanan diproses melalui PesanIn.
+                                Pesanan diproses melalui {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
                             </p>
 
                             @if ($order->merchant?->settings?->cs_phone)
@@ -822,7 +822,7 @@
                             "
                         >
                             Email ini dikirim secara otomatis oleh sistem
-                            PesanIn. Mohon tidak membalas email ini.
+                            {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}. Mohon tidak membalas email ini.
                         </p>
 
                         <p
@@ -833,7 +833,7 @@
                                 text-align:center;
                             "
                         >
-                            © {{ date('Y') }} PesanIn
+                            © {{ date('Y') }} {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}
                         </p>
 
                     </td>

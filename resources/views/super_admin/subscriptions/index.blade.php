@@ -8,7 +8,7 @@
     </h1>
 
     <p class="mt-1 text-sm text-slate-500">
-        Kelola seluruh langganan merchant di platform PesanIn.
+        Kelola seluruh langganan merchant di platform {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
     </p>
 </div>
 

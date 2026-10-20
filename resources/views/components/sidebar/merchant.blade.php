@@ -49,7 +49,7 @@
                         <img src="{{ asset('storage/' . Auth::user()->merchant->logo) }}"
                             alt="{{ Auth::user()->merchant->name }}" class="w-10 h-10 rounded-lg object-cover">
                     @else
-                        <img src="{{ asset('assets/images/menu-default.jpg') }}" alt="PesanIn"
+                        <img src="{{ asset('assets/images/menu-default.jpg') }}" alt="PesanYuk"
                             class="w-10 h-10 rounded-lg object-cover">
                     @endif
 
@@ -57,7 +57,7 @@
 
                 <div id="sidebarBrand" class="whitespace-nowrap transition-all duration-300">
                     <h1 class="font-bold text-white text-base tracking-wide">
-                        {{ Auth::user()->merchant->name ?? 'PesanIn' }}
+                        {{ Auth::user()->merchant->name ?? 'PesanYuk' }}
                     </h1>
 
                     <p class="text-[10px] text-slate-400 tracking-wider uppercase font-semibold">

@@ -2,18 +2,18 @@
 
 @section('body')
 
-<style>
-    .hero-content p {
-        margin: 0;
-        font-size: inherit;
-        line-height: inherit;
-        font-weight: inherit;
-    }
+    <style>
+        .hero-content p {
+            margin: 0;
+            font-size: inherit;
+            line-height: inherit;
+            font-weight: inherit;
+        }
 
-    .hero-content span {
-        color: #f59e0b;
-    }
-</style>
+        .hero-content span {
+            color: #f59e0b;
+        }
+    </style>
 
 
     <div class="min-h-screen overflow-hidden bg-white text-slate-900">
@@ -34,13 +34,21 @@
 
             <div class="relative mx-auto max-w-7xl px-6 pb-20 pt-12 lg:px-8 lg:pb-24 lg:pt-16">
 
-                <div class="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
+
+
+                <div
+                    class="grid items-center gap-10 {{ $activePromotion ? 'lg:grid-cols-[1.15fr_0.85fr] lg:gap-14' : 'grid-cols-1' }}">
+
+
+
 
 
                     {{-- =================================================
                 HERO CONTENT
             ================================================== --}}
-                    <div>
+
+                    <div class="{{ $activePromotion ? '' : 'lg:max-w-5xl' }}">
+
 
                         {{-- Badge --}}
                         <div
@@ -54,10 +62,11 @@
 
 
                         {{-- Heading --}}
-                        <div
-                            class="hero-content max-w-2xl text-4xl font-black leading-[1.08] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
 
-                            {!! $setting->hero_content !!}
+                        <div
+                            class="hero-content {{ $activePromotion ? 'max-w-2xl' : 'max-w-4xl' }} text-4xl font-black leading-[1.08] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+
+                            {{ html_entity_decode(strip_tags($setting->hero_content), ENT_QUOTES, 'UTF-8') }}
 
                         </div>
 
@@ -65,7 +74,7 @@
                         {{-- Description --}}
                         <div class="mt-6 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
 
-                            {!! $setting->hero_description !!}
+                            {{ html_entity_decode(strip_tags($setting->hero_description), ENT_QUOTES, 'UTF-8') }}
 
                         </div>
 
@@ -301,7 +310,7 @@
                 <div class="mb-10 text-center">
 
                     <p class="text-sm font-extrabold uppercase tracking-widest text-amber-500">
-                        Kenapa PesanIn?
+                        Kenapa {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}?
                     </p>
 
                     <h2 class="mt-2 text-3xl font-black tracking-tight text-slate-900">
@@ -446,7 +455,8 @@
                         </h3>
 
                         <p class="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500">
-                            Daftarkan bisnis Anda dan mulai menggunakan PesanIn.
+                            Daftarkan bisnis Anda dan mulai menggunakan
+                            {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
                         </p>
 
                     </div>
@@ -526,15 +536,14 @@
 
                     <div class="text-3xl font-black tracking-tight text-white sm:text-4xl">
 
-                        {!! $setting->cta_content !!}
+                        {{ strip_tags($setting->cta_content) }}
 
                     </div>
 
 
                     <div class="mx-auto mt-4 max-w-xl text-sm leading-6 text-slate-400">
 
-                        {!! $setting->cta_description !!}
-
+                        {{ strip_tags($setting->cta_description) }}
                     </div>
 
 
@@ -576,14 +585,14 @@
                     </div>
 
                     <span class="text-sm font-extrabold text-slate-900">
-                        {{ $setting->website_name }}
+                        {{ strip_tags($setting->website_name) }}
                     </span>
 
                 </div>
 
 
                 <p class="text-xs text-slate-400">
-                    © {{ date('Y') }} {{ $setting->website_name }}.
+                    © {{ date('Y') }} {{ strip_tags($setting->website_name) }}.
                     {{ $setting->footer_text }}
                 </p>
 
@@ -594,4 +603,3 @@
     </div>
 
 @endsection
-

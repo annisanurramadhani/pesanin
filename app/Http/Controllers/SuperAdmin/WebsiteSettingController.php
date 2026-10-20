@@ -44,14 +44,21 @@ class WebsiteSettingController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            'website_name'
-            => 'required|string|max:255',
-            New SecureText(),
+            'website_name' => [
+                'required',
+                'string',
+                'max:255',
+                new SecureText(),
+            ],
 
 
-            'tagline'
-            => 'nullable|string|max:255',
-            New SecureText(),
+
+            'tagline' => [
+                'nullable',
+                'string',
+                'max:255',
+                new SecureText(),
+            ],
 
 
 
@@ -85,14 +92,19 @@ class WebsiteSettingController extends Controller
             => 'nullable|string|max:255',
 
 
-            'hero_content'
-            => 'required|string',
-            New SecureText(),
+            'hero_content' => [
+                'required',
+                'string',
+                new SecureText(),
+            ],
 
 
-            'hero_description'
-            => 'required|string',
-            New SecureText(),
+
+            'hero_description' => [
+                'required',
+                'string',
+                new SecureText(),
+            ],
 
 
 
@@ -105,14 +117,18 @@ class WebsiteSettingController extends Controller
             */
 
 
-            'cta_content'
-            => 'required|string',
-            New SecureText(),
+            'cta_content' => [
+                'required',
+                'string',
+                new SecureText(),
+            ],
 
 
-            'cta_description'
-            => 'nullable|string',
-            New SecureText(),
+            'cta_description' => [
+                'nullable',
+                'string',
+                new SecureText(),
+            ],
 
             'cta_button_text'
             => 'required|string|max:255',
@@ -128,17 +144,23 @@ class WebsiteSettingController extends Controller
             */
 
 
-            'footer_text'
-            => 'nullable|string|max:255',
-
+            'footer_text' => [
+                'nullable',
+                'string',
+                'max:255',
+                new SecureText(),
+            ],
 
             'footer_email'
             => 'nullable|email|max:255',
 
 
-            'footer_whatsapp'
-            => 'nullable|string|max:20',
-
+            'footer_whatsapp' => [
+                'nullable',
+                'string',
+                'max:20',
+                new SecureText(),
+            ],
 
 
 

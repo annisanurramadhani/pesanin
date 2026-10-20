@@ -15,7 +15,7 @@ class SubscriptionSeeder extends Seeder
     {
         $promotion = SubscriptionPromotion::where(
             'name',
-            'Promo Spesial PesanIn'
+            'Promo Spesial PesanYuk'
         )->first();
 
         $monthly = PackageDuration::where('name', 'Monthly')

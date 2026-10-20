@@ -13,8 +13,8 @@ class SubscriptionPromotionSeeder extends Seeder
     public function run(): void
     {
         SubscriptionPromotion::updateOrCreate([
-            'name' => 'Promo Spesial PesanIn',
-            'description' => 'Nikmati diskon spesial untuk berlangganan PesanIn.',
+            'name' => 'Promo Spesial PesanYuk',
+            'description' => 'Nikmati diskon spesial untuk berlangganan PesanYuk.',
             'discount_type' => 'percentage',
             'discount_value' => 20,
             'starts_at' => now()->subDay(),

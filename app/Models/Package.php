@@ -47,15 +47,15 @@ class Package extends Model
     public function getSEOTitle(): ?string
     {
         return $this->name
-            ? $this->name . ' | Paket Langganan PesanIn'
-            : 'Paket Langganan PesanIn';
+            ? $this->name . ' | Paket Langganan PesanYuk'
+            : 'Paket Langganan PesanYuk';
     }
 
     public function getSEODescription(): ?string
     {
         $description = $this->description
             ? strip_tags($this->description)
-            : 'Paket langganan PesanIn untuk membantu bisnis mengelola menu, pesanan, QR Code, dan operasional bisnis.';
+            : 'Paket langganan PesanYuk untuk membantu bisnis mengelola menu, pesanan, QR Code, dan operasional bisnis.';
 
         return Str::limit(
             trim($description),

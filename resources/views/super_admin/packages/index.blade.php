@@ -142,16 +142,6 @@
                                                     {{ strip_tags($package->name) }}
                                                 </p>
 
-                                                @if ($package->badge)
-
-                                                    <span class="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold uppercase text-indigo-600">
-
-                                                        {{ strip_tags($package->badge) }}
-
-                                                    </span>
-
-                                                @endif
-
                                             </div>
 
                                             <p class="mt-1 text-xs text-slate-400">

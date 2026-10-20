@@ -41,13 +41,6 @@ class PackageController extends Controller
                 new SecureText(),
             ],
 
-            'badge' => [
-                'nullable',
-                'string',
-                'max:50',
-                new SecureText(),
-            ],
-
             'description' => [
                 'nullable',
                 'string',
@@ -83,7 +76,6 @@ class PackageController extends Controller
             'name.max' => 'Nama paket maksimal 100 karakter.',
             'name.unique' => 'Nama paket sudah digunakan.',
 
-            'badge.max' => 'Badge maksimal 50 karakter.',
             'description.max' => 'Deskripsi maksimal 1000 karakter.',
 
             'status.required' => 'Status wajib dipilih.',
@@ -107,9 +99,7 @@ class PackageController extends Controller
                 Package::create([
                     'name' => trim($validated['name']),
                     'slug' => Str::slug($validated['name']),
-                    'badge' => isset($validated['badge'])
-                        ? trim($validated['badge'])
-                        : null,
+                    'badge' => null,
                     'description' => isset($validated['description'])
                         ? trim($validated['description'])
                         : null,
@@ -166,13 +156,6 @@ class PackageController extends Controller
                 new SecureText(),
             ],
 
-            'badge' => [
-                'nullable',
-                'string',
-                'max:50',
-                new SecureText(),
-            ],
-
             'description' => [
                 'nullable',
                 'string',
@@ -208,7 +191,6 @@ class PackageController extends Controller
             'name.max' => 'Nama paket maksimal 100 karakter.',
             'name.unique' => 'Nama paket sudah digunakan.',
 
-            'badge.max' => 'Badge maksimal 50 karakter.',
             'description.max' => 'Deskripsi maksimal 1000 karakter.',
 
             'status.required' => 'Status wajib dipilih.',

@@ -17,10 +17,10 @@ class UserSeeder extends Seeder
         */
 
         User::updateOrCreate(
-            ['email' => 'admin@pesanin.id'],
+            ['email' => 'admin@pesanYuk.id'],
             [
                 'merchant_id' => null,
-                'name' => 'Super Admin PesanIn',
+                'name' => 'Super Admin PesanYuk',
                 'password' => 'password',
                 'role' => 'super_admin',
                 'status' => 'active',
@@ -55,7 +55,7 @@ class UserSeeder extends Seeder
         */
 
         User::updateOrCreate(
-            ['email' => 'owner@pesanin.id'],
+            ['email' => 'owner@pesanYuk.id'],
             [
                 'merchant_id' => $barokah->id,
                 'name' => 'Owner Barokah',
@@ -71,7 +71,7 @@ class UserSeeder extends Seeder
         );
 
         User::updateOrCreate(
-            ['email' => 'kasir@pesanin.id'],
+            ['email' => 'kasir@pesanYuk.id'],
             [
                 'merchant_id' => $barokah->id,
                 'name' => 'Kasir Barokah',
@@ -87,7 +87,7 @@ class UserSeeder extends Seeder
         );
 
         User::updateOrCreate(
-            ['email' => 'dapur@pesanin.id'],
+            ['email' => 'dapur@pesanYuk.id'],
             [
                 'merchant_id' => $barokah->id,
                 'name' => 'Dapur Barokah',
@@ -109,7 +109,7 @@ class UserSeeder extends Seeder
         */
 
         User::updateOrCreate(
-            ['email' => 'owner2@pesanin.id'],
+            ['email' => 'owner2@pesanYuk.id'],
             [
                 'merchant_id' => $nusantara->id,
                 'name' => 'Owner Nusantara',
@@ -125,7 +125,7 @@ class UserSeeder extends Seeder
         );
 
         User::updateOrCreate(
-            ['email' => 'kasir2@pesanin.id'],
+            ['email' => 'kasir2@pesanYuk.id'],
             [
                 'merchant_id' => $nusantara->id,
                 'name' => 'Kasir Nusantara',
@@ -141,7 +141,7 @@ class UserSeeder extends Seeder
         );
 
         User::updateOrCreate(
-            ['email' => 'dapur2@pesanin.id'],
+            ['email' => 'dapur2@pesanYuk.id'],
             [
                 'merchant_id' => $nusantara->id,
                 'name' => 'Dapur Nusantara',

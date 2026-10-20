@@ -20,7 +20,7 @@ class VerificationCodeMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('Kode Verifikasi Akun PesanIn')
+            ->subject('Kode Verifikasi Akun PesanYuk')
             ->view('emails.verification-code');
     }
 }

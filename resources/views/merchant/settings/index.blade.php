@@ -47,7 +47,7 @@
                     </h3>
 
                     <p class="text-[11px] font-medium text-slate-400">
-                        Kelola informasi bisnis yang digunakan pada sistem PesanIn.
+                        Kelola informasi bisnis yang digunakan pada sistem {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
                     </p>
 
                 </div>
@@ -122,7 +122,7 @@
                             src="{{ $merchant->logo
                                 ? asset('storage/' . $merchant->logo)
                                 : asset('assets/images/menu-default.jpg') }}"
-                            alt="{{ $merchant->logo ? 'Logo ' . $merchant->name : 'Logo default PesanIn' }}"
+                            alt="{{ $merchant->logo ? 'Logo ' . $merchant->name : 'Logo default PesanYuk' }}"
                             class="h-16 w-16 rounded-xl border border-slate-200 bg-white object-cover"
                         >
 

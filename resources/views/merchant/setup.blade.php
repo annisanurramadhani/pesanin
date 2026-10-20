@@ -16,11 +16,11 @@
                 <div>
 
                     <h1 class="text-xl font-extrabold text-slate-900">
-                        PesanIn
+                        {{ strip_tags($setting->website_name ?? 'PesanYuk') }}
                     </h1>
 
                     <p class="text-xs text-slate-500">
-                        Solusi digital untuk bisnis Anda
+                        {{ strip_tags($setting->tagline ?? 'Solusi digital untuk bisnis Anda') }}
                     </p>
 
                 </div>
@@ -74,7 +74,7 @@
                     <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
 
                         Masukkan informasi dasar toko untuk melanjutkan proses
-                        berlangganan PesanIn.
+                        berlangganan {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
 
                     </p>
 

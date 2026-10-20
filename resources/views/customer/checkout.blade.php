@@ -23,7 +23,7 @@
                         </h1>
 
                         <p class="text-xs text-slate-500 mt-0.5">
-                            {{ $merchant->name ?? 'PesanIn' }}
+                            {{ $merchant->name ?? 'PesanYuk' }}
                         </p>
                     </div>
 

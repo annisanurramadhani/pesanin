@@ -8,7 +8,7 @@
 
                 <div>
                     <h1 class="text-xl font-extrabold text-slate-900">
-                        {{ $setting?->website_name ?? 'PesanIn' }}
+                        {{ $setting?->website_name ?? 'PesanYuk' }}
                     </h1>
 
                     <p class="text-xs text-slate-500">

@@ -40,13 +40,13 @@ class VerifyEmailNotification extends Notification
         );
 
         return (new MailMessage)
-            ->subject('Verifikasi Alamat Email - PesanIn')
+            ->subject('Verifikasi Alamat Email - PesanYuk')
             ->greeting('Halo, ' . $notifiable->name . '!')
-            ->line('Terima kasih telah membuat akun di PesanIn.')
+            ->line('Terima kasih telah membuat akun di PesanYuk.')
             ->line('Untuk mengaktifkan akun Anda, silakan verifikasi alamat email ini.')
             ->action('Verifikasi Alamat Email', $verificationUrl)
             ->line('Tautan verifikasi ini berlaku selama 60 menit.')
-            ->line('Jika Anda tidak merasa membuat akun PesanIn, Anda dapat mengabaikan email ini.')
-            ->salutation("Salam,\nTim PesanIn");
+            ->line('Jika Anda tidak merasa membuat akun PesanYuk, Anda dapat mengabaikan email ini.')
+            ->salutation("Salam,\nTim PesanYuk");
     }
 }

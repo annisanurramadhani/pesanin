@@ -144,7 +144,19 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (!result) {
-            alert("Merchant tidak ditemukan.");
+            Swal.fire({
+                icon: "warning",
+                title: "Merchant Tidak Ditemukan",
+                text: "Data merchant yang dicari tidak tersedia.",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#f59e0b",
+                background: "#ffffff",
+                color: "#111827",
+                customClass: {
+                    popup: "rounded-2xl",
+                    confirmButton: "rounded-xl px-5 py-2.5 font-bold",
+                },
+            });
 
             return;
         }

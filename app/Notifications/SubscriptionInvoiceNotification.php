@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Subscription;
+use App\Models\WebsiteSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -31,16 +32,18 @@ class SubscriptionInvoiceNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+         $setting = WebsiteSetting::first();
+
         return (new MailMessage)
             ->subject(
-                'Invoice Langganan PesanIn - ' .
+                'Invoice Langganan ' . $setting->website_name . ' - ' .
                 $this->subscription->invoice_number
             )
             ->view(
                 'emails.subscription-invoice',
                 [
                     'user' => $notifiable,
-                    'subscription' => $this->subscription,
+                    'subscription' => $this->subscription, 'setting' => $setting,
                 ]
             );
     }

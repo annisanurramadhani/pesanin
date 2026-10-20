@@ -18,7 +18,7 @@
         </h1>
 
         <p class="mt-1 text-sm text-slate-500">
-            Tambahkan merchant baru ke dalam platform PesanIn.
+            Tambahkan merchant baru ke dalam platform {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
         </p>
 
     </div>

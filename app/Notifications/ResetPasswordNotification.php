@@ -28,7 +28,7 @@ class ResetPasswordNotification extends Notification
         ], false));
 
         return (new MailMessage)
-            ->subject('Pengaturan Ulang Password PesanIn')
+            ->subject('Pengaturan Ulang Password PesanYuk')
             ->view('emails.reset-password', [
                 'url' => $url,
                 'user' => $notifiable,

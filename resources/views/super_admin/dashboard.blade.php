@@ -6,7 +6,7 @@
             Super Admin Platform
         </h2>
         <p class="text-xs font-medium text-slate-500 mt-1">
-            Kelola seluruh mitra kafe & merchant terdaftar di sistem PesanIn.
+            Kelola seluruh mitra kafe & merchant terdaftar di sistem {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
         </p>
     </div>
 @endsection

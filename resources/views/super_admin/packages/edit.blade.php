@@ -151,32 +151,6 @@
 
                     </div>
 
-
-                    {{-- Badge --}}
-                    <div class="md:col-span-2">
-
-                        <label for="badge" class="mb-2 block text-sm font-bold text-slate-700">
-                            Badge
-                        </label>
-
-                        <input type="text" id="badge" name="badge"
-                            value="{{ old('badge', strip_tags($package->badge)) }}" maxlength="50"
-                            placeholder="Contoh: Popular, Recommended"
-                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 @error('badge') border-rose-500 @enderror">
-
-                        <p class="mt-1.5 text-xs text-slate-400">
-                            Label yang akan ditampilkan sebagai penanda paket.
-                        </p>
-
-                        @error('badge')
-                            <p class="mt-1 text-xs font-semibold text-rose-500">
-                                {{ $message }}
-                            </p>
-                        @enderror
-
-                    </div>
-
-
                     {{-- Description --}}
                     <div class="md:col-span-2">
 
