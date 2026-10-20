@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+
 use App\Models\Order;
 use App\Observers\OrderObserver;
 use App\Models\WalletTransaction;
@@ -34,9 +37,7 @@ use App\Observers\PackageObserver;
 use App\Observers\PackageDurationObserver;
 use App\Models\SubscriptionPromotion;
 use App\Observers\SubscriptionPromotionObserver;
-
 use App\Models\WebsiteSetting;
-use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -63,13 +64,9 @@ class AppServiceProvider extends ServiceProvider
             WithdrawalObserver::class
         );
 
-        Menu::observe(
-            MenuObserver::class
-        );
+        Menu::observe(MenuObserver::class);
 
-        User::observe(
-            UserObserver::class
-        );
+        User::observe(UserObserver::class);
 
         Event::listen(
             Login::class,
@@ -81,31 +78,19 @@ class AppServiceProvider extends ServiceProvider
             LogSuccessfulLogout::class
         );
 
-        Category::observe(
-            CategoryObserver::class
-        );
+        Category::observe(CategoryObserver::class);
 
-        Merchant::observe(
-            MerchantObserver::class
-        );
+        Merchant::observe(MerchantObserver::class);
 
-        Subscription::observe(
-            SubscriptionObserver::class
-        );
+        Subscription::observe(SubscriptionObserver::class);
 
         MerchantBankAccount::observe(
             MerchantBankAccountObserver::class
         );
 
-        QrCode::observe(
-            QrCodeObserver::class
-        );
+        QrCode::observe(QrCodeObserver::class);
 
-
-        Package::observe(
-            PackageObserver::class
-        );
-
+        Package::observe(PackageObserver::class);
 
         PackageDuration::observe(
             PackageDurationObserver::class
@@ -114,22 +99,13 @@ class AppServiceProvider extends ServiceProvider
         SubscriptionPromotion::observe(
             SubscriptionPromotionObserver::class
         );
+        
+        $setting = null;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Global Website Setting
-        |--------------------------------------------------------------------------
-        |
-        | Semua blade dapat langsung menggunakan:
-        | $setting->website_name
-        | $setting->logo
-        | $setting->footer_text
-        |
-        */
+        if (Schema::hasTable('website_settings')) {
+            $setting = WebsiteSetting::first();
+        }
 
-        View::share(
-            'setting',
-            WebsiteSetting::first()
-        );
+        View::share('setting', $setting);
     }
 }
