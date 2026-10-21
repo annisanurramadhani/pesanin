@@ -12,15 +12,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         body {
@@ -37,16 +32,16 @@
 
             <div class="mb-7 text-center">
 
-                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-900/10 overflow-hidden">
-                    <img
-                        src="{{ asset('assets/images/logo-login.png') }}"
-                        alt="PesanYuk"
-                        class="h-full w-full object-contain p-1"
-                    >
+                <div
+                    class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-900/10 overflow-hidden">
+                    <img src="{{ !empty($setting?->logo) ? menuImage($setting->logo) : asset('assets/images/menu-default.jpg') }}"
+                        alt="{{ strip_tags($setting?->website_name ?? 'PesanYuk') }}"
+                        class="h-full w-full object-contain"
+                        onerror="this.onerror=null; this.src='{{ asset('assets/images/menu-default.jpg') }}';">
                 </div>
 
                 <h1 class="text-2xl font-extrabold text-[#111827] tracking-tight">
-                   {{ strip_tags($setting->website_name ?? 'PesanYuk') }}
+                    {{ strip_tags($setting->website_name ?? 'PesanYuk') }}
                 </h1>
 
                 <p class="mt-1 text-[11px] text-slate-500 tracking-widest uppercase font-bold">
@@ -55,7 +50,8 @@
 
             </div>
 
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-xl shadow-slate-900/5 px-7 py-8 sm:px-8 sm:py-9">
+            <div
+                class="bg-white rounded-2xl border border-slate-200 shadow-xl shadow-slate-900/5 px-7 py-8 sm:px-8 sm:py-9">
 
                 {{ $slot }}
 
@@ -82,9 +78,8 @@
 
     {{-- Success --}}
     @if (session('success'))
-
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
 
                 Swal.fire({
                     icon: 'success',
@@ -103,15 +98,13 @@
 
             });
         </script>
-
     @endif
 
 
     {{-- Error --}}
     @if (session('error'))
-
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
 
                 Swal.fire({
                     icon: 'error',
@@ -130,15 +123,13 @@
 
             });
         </script>
-
     @endif
 
 
     {{-- Validation Error --}}
     @if ($errors->any())
-
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
 
                 Swal.fire({
                     icon: 'error',
@@ -157,7 +148,6 @@
 
             });
         </script>
-
     @endif
 
 </body>
