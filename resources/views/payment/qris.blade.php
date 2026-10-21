@@ -1,856 +1,856 @@
 @extends('layouts.app')
 
 @section('body')
+    <div class="min-h-screen bg-slate-50 px-5 py-10">
 
-<div class="min-h-screen bg-slate-50 px-5 py-10">
+        <div class="mx-auto max-w-lg">
 
-    <div class="mx-auto max-w-lg">
-
-        {{-- =========================================================
+            {{-- =========================================================
             HEADER
         ========================================================== --}}
-        <div class="mb-8 text-center">
+            <div class="mb-8 text-center">
 
-            <div
-                class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500 text-2xl text-slate-950 shadow-lg shadow-amber-500/30">
+                <div
+                    class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500 text-2xl text-slate-950 shadow-lg shadow-amber-500/30">
 
-                <i class="fa-solid fa-qrcode"></i>
-
-            </div>
-
-
-            <h1 class="text-2xl font-black text-slate-900">
-
-                Pembayaran QRIS
-
-            </h1>
-
-
-            <p class="mt-2 text-sm text-slate-500">
-
-                Scan QRIS untuk menyelesaikan pembayaran langganan Anda.
-
-            </p>
-
-        </div>
-
-
-        {{-- =========================================================
-            CARD
-        ========================================================== --}}
-        <div
-            class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
-
-
-            {{-- =====================================================
-                INFORMASI PEMBAYARAN
-            ====================================================== --}}
-            <div class="border-b border-slate-200 px-6 py-5">
-
-                <div class="flex items-center justify-between">
-
-                    <div>
-
-                        <p
-                            class="text-xs font-bold uppercase tracking-wider text-slate-400">
-
-                            Total Pembayaran
-
-                        </p>
-
-
-                        <p class="mt-1 text-3xl font-black text-slate-900">
-
-                            Rp
-                            {{ number_format($subscription->price, 0, ',', '.') }}
-
-                        </p>
-
-                    </div>
-
-
-                    <div
-                        class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
-
-                        <i class="fa-solid fa-wallet text-xl"></i>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            {{-- =====================================================
-                QR CODE
-            ====================================================== --}}
-            <div class="px-6 py-8">
-
-                <div class="text-center">
-
-
-                    <p class="text-sm font-bold text-slate-700">
-
-                        Scan QR Code
-
-                    </p>
-
-
-                    <p class="mt-1 text-xs text-slate-400">
-
-                        Gunakan GoPay atau aplikasi pembayaran lain
-                        yang mendukung QRIS.
-
-                    </p>
-
-
-                    {{-- =================================================
-                        QR
-                    ================================================== --}}
-                    <div
-                        class="mx-auto mt-6 flex w-fit items-center justify-center rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
-                        <img
-                            src="{{ $qrUrl }}"
-                            alt="QRIS Pembayaran"
-                            class="h-64 w-64 object-contain"
-                        >
-
-                    </div>
-
-
-                    {{-- =================================================
-                        STATUS
-                    ================================================== --}}
-                    <div
-                        id="payment-status"
-                        class="mx-auto mt-6 flex max-w-sm items-center justify-center gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
-
-                        <i
-                            id="payment-status-icon"
-                            class="fa-solid fa-clock">
-                        </i>
-
-
-                        <span id="payment-status-text">
-
-                            Menunggu pembayaran
-
-                        </span>
-
-                    </div>
-
+                    <i class="fa-solid fa-qrcode"></i>
 
                 </div>
 
 
-                {{-- =====================================================
-                    INFORMASI
-                ====================================================== --}}
-                <div class="mt-7 rounded-2xl bg-slate-50 p-5">
+                <h1 class="text-2xl font-black text-slate-900">
 
-                    <div class="flex gap-3">
+                    Pembayaran QRIS
 
-                        <i
-                            class="fa-solid fa-circle-info mt-0.5 text-amber-500">
-                        </i>
+                </h1>
 
 
+                <p class="mt-2 text-sm text-slate-500">
+
+                    Scan QRIS untuk menyelesaikan pembayaran langganan Anda.
+
+                </p>
+
+            </div>
+
+
+            {{-- =========================================================
+CARD
+========================================================== --}}
+            <div class="rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
+
+                {{-- INFORMASI PEMBAYARAN --}}
+                <div class="border-b border-slate-200 px-6 py-5">
+                    <div class="flex items-center justify-between">
                         <div>
-
-                            <p class="text-sm font-bold text-slate-700">
-
-                                Cara Pembayaran
-
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                                Total Pembayaran
                             </p>
 
-
-                            <ol
-                                class="mt-2 space-y-1 text-xs leading-5 text-slate-500">
-
-                                <li>
-                                    1. Buka aplikasi pembayaran yang mendukung QRIS.
-                                </li>
-
-                                <li>
-                                    2. Pilih menu Scan QR.
-                                </li>
-
-                                <li>
-                                    3. Scan QR Code di atas.
-                                </li>
-
-                                <li>
-                                    4. Periksa nominal pembayaran.
-                                </li>
-
-                                <li>
-                                    5. Konfirmasi pembayaran.
-                                </li>
-
-                            </ol>
-
+                            <p class="mt-1 text-3xl font-black text-slate-900">
+                                Rp {{ number_format($subscription->price, 0, ',', '.') }}
+                            </p>
                         </div>
 
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+                            <i class="fa-solid fa-wallet text-xl"></i>
+                        </div>
                     </div>
-
                 </div>
 
+                {{-- COUNTDOWN PEMBAYARAN --}}
+                <div class="px-6 pt-5">
+                    <div id="payment-countdown-container"
+                        data-expires-at="{{ isset($paymentExpiresAt) && $paymentExpiresAt ? \Illuminate\Support\Carbon::parse($paymentExpiresAt)->toIso8601String() : '' }}"
+                        class="mx-auto max-w-sm rounded-xl border border-amber-100 bg-amber-50 px-4 py-4 text-center">
+                        <p id="payment-countdown-title" class="text-xs font-bold uppercase tracking-wide text-amber-700">
+                            Batas Waktu Pembayaran
+                        </p>
 
-                {{-- =====================================================
-                    ORDER ID
-                ====================================================== --}}
-                <div class="mt-5 text-center">
+                        <p id="payment-countdown" class="mt-2 text-2xl font-black tabular-nums text-amber-700">
+                            24:00:00
+                        </p>
 
-                    <p class="text-xs text-slate-400">
-
-                        ID Pesanan
-
-                    </p>
-
-
-                    <p
-                        class="mt-1 text-xs font-bold text-slate-600">
-
-                        {{ $orderId }}
-
-                    </p>
-
+                        <p id="payment-countdown-description" class="mt-1 text-xs text-slate-500">
+                            Selesaikan pembayaran sebelum waktu habis.
+                        </p>
+                    </div>
                 </div>
 
+                {{-- QR CODE --}}
+                <div class="px-6 py-8">
+                    <div class="text-center">
+                        <p class="text-sm font-bold text-slate-700">
+                            Scan QR Code
+                        </p>
+
+                        <p class="mt-1 text-xs text-slate-400">
+                            Gunakan GoPay atau aplikasi pembayaran lain
+                            yang mendukung QRIS.
+                        </p>
+
+                        {{-- QR --}}
+                        <div
+                            class="mx-auto mt-6 flex w-fit items-center justify-center rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                            <img src="{{ $qrUrl }}" alt="QRIS Pembayaran" class="h-64 w-64 object-contain">
+                        </div>
+
+                        {{-- STATUS --}}
+                        <div id="payment-status"
+                            class="mx-auto mt-6 flex max-w-sm items-center justify-center gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+                            <i id="payment-status-icon" class="fa-solid fa-clock"></i>
+
+                            <span id="payment-status-text">
+                                Menunggu pembayaran
+                            </span>
+                        </div>
+
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-7">
+                            <div class="mx-auto max-w-md">
+                                <div class="text-center">
+                                    <h3 class="text-base font-semibold text-slate-900">
+                                        Cara Pembayaran
+                                    </h3>
+
+                                    <p class="mt-1 text-sm leading-5 text-slate-500">
+                                        Ikuti langkah berikut untuk menyelesaikan pembayaran langganan Anda.
+                                    </p>
+                                </div>
+
+                                <ol class="mt-5 space-y-3">
+                                    <li class="flex items-start gap-3">
+                                        <span
+                                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-sm font-semibold text-amber-600 shadow-sm">
+                                            1
+                                        </span>
+                                        <p class="pt-0.5 text-sm leading-5 text-slate-700">
+                                            Buka aplikasi pembayaran yang mendukung QRIS.
+                                        </p>
+                                    </li>
+
+                                    <li class="flex items-start gap-3">
+                                        <span
+                                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-sm font-semibold text-amber-600 shadow-sm">
+                                            2
+                                        </span>
+                                        <p class="pt-0.5 text-sm leading-5 text-slate-700">
+                                            Pilih menu Scan QR atau pemindaian QRIS.
+                                        </p>
+                                    </li>
+
+                                    <li class="flex items-start gap-3">
+                                        <span
+                                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-sm font-semibold text-amber-600 shadow-sm">
+                                            3
+                                        </span>
+                                        <p class="pt-0.5 text-sm leading-5 text-slate-700">
+                                            Pindai kode QR yang ditampilkan pada halaman ini.
+                                        </p>
+                                    </li>
+
+                                    <li class="flex items-start gap-3">
+                                        <span
+                                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-sm font-semibold text-amber-600 shadow-sm">
+                                            4
+                                        </span>
+                                        <p class="pt-0.5 text-sm leading-5 text-slate-700">
+                                            Pastikan nominal pembayaran sudah sesuai.
+                                        </p>
+                                    </li>
+
+                                    <li class="flex items-start gap-3">
+                                        <span
+                                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-sm font-semibold text-amber-600 shadow-sm">
+                                            5
+                                        </span>
+                                        <p class="pt-0.5 text-sm leading-5 text-slate-700">
+                                            Konfirmasi pembayaran dan tunggu verifikasi otomatis.
+                                        </p>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        {{-- ORDER ID --}}
+                        <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                ID Pesanan
+                            </p>
+
+                            <div class="mt-2 flex items-start justify-between gap-3">
+                                <p class="break-all text-sm font-bold leading-6 text-slate-800">
+                                    {{ $orderId }}
+                                </p>
+                            </div>
+                        </div>
 
-                {{-- =====================================================
-                    STATUS CHECK INFO
-                ====================================================== --}}
-                <div class="mt-5 text-center">
+                        {{-- STATUS CHECK INFO --}}
+                        <div class="mt-4 rounded-xl bg-amber-50 px-4 py-3">
+                            <p id="checking-text" class="flex items-start gap-2 text-left text-xs leading-5 text-amber-800">
+                                <i class="fa-solid fa-rotate mt-0.5 shrink-0"></i>
+                                <span>Status pembayaran akan diperiksa secara otomatis. Silakan tetap menunggu
+                                    konfirmasi.</span>
+                            </p>
+                        </div>
 
-                    <p
-                        id="checking-text"
-                        class="text-xs text-slate-400">
 
-                        Status pembayaran akan diperiksa otomatis.
+                        {{-- ================================================================
+                            SWEETALERT
+                        ================================================================ --}}
+                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-                    </p>
 
-                </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
 
-            </div>
 
-        </div>
+                                /*
+                                |--------------------------------------------------------------------------
+                                | DATA
+                                |--------------------------------------------------------------------------
+                                */
 
+                                const encryptedSubscription =
+                                    @json(encryptId($subscription->id));
 
-        {{-- =========================================================
-            KEMBALI
-        ========================================================== --}}
-        <div class="mt-6 text-center">
 
-            <a
-                href="{{ route('dashboard') }}"
-                id="back-dashboard"
-                class="text-sm font-bold text-slate-500 underline transition hover:text-slate-900">
+                                const statusUrl =
+                                    @json(route('public.subscription.payment.qris.status', encryptId($subscription->id)));
 
-                Kembali ke Dashboard
 
-            </a>
+                                const dashboardUrl =
+                                    @json(route('dashboard'));
 
-        </div>
 
-    </div>
+                                /*
+                                |--------------------------------------------------------------------------
+                                | ELEMENT
+                                |--------------------------------------------------------------------------
+                                */
 
-</div>
+                                const statusBox =
+                                    document.getElementById('payment-status');
 
 
-{{-- ================================================================
-    SWEETALERT
-================================================================ --}}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                                const statusIcon =
+                                    document.getElementById('payment-status-icon');
 
 
-<script>
+                                const statusText =
+                                    document.getElementById('payment-status-text');
 
-document.addEventListener('DOMContentLoaded', function () {
 
+                                const checkingText =
+                                    document.getElementById('checking-text');
 
-    /*
-    |--------------------------------------------------------------------------
-    | DATA
-    |--------------------------------------------------------------------------
-    */
 
-    const encryptedSubscription =
-        @json(encryptId($subscription->id));
+                                /*
+                                |--------------------------------------------------------------------------
+                                | STATE
+                                |--------------------------------------------------------------------------
+                                */
 
+                                let checkingPayment = true;
 
-    const statusUrl =
-        @json(
-            route(
-                'public.subscription.payment.qris.status',
-                encryptId($subscription->id)
-            )
-        );
+                                let paymentCompleted = false;
 
+                                let checkingInterval = null;
 
-    const dashboardUrl =
-        @json(route('dashboard'));
 
+                                /*
+                                |--------------------------------------------------------------------------
+                                | UPDATE STATUS UI
+                                |--------------------------------------------------------------------------
+                                */
 
-    /*
-    |--------------------------------------------------------------------------
-    | ELEMENT
-    |--------------------------------------------------------------------------
-    */
+                                function updateStatus(
+                                    type,
+                                    icon,
+                                    text
+                                ) {
 
-    const statusBox =
-        document.getElementById('payment-status');
 
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Reset
+                                    |--------------------------------------------------------------------------
+                                    */
 
-    const statusIcon =
-        document.getElementById('payment-status-icon');
+                                    statusBox.classList.remove(
+                                        'bg-amber-50',
+                                        'text-amber-700',
+                                        'bg-emerald-50',
+                                        'text-emerald-700',
+                                        'bg-red-50',
+                                        'text-red-700',
+                                        'bg-blue-50',
+                                        'text-blue-700'
+                                    );
 
 
-    const statusText =
-        document.getElementById('payment-status-text');
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Amber
+                                    |--------------------------------------------------------------------------
+                                    */
 
+                                    if (type === 'waiting') {
 
-    const checkingText =
-        document.getElementById('checking-text');
+                                        statusBox.classList.add(
+                                            'bg-amber-50',
+                                            'text-amber-700'
+                                        );
 
+                                    }
 
-    /*
-    |--------------------------------------------------------------------------
-    | STATE
-    |--------------------------------------------------------------------------
-    */
 
-    let checkingPayment = true;
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Blue
+                                    |--------------------------------------------------------------------------
+                                    */
 
-    let paymentCompleted = false;
+                                    if (type === 'processing') {
 
-    let checkingInterval = null;
+                                        statusBox.classList.add(
+                                            'bg-blue-50',
+                                            'text-blue-700'
+                                        );
 
+                                    }
 
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE STATUS UI
-    |--------------------------------------------------------------------------
-    */
 
-    function updateStatus(
-        type,
-        icon,
-        text
-    ) {
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Green
+                                    |--------------------------------------------------------------------------
+                                    */
 
+                                    if (type === 'success') {
 
-        /*
-        |--------------------------------------------------------------------------
-        | Reset
-        |--------------------------------------------------------------------------
-        */
+                                        statusBox.classList.add(
+                                            'bg-emerald-50',
+                                            'text-emerald-700'
+                                        );
 
-        statusBox.classList.remove(
-            'bg-amber-50',
-            'text-amber-700',
-            'bg-emerald-50',
-            'text-emerald-700',
-            'bg-red-50',
-            'text-red-700',
-            'bg-blue-50',
-            'text-blue-700'
-        );
+                                    }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Amber
-        |--------------------------------------------------------------------------
-        */
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Red
+                                    |--------------------------------------------------------------------------
+                                    */
 
-        if (type === 'waiting') {
+                                    if (type === 'failed') {
 
-            statusBox.classList.add(
-                'bg-amber-50',
-                'text-amber-700'
-            );
+                                        statusBox.classList.add(
+                                            'bg-red-50',
+                                            'text-red-700'
+                                        );
 
-        }
+                                    }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Blue
-        |--------------------------------------------------------------------------
-        */
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Icon
+                                    |--------------------------------------------------------------------------
+                                    */
 
-        if (type === 'processing') {
+                                    statusIcon.className =
+                                        'fa-solid ' + icon;
 
-            statusBox.classList.add(
-                'bg-blue-50',
-                'text-blue-700'
-            );
 
-        }
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Text
+                                    |--------------------------------------------------------------------------
+                                    */
 
+                                    statusText.textContent =
+                                        text;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Green
-        |--------------------------------------------------------------------------
-        */
+                                }
 
-        if (type === 'success') {
 
-            statusBox.classList.add(
-                'bg-emerald-50',
-                'text-emerald-700'
-            );
+                                const countdownContainer = document.getElementById(
+                                    'payment-countdown-container'
+                                );
 
-        }
+                                const countdownElement = document.getElementById(
+                                    'payment-countdown'
+                                );
 
+                                const countdownTitle = document.getElementById(
+                                    'payment-countdown-title'
+                                );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Red
-        |--------------------------------------------------------------------------
-        */
+                                const countdownDescription = document.getElementById(
+                                    'payment-countdown-description'
+                                );
 
-        if (type === 'failed') {
+                                const expiryValue = countdownContainer?.dataset.expiresAt || '';
 
-            statusBox.classList.add(
-                'bg-red-50',
-                'text-red-700'
-            );
+                                let countdownInterval = null;
 
-        }
+                                function updatePaymentCountdown() {
+                                    if (!countdownElement || !countdownContainer) {
+                                        return;
+                                    }
 
+                                    if (!expiryValue) {
+                                        countdownElement.textContent = '--:--:--';
+                                        countdownTitle.textContent = 'Batas Waktu Pembayaran';
+                                        countdownDescription.textContent =
+                                            'Waktu kedaluwarsa belum tersedia dari Midtrans.';
+                                        return;
+                                    }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Icon
-        |--------------------------------------------------------------------------
-        */
+                                    const expiry = new Date(expiryValue).getTime();
 
-        statusIcon.className =
-            'fa-solid ' + icon;
+                                    if (!Number.isFinite(expiry)) {
+                                        countdownElement.textContent = '--:--:--';
+                                        countdownDescription.textContent =
+                                            'Waktu kedaluwarsa tidak dapat dibaca.';
+                                        return;
+                                    }
 
+                                    const remaining = expiry - Date.now();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Text
-        |--------------------------------------------------------------------------
-        */
+                                    if (remaining <= 0) {
+                                        countdownElement.textContent = '00:00:00';
 
-        statusText.textContent =
-            text;
+                                        countdownContainer.classList.remove(
+                                            'bg-amber-50',
+                                            'border-amber-100'
+                                        );
+                                        countdownContainer.classList.add(
+                                            'bg-red-50',
+                                            'border-red-100'
+                                        );
 
-    }
+                                        countdownElement.classList.remove('text-amber-700');
+                                        countdownElement.classList.add('text-red-700');
 
+                                        countdownTitle.textContent = 'Waktu Pembayaran Habis';
+                                        countdownDescription.textContent =
+                                            'Batas waktu transaksi telah tercapai.';
 
-    /*
-    |--------------------------------------------------------------------------
-    | CHECK PAYMENT STATUS
-    |--------------------------------------------------------------------------
-    */
+                                        if (countdownInterval) {
+                                            clearInterval(countdownInterval);
+                                            countdownInterval = null;
+                                        }
 
-    async function checkPaymentStatus() {
+                                        return;
+                                    }
 
+                                    const totalSeconds = Math.floor(remaining / 1000);
+                                    const hours = Math.floor(totalSeconds / 3600);
+                                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                                    const seconds = totalSeconds % 60;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Stop Jika Sudah Berhasil
-        |--------------------------------------------------------------------------
-        */
+                                    countdownElement.textContent = [
+                                        String(hours).padStart(2, '0'),
+                                        String(minutes).padStart(2, '0'),
+                                        String(seconds).padStart(2, '0'),
+                                    ].join(':');
+                                }
 
-        if (
-            !checkingPayment ||
-            paymentCompleted
-        ) {
+                                updatePaymentCountdown();
+                                countdownInterval = setInterval(updatePaymentCountdown, 1000);
 
-            return;
+                                window.addEventListener('beforeunload', function() {
+                                    if (countdownInterval) {
+                                        clearInterval(countdownInterval);
+                                    }
+                                });
 
-        }
 
+                                /*
+                                |--------------------------------------------------------------------------
+                                | CHECK PAYMENT STATUS
+                                |--------------------------------------------------------------------------
+                                */
 
-        try {
+                                async function checkPaymentStatus() {
 
 
-            checkingText.textContent =
-                'Memeriksa status pembayaran...';
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Stop Jika Sudah Berhasil
+                                    |--------------------------------------------------------------------------
+                                    */
 
+                                    if (
+                                        !checkingPayment ||
+                                        paymentCompleted
+                                    ) {
 
-            const response =
-                await fetch(
-                    statusUrl,
-                    {
+                                        return;
 
-                        method: 'GET',
+                                    }
 
-                        headers: {
 
-                            'Accept':
-                                'application/json',
+                                    try {
 
-                            'X-Requested-With':
-                                'XMLHttpRequest',
 
-                        },
+                                        checkingText.textContent =
+                                            'Memeriksa status pembayaran...';
 
-                        credentials:
-                            'same-origin',
 
-                        cache:
-                            'no-store',
+                                        const response =
+                                            await fetch(
+                                                statusUrl, {
 
-                    }
-                );
+                                                    method: 'GET',
 
+                                                    headers: {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Response Tidak OK
-            |--------------------------------------------------------------------------
-            */
+                                                        'Accept': 'application/json',
 
-            if (!response.ok) {
+                                                        'X-Requested-With': 'XMLHttpRequest',
 
-                throw new Error(
-                    'Gagal mendapatkan status pembayaran.'
-                );
+                                                    },
 
-            }
+                                                    credentials: 'same-origin',
 
+                                                    cache: 'no-store',
 
-            const data =
-                await response.json();
+                                                }
+                                            );
 
 
-            console.log(
-                'QRIS Status:',
-                data
-            );
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | Response Tidak OK
+                                        |--------------------------------------------------------------------------
+                                        */
 
+                                        if (!response.ok) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | PEMBAYARAN BERHASIL
-            |--------------------------------------------------------------------------
-            */
+                                            throw new Error(
+                                                'Gagal mendapatkan status pembayaran.'
+                                            );
 
-            if (
-                data.paid === true
-                &&
-                data.success === true
-            ) {
+                                        }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Stop Polling
-                |--------------------------------------------------------------------------
-                */
+                                        const data =
+                                            await response.json();
 
-                paymentCompleted =
-                    true;
 
-                checkingPayment =
-                    false;
+                                        console.log(
+                                            'QRIS Status:',
+                                            data
+                                        );
 
 
-                if (checkingInterval) {
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | PEMBAYARAN BERHASIL
+                                        |--------------------------------------------------------------------------
+                                        */
 
-                    clearInterval(
-                        checkingInterval
-                    );
+                                        if (
+                                            data.paid === true &&
+                                            data.success === true
+                                        ) {
 
-                }
 
+                                            /*
+                                            |--------------------------------------------------------------------------
+                                            | Stop Polling
+                                            |--------------------------------------------------------------------------
+                                            */
 
-                /*
-                |--------------------------------------------------------------------------
-                | Update UI
-                |--------------------------------------------------------------------------
-                */
+                                            paymentCompleted =
+                                                true;
 
-                updateStatus(
-                    'success',
-                    'fa-circle-check',
-                    'Pembayaran berhasil'
-                );
+                                            checkingPayment =
+                                                false;
 
 
-                checkingText.textContent =
-                    'Pembayaran berhasil. Mengarahkan ke dashboard...';
+                                            if (checkingInterval) {
 
+                                                clearInterval(
+                                                    checkingInterval
+                                                );
 
-                /*
-                |--------------------------------------------------------------------------
-                | SweetAlert
-                |--------------------------------------------------------------------------
-                */
+                                            }
 
-                Swal.fire({
 
-                    icon: 'success',
+                                            /*
+                                            |--------------------------------------------------------------------------
+                                            | Update UI
+                                            |--------------------------------------------------------------------------
+                                            */
 
-                    title: 'Pembayaran Berhasil!',
+                                            updateStatus(
+                                                'success',
+                                                'fa-circle-check',
+                                                'Pembayaran berhasil'
+                                            );
 
-                    text:
-                        'Langganan Anda berhasil diperpanjang dan sudah aktif.',
 
-                    confirmButtonText:
-                        'Lanjutkan',
+                                            checkingText.textContent =
+                                                'Pembayaran berhasil. Mengarahkan ke dashboard...';
 
-                    confirmButtonColor:
-                        '#f59e0b',
 
-                    allowOutsideClick:
-                        false,
+                                            /*
+                                            |--------------------------------------------------------------------------
+                                            | SweetAlert
+                                            |--------------------------------------------------------------------------
+                                            */
 
-                    allowEscapeKey:
-                        false,
+                                            Swal.fire({
 
-                }).then(function () {
+                                                icon: 'success',
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Dashboard
-                    |--------------------------------------------------------------------------
-                    */
+                                                title: 'Pembayaran Berhasil!',
 
-                    window.location.href =
-                        data.redirect
-                        || dashboardUrl;
+                                                text: 'Langganan Anda berhasil diperpanjang dan sudah aktif.',
 
-                });
+                                                confirmButtonText: 'Lanjutkan',
 
+                                                confirmButtonColor: '#f59e0b',
 
-                return;
+                                                allowOutsideClick: false,
 
-            }
+                                                allowEscapeKey: false,
 
+                                            }).then(function() {
 
-            /*
-            |--------------------------------------------------------------------------
-            | PENDING
-            |--------------------------------------------------------------------------
-            */
+                                                /*
+                                                |--------------------------------------------------------------------------
+                                                | Dashboard
+                                                |--------------------------------------------------------------------------
+                                                */
 
-            if (
-                data.status === 'pending'
-                ||
-                data.paid === false
-            ) {
+                                                window.location.href =
+                                                    data.redirect ||
+                                                    dashboardUrl;
 
-                updateStatus(
-                    'waiting',
-                    'fa-clock',
-                    'Menunggu pembayaran'
-                );
+                                            });
 
 
-                checkingText.textContent =
-                    'Menunggu konfirmasi pembayaran...';
+                                            return;
 
+                                        }
 
-                return;
 
-            }
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | PENDING
+                                        |--------------------------------------------------------------------------
+                                        */
 
+                                        if (
+                                            data.status === 'pending' ||
+                                            data.paid === false
+                                        ) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | EXPIRED
-            |--------------------------------------------------------------------------
-            */
+                                            updateStatus(
+                                                'waiting',
+                                                'fa-clock',
+                                                'Menunggu pembayaran'
+                                            );
 
-            if (
-                data.status === 'expire'
-            ) {
 
-                checkingPayment =
-                    false;
+                                            checkingText.textContent =
+                                                'Menunggu konfirmasi pembayaran...';
 
 
-                if (checkingInterval) {
+                                            return;
 
-                    clearInterval(
-                        checkingInterval
-                    );
+                                        }
 
-                }
 
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | EXPIRED
+                                        |--------------------------------------------------------------------------
+                                        */
 
-                updateStatus(
-                    'failed',
-                    'fa-circle-xmark',
-                    'Pembayaran kedaluwarsa'
-                );
+                                        if (
+                                            data.status === 'expire'
+                                        ) {
 
+                                            checkingPayment =
+                                                false;
 
-                checkingText.textContent =
-                    'QRIS sudah tidak dapat digunakan.';
 
+                                            if (checkingInterval) {
 
-                Swal.fire({
+                                                clearInterval(
+                                                    checkingInterval
+                                                );
 
-                    icon: 'warning',
+                                            }
 
-                    title: 'Pembayaran Kedaluwarsa',
 
-                    text:
-                        'QRIS ini sudah kedaluwarsa. Silakan kembali dan buat pembayaran baru.',
+                                            updateStatus(
+                                                'failed',
+                                                'fa-circle-xmark',
+                                                'Pembayaran kedaluwarsa'
+                                            );
 
-                    confirmButtonText:
-                        'Kembali',
 
-                    confirmButtonColor:
-                        '#f59e0b'
+                                            checkingText.textContent =
+                                                'QRIS sudah tidak dapat digunakan.';
 
-                }).then(function () {
 
-                    window.location.href =
-                        dashboardUrl;
+                                            Swal.fire({
 
-                });
+                                                icon: 'warning',
 
+                                                title: 'Pembayaran Kedaluwarsa',
 
-                return;
+                                                text: 'QRIS ini sudah kedaluwarsa. Silakan kembali dan buat pembayaran baru.',
 
-            }
+                                                confirmButtonText: 'Kembali',
 
+                                                confirmButtonColor: '#f59e0b'
 
-            /*
-            |--------------------------------------------------------------------------
-            | CANCEL / DENY
-            |--------------------------------------------------------------------------
-            */
+                                            }).then(function() {
 
-            if (
-                data.status === 'cancel'
-                ||
-                data.status === 'deny'
-            ) {
+                                                window.location.href =
+                                                    dashboardUrl;
 
-                checkingPayment =
-                    false;
+                                            });
 
 
-                if (checkingInterval) {
+                                            return;
 
-                    clearInterval(
-                        checkingInterval
-                    );
+                                        }
 
-                }
 
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | CANCEL / DENY
+                                        |--------------------------------------------------------------------------
+                                        */
 
-                updateStatus(
-                    'failed',
-                    'fa-circle-xmark',
-                    'Pembayaran gagal'
-                );
+                                        if (
+                                            data.status === 'cancel' ||
+                                            data.status === 'deny'
+                                        ) {
 
+                                            checkingPayment =
+                                                false;
 
-                checkingText.textContent =
-                    'Pembayaran tidak berhasil.';
 
+                                            if (checkingInterval) {
 
-                Swal.fire({
+                                                clearInterval(
+                                                    checkingInterval
+                                                );
 
-                    icon: 'error',
+                                            }
 
-                    title: 'Pembayaran Gagal',
 
-                    text:
-                        'Pembayaran QRIS tidak berhasil. Silakan coba kembali.',
+                                            updateStatus(
+                                                'failed',
+                                                'fa-circle-xmark',
+                                                'Pembayaran gagal'
+                                            );
 
-                    confirmButtonText:
-                        'Kembali',
 
-                    confirmButtonColor:
-                        '#111827'
+                                            checkingText.textContent =
+                                                'Pembayaran tidak berhasil.';
 
-                }).then(function () {
 
-                    window.location.href =
-                        dashboardUrl;
+                                            Swal.fire({
 
-                });
+                                                icon: 'error',
 
+                                                title: 'Pembayaran Gagal',
 
-                return;
+                                                text: 'Pembayaran QRIS tidak berhasil. Silakan coba kembali.',
 
-            }
+                                                confirmButtonText: 'Kembali',
 
+                                                confirmButtonColor: '#111827'
 
-        } catch (error) {
+                                            }).then(function() {
 
+                                                window.location.href =
+                                                    dashboardUrl;
 
-            console.error(
-                'QRIS status error:',
-                error
-            );
+                                            });
 
 
-            checkingText.textContent =
-                'Sedang menunggu konfirmasi pembayaran...';
+                                            return;
 
-        }
+                                        }
 
-    }
 
+                                    } catch (error) {
 
-    /*
-    |--------------------------------------------------------------------------
-    | CEK PERTAMA
-    |--------------------------------------------------------------------------
-    */
 
-    checkPaymentStatus();
+                                        console.error(
+                                            'QRIS status error:',
+                                            error
+                                        );
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | AUTO CHECK
-    |--------------------------------------------------------------------------
-    |
-    | Cek setiap 3 detik.
-    |
-    */
+                                        checkingText.textContent =
+                                            'Sedang menunggu konfirmasi pembayaran...';
 
-    checkingInterval =
-        setInterval(
-            checkPaymentStatus,
-            3000
-        );
+                                    }
 
+                                }
 
-    /*
-    |--------------------------------------------------------------------------
-    | STOP SAAT USER MENINGGALKAN HALAMAN
-    |--------------------------------------------------------------------------
-    */
 
-    window.addEventListener(
-        'beforeunload',
-        function () {
+                                /*
+                                |--------------------------------------------------------------------------
+                                | CEK PERTAMA
+                                |--------------------------------------------------------------------------
+                                */
 
-            checkingPayment =
-                false;
+                                checkPaymentStatus();
 
-            if (checkingInterval) {
 
-                clearInterval(
-                    checkingInterval
-                );
+                                /*
+                                |--------------------------------------------------------------------------
+                                | AUTO CHECK
+                                |--------------------------------------------------------------------------
+                                |
+                                | Cek setiap 3 detik.
+                                |
+                                */
 
-            }
+                                checkingInterval =
+                                    setInterval(
+                                        checkPaymentStatus,
+                                        3000
+                                    );
 
-        }
-    );
 
-});
+                                /*
+                                |--------------------------------------------------------------------------
+                                | STOP SAAT USER MENINGGALKAN HALAMAN
+                                |--------------------------------------------------------------------------
+                                */
 
-</script>
+                                window.addEventListener(
+                                    'beforeunload',
+                                    function() {
 
-@endsection
+                                        checkingPayment =
+                                            false;
+
+                                        if (checkingInterval) {
+
+                                            clearInterval(
+                                                checkingInterval
+                                            );
+
+                                        }
+
+                                    }
+                                );
+
+                            });
+                        </script>
+                    @endsection

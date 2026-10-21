@@ -14,7 +14,7 @@ use App\Http\Controllers\Merchant\StaffController;
 
 use App\Http\Controllers\Payment\PaymentController;
 use App\Http\Controllers\Payment\MidtransNotificationController;
-// use App\Http\Controllers\Payment\MidtransOrderNotificationController;
+use App\Http\Controllers\Payment\MidtransOrderNotificationController;
 use App\Http\Controllers\PayoutCallbackController;
 use App\Http\Controllers\Customer\CustomerOrderController;
 

@@ -7,6 +7,7 @@ use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
 use Midtrans\Config;
 use Midtrans\CoreApi;
 use Midtrans\Snap;
@@ -451,36 +452,33 @@ class PaymentController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Simpan Order ID
+        | Waktu Kedaluwarsa dari Midtrans
         |--------------------------------------------------------------------------
-        |
-        | Digunakan oleh qrisStatus()
-        | untuk mengecek transaksi Midtrans.
-        |
         */
 
-        $subscription->update([
+        $paymentExpiresAt = !empty($response->expiry_time)
+            ? Carbon::parse($response->expiry_time)
+            : null;
 
-            'invoice_number' =>
-                $orderId,
-
+        Log::info('Midtrans QRIS expiry', [
+            'order_id' => $orderId,
+            'transaction_time' => $response->transaction_time ?? null,
+            'expiry_time' => $response->expiry_time ?? null,
         ]);
 
+        $subscription->update([
+            'invoice_number' => $orderId,
+            'payment_type' => 'qris',
+            'expired_at' => $paymentExpiresAt,
+            'payment_status' => 'pending',
+        ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Tampilkan Halaman QRIS Custom
-        |--------------------------------------------------------------------------
-        */
-
-        return view(
-            'payment.qris',
-            compact(
-                'subscription',
-                'orderId',
-                'qrUrl'
-            )
-        );
+        return view('payment.qris', [
+            'subscription' => $subscription,
+            'orderId' => $orderId,
+            'qrUrl' => $qrUrl,
+            'paymentExpiresAt' => $paymentExpiresAt,
+        ]);
     }
 
 
