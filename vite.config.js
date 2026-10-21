@@ -7,6 +7,8 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/css/components/rich-text-editor.css',
+                'resources/js/components/rich-text-editor.js',
             ],
             refresh: true,
         }),
