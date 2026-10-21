@@ -27,7 +27,7 @@
         justify-content: center !important;
     }
 
-    html.sidebar-precollapsed .sidebar-menu > i {
+    html.sidebar-precollapsed .sidebar-menu>i {
         margin-left: auto !important;
         margin-right: auto !important;
     }
@@ -167,18 +167,73 @@
                     </span>
                 </a>
 
-                {{-- KEUANGAN --}}
-                <a href="{{ route('merchant.finance.index') }}"
-                    class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
-    {{ request()->routeIs('merchant.finance.*')
-        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
-        : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
-                    <i class="fa-solid fa-wallet w-5 shrink-0"></i>
 
-                    <span class="sidebar-text whitespace-nowrap transition-all duration-200">
-                        Keuangan
-                    </span>
-                </a>
+                {{-- KEUANGAN --}}
+                @php
+                    $financeMenuActive = request()->routeIs('merchant.kyc.*', 'merchant.withdrawals.*');
+                @endphp
+
+                <div class="space-y-1">
+                    {{-- MENU INDUK --}}
+                    <button type="button" id="financeMenuToggle"
+                        aria-expanded="{{ $financeMenuActive ? 'true' : 'false' }}" aria-controls="financeSubmenu"
+                        class="sidebar-menu w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+        {{ $financeMenuActive
+            ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+            : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                        <i class="fa-solid fa-wallet w-5 shrink-0"></i>
+
+                        <span class="sidebar-text flex-1 text-left whitespace-nowrap transition-all duration-200">
+                            Keuangan
+                        </span>
+
+                        <i id="financeMenuChevron"
+                            class="fa-solid fa-chevron-down text-xs transition-transform duration-200
+            {{ $financeMenuActive ? 'rotate-180' : '' }}"></i>
+                    </button>
+
+                    {{-- SUBMENU --}}
+                    <div id="financeSubmenu" class="{{ $financeMenuActive ? '' : 'hidden' }} space-y-1 pl-4">
+                        {{-- KYC --}}
+                        <a href="{{ route('merchant.kyc.index') }}"
+                            class="sidebar-menu flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200
+            {{ request()->routeIs('merchant.kyc.*')
+                ? 'bg-amber-500 text-slate-950'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-id-card w-5 shrink-0"></i>
+                            <span class="sidebar-text whitespace-nowrap">KYC</span>
+                        </a>
+
+                        {{-- PENARIKAN SALDO --}}
+                        <a href="{{ route('merchant.withdrawals.index') }}"
+                            class="sidebar-menu flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200
+            {{ request()->routeIs('merchant.withdrawals.*')
+                ? 'bg-amber-500 text-slate-950'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-money-bill-transfer w-5 shrink-0"></i>
+                            <span class="sidebar-text whitespace-nowrap">Penarikan Saldo</span>
+                        </a>
+                    </div>
+                </div>
+
+                <script>
+                    (() => {
+                        const toggle = document.getElementById('financeMenuToggle');
+                        const submenu = document.getElementById('financeSubmenu');
+                        const chevron = document.getElementById('financeMenuChevron');
+
+                        if (!toggle || !submenu || !chevron) return;
+
+                        toggle.addEventListener('click', () => {
+                            const isOpen = !submenu.classList.contains('hidden');
+
+                            submenu.classList.toggle('hidden', isOpen);
+                            chevron.classList.toggle('rotate-180', !isOpen);
+                            toggle.setAttribute('aria-expanded', String(!isOpen));
+                        });
+                    })();
+                </script>
+
 
                 {{-- PENGATURAN --}}
                 <a href="{{ route('merchant.settings.index') }}"

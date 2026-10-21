@@ -26,6 +26,7 @@ use App\Http\Controllers\Merchant\VoucherController;
 use App\Http\Controllers\Merchant\MerchantSettingController;
 use App\Http\Controllers\Merchant\FinanceController;
 use App\Http\Controllers\Merchant\MerchantBankAccountController;
+use App\Http\Controllers\Merchant\MerchantKycController;
 use App\Http\Controllers\Merchant\WithdrawalController as MerchantWithdrawalController;
 
 use App\Http\Controllers\PublicSubscription\PublicSubscriptionController;
@@ -858,20 +859,6 @@ Route::middleware('auth')
         // DASHBOARD
         // ==================================================================
 
-        /*
-        |--------------------------------------------------------------------------
-        | Dashboard TIDAK menggunakan subscription.active
-        |--------------------------------------------------------------------------
-        |
-        | Tujuannya supaya:
-        |
-        | Login biasa
-        | -> dashboard
-        | -> subscription expired
-        | -> popup expired langsung muncul
-        |
-        */
-
         Route::middleware('role:owner,kasir')
             ->group(function () {
 
@@ -1165,7 +1152,13 @@ Route::middleware('auth')
                 ->name(
                     'bank-account.store'
                 );
+
             Route::get(
+                '/kyc',
+                [MerchantKycController::class, 'index']
+            )->name('kyc.index');
+            Route::get(
+
                 '/withdrawals',
                 [
                     MerchantWithdrawalController::class,

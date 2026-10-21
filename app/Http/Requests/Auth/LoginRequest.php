@@ -2,16 +2,16 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 
 class LoginRequest extends FormRequest
 {
@@ -33,7 +33,7 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            'g-recaptcha-response' => ['required',],
+            'g-recaptcha-response' => ['required', 'string'],
         ];
     }
 
@@ -44,7 +44,9 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
+        // Verifikasi reCAPTCHA v3 sebelum memproses login.
         $this->validateRecaptcha();
+
         /*
         |--------------------------------------------------------------------------
         | Cari User
@@ -54,7 +56,6 @@ class LoginRequest extends FormRequest
         $email = strtolower(trim($this->input('email')));
 
         $user = User::where('email', $email)->first();
-
 
         /*
         |--------------------------------------------------------------------------
@@ -68,7 +69,6 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Cek Status Akun
@@ -81,7 +81,6 @@ class LoginRequest extends FormRequest
                     'Akun Anda tidak aktif. Silakan hubungi administrator.',
             ]);
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -97,17 +96,13 @@ class LoginRequest extends FormRequest
                 $user->login_locked_until
             );
 
-            $minutes = max(
-                1,
-                (int) ceil($seconds / 60)
-            );
+            $minutes = max(1, (int) ceil($seconds / 60));
 
             throw ValidationException::withMessages([
                 'email' =>
                     "Akun Anda sedang dikunci. Silakan coba lagi dalam {$minutes} menit.",
             ]);
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -119,17 +114,13 @@ class LoginRequest extends FormRequest
             $user->login_locked_until &&
             now()->gte($user->login_locked_until);
 
-
         /*
         |--------------------------------------------------------------------------
         | Cek Password
         |--------------------------------------------------------------------------
         */
 
-        if (!Hash::check(
-            $this->input('password'),
-            $user->password
-        )) {
+        if (!Hash::check($this->input('password'), $user->password)) {
 
             /*
             |--------------------------------------------------------------------------
@@ -138,7 +129,6 @@ class LoginRequest extends FormRequest
             */
 
             if ($lockExpired) {
-
                 $user->update([
                     'status' => 'inactive',
                     'failed_login_attempts' => 0,
@@ -151,7 +141,6 @@ class LoginRequest extends FormRequest
                 ]);
             }
 
-
             /*
             |--------------------------------------------------------------------------
             | Tambah Failed Attempt
@@ -161,7 +150,6 @@ class LoginRequest extends FormRequest
             $failedAttempts =
                 (int) $user->failed_login_attempts + 1;
 
-
             /*
             |--------------------------------------------------------------------------
             | Percobaan Ke-3 → Lock 30 Menit
@@ -169,7 +157,6 @@ class LoginRequest extends FormRequest
             */
 
             if ($failedAttempts >= 3) {
-
                 $user->update([
                     'failed_login_attempts' => 3,
                     'login_locked_until' => now()->addMinutes(30),
@@ -181,7 +168,6 @@ class LoginRequest extends FormRequest
                 ]);
             }
 
-
             /*
             |--------------------------------------------------------------------------
             | Simpan Failed Attempt
@@ -191,7 +177,6 @@ class LoginRequest extends FormRequest
             $user->update([
                 'failed_login_attempts' => $failedAttempts,
             ]);
-
 
             /*
             |--------------------------------------------------------------------------
@@ -207,7 +192,6 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Password Benar
@@ -218,7 +202,6 @@ class LoginRequest extends FormRequest
             'failed_login_attempts' => 0,
             'login_locked_until' => null,
         ]);
-
 
         /*
         |--------------------------------------------------------------------------
@@ -239,7 +222,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -260,50 +243,110 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(
+            Str::lower($this->string('email')) . '|' . $this->ip()
+        );
     }
+
+    /**
+     * Validate the reCAPTCHA v3 token with Google.
+     *
+     * Requires a compatible secret key for the siteverify API.
+     *
+     * @throws ValidationException
+     */
     protected function validateRecaptcha(): void
     {
         $response = $this->input('g-recaptcha-response');
+        $secretKey = config('services.recaptcha.secret_key');
 
         if (!$response) {
             throw ValidationException::withMessages([
                 'g-recaptcha-response' =>
-                    'Silakan centang "I\'m not a robot".',
+                    'Verifikasi keamanan gagal. Silakan coba lagi.',
+            ]);
+        }
+
+        if (!$secretKey) {
+            report(new \RuntimeException(
+                'Konfigurasi secret key reCAPTCHA belum tersedia.'
+            ));
+
+            throw ValidationException::withMessages([
+                'g-recaptcha-response' =>
+                    'Layanan verifikasi sedang bermasalah. Silakan coba lagi nanti.',
             ]);
         }
 
         try {
-            $result = Http::asForm()
+            $httpResponse = Http::asForm()
                 ->timeout(10)
                 ->post(
                     'https://www.google.com/recaptcha/api/siteverify',
                     [
-                        'secret' => config(
-                            'services.recaptcha.secret_key'
-                        ),
-
+                        'secret' => $secretKey,
                         'response' => $response,
-
                         'remoteip' => $this->ip(),
                     ]
-                )
-                ->json();
+                );
+
+            if (!$httpResponse->successful()) {
+                throw new \RuntimeException(
+                    'Server reCAPTCHA tidak merespons dengan sukses.'
+                );
+            }
+
+            $result = $httpResponse->json();
 
         } catch (\Throwable $e) {
-
             report($e);
 
             throw ValidationException::withMessages([
                 'g-recaptcha-response' =>
-                    'Verifikasi reCAPTCHA gagal. Silakan coba lagi.',
+                    'Verifikasi keamanan gagal. Silakan coba lagi.',
             ]);
         }
 
+        // Token harus valid menurut Google.
         if (!($result['success'] ?? false)) {
             throw ValidationException::withMessages([
                 'g-recaptcha-response' =>
-                    'Verifikasi reCAPTCHA tidak valid. Silakan coba lagi.',
+                    'Verifikasi keamanan tidak valid. Silakan coba lagi.',
+            ]);
+        }
+
+        // Pastikan token dibuat untuk aksi login.
+        if (($result['action'] ?? null) !== 'login') {
+            throw ValidationException::withMessages([
+                'g-recaptcha-response' =>
+                    'Verifikasi keamanan tidak sesuai. Silakan muat ulang halaman.',
+            ]);
+        }
+
+        // Tolak token jika skor terlalu rendah.
+        $score = $result['score'] ?? null;
+
+        if (!is_numeric($score) || (float) $score < 0.5) {
+            throw ValidationException::withMessages([
+                'g-recaptcha-response' =>
+                    'Aktivitas login terdeteksi mencurigakan. Silakan coba lagi.',
+            ]);
+        }
+
+        // Pastikan hostname sesuai dengan host aplikasi saat ini.
+        $hostname = strtolower(
+            (string) ($result['hostname'] ?? '')
+        );
+
+        $expectedHostname = strtolower($this->getHost());
+
+        if (
+            $hostname === '' ||
+            $hostname !== $expectedHostname
+        ) {
+            throw ValidationException::withMessages([
+                'g-recaptcha-response' =>
+                    'Domain verifikasi tidak sesuai. Silakan muat ulang halaman.',
             ]);
         }
     }
