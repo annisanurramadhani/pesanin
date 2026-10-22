@@ -16,8 +16,7 @@
         }
     </style>
 
-    <aside
-        id="sidebar"
+    <aside id="sidebar"
         class="w-64 bg-[#111827] text-slate-300 flex flex-col justify-between shrink-0 min-h-screen border-r border-slate-800 shadow-2xl transition-all duration-300 ease-in-out">
 
         <div>
@@ -29,24 +28,18 @@
             <div class="px-5 py-5 flex items-center justify-between border-b border-slate-800/80">
 
                 {{-- LOGO + BRAND --}}
-                <div
-                    id="sidebarLogo"
-                    class="flex items-center gap-3 overflow-hidden transition-all duration-300">
+                <div id="sidebarLogo" class="flex items-center gap-3 overflow-hidden transition-all duration-300">
 
                     @php
                         $websiteSetting = \App\Models\WebsiteSetting::first();
                     @endphp
 
                     <div class="w-10 h-10 shrink-0 flex items-center justify-center">
-                        <img
-                            src="{{ menuImage($websiteSetting?->logo) }}"
-                            alt="PesanYuk"
+                        <img src="{{ menuImage($websiteSetting?->logo) }}" alt="PesanYuk"
                             class="w-10 h-10 rounded-lg object-cover">
                     </div>
 
-                    <div
-                        id="sidebarBrand"
-                        class="whitespace-nowrap transition-all duration-300">
+                    <div id="sidebarBrand" class="whitespace-nowrap transition-all duration-300">
 
                         <h1 class="font-bold text-white text-base tracking-wide">
                             Command Center
@@ -62,15 +55,11 @@
 
 
                 {{-- HAMBURGER --}}
-                <button
-                    type="button"
-                    id="sidebarToggle"
+                <button type="button" id="sidebarToggle"
                     class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200"
                     title="Toggle Sidebar">
 
-                    <i
-                        id="sidebarToggleIcon"
-                        class="fa-solid fa-bars text-lg transition-transform duration-300">
+                    <i id="sidebarToggleIcon" class="fa-solid fa-bars text-lg transition-transform duration-300">
                     </i>
 
                 </button>
@@ -89,8 +78,7 @@
                     DASHBOARD
                 ======================================================= --}}
 
-                <a
-                    href="{{ route('super_admin.dashboard') }}"
+                <a href="{{ route('super_admin.dashboard') }}"
                     class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('super_admin.dashboard')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
@@ -109,8 +97,7 @@
                     KELOLA MERCHANT
                 ======================================================= --}}
 
-                <a
-                    href="{{ route('super_admin.merchants.index') }}"
+                <a href="{{ route('super_admin.merchants.index') }}"
                     class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('super_admin.merchants.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
@@ -137,17 +124,13 @@
                         request()->routeIs('super_admin.withdrawals.*');
                 @endphp
 
-                <div
-                    x-data="{ open: @js($isKeuanganActive) }"
-                    class="relative">
+                <div x-data="{ open: @js($isKeuanganActive) }" class="relative">
 
                     {{-- ==================================================
                         PARENT MENU KEUANGAN
                     =================================================== --}}
 
-                    <button
-                        type="button"
-                        @click="open = !open"
+                    <button type="button" @click="open = !open"
                         class="sidebar-menu w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                         {{ $isKeuanganActive
                             ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
@@ -166,8 +149,7 @@
 
 
                         {{-- BADGE WITHDRAWAL PENDING --}}
-                        <span
-                            id="withdrawalParentBadge"
+                        <span id="withdrawalParentBadge"
                             class="withdrawal-notification-badge hidden shrink-0 min-w-[22px] h-[22px] px-1.5
                                 rounded-full bg-red-500 text-white text-[11px] font-black
                                 items-center justify-center shadow-lg shadow-red-500/30">
@@ -178,8 +160,7 @@
 
 
                         {{-- CHEVRON --}}
-                        <i
-                            class="sidebar-chevron fa-solid fa-chevron-down text-xs shrink-0 transition-transform duration-200"
+                        <i class="sidebar-chevron fa-solid fa-chevron-down text-xs shrink-0 transition-transform duration-200"
                             :class="{ 'rotate-180': open }">
                         </i>
 
@@ -190,19 +171,14 @@
                         SUB MENU KEUANGAN
                     =================================================== --}}
 
-                    <div
-                        x-cloak
-                        x-show="open"
-                        x-transition
-                        class="ml-4 pl-4 border-l border-slate-700 space-y-1">
+                    <div x-cloak x-show="open" x-transition class="ml-4 pl-4 border-l border-slate-700 space-y-1">
 
 
                         {{-- ==================================================
                             REKENING MERCHANT
                         =================================================== --}}
 
-                        <a
-                            href="{{ route('super_admin.merchant_bank_accounts.index') }}"
+                        <a href="{{ route('super_admin.merchant_bank_accounts.index') }}"
                             class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200
                             {{ request()->routeIs('super_admin.merchant_bank_accounts.*')
                                 ? 'bg-amber-500/15 text-amber-400'
@@ -221,8 +197,7 @@
                             PENARIKAN SALDO
                         =================================================== --}}
 
-                        <a
-                            href="{{ route('super_admin.withdrawals.index') }}"
+                        <a href="{{ route('super_admin.withdrawals.index') }}"
                             class="flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200
                             {{ request()->routeIs('super_admin.withdrawals.*')
                                 ? 'bg-amber-500/15 text-amber-400'
@@ -241,8 +216,7 @@
 
 
                             {{-- BADGE WITHDRAWAL PENDING --}}
-                            <span
-                                id="withdrawalSubmenuBadge"
+                            <span id="withdrawalSubmenuBadge"
                                 class="withdrawal-notification-badge hidden shrink-0 min-w-[22px] h-[22px] px-1.5
                                     rounded-full bg-red-500 text-white text-[11px] font-black
                                     items-center justify-center shadow-lg shadow-red-500/30">
@@ -253,8 +227,54 @@
 
                         </a>
 
+
                     </div>
 
+                </div>
+
+                @php
+                    $isKycVerificationActive =
+                        request()->routeIs('super_admin.kyc_identity.*') ||
+                        request()->routeIs('super_admin.kyc_bank.*');
+                @endphp
+
+                <div x-data="{ open: @js($isKycVerificationActive) }" class="relative">
+                    <button type="button" @click="open = !open"
+                        class="sidebar-menu w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
+        {{ $isKycVerificationActive
+            ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
+            : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <i class="fa-solid fa-shield-halved w-5 shrink-0"></i>
+
+                            <span class="sidebar-text whitespace-nowrap transition-all duration-200">
+                                Verifikasi KYC
+                            </span>
+                        </div>
+
+                        <i class="sidebar-chevron fa-solid fa-chevron-down text-xs shrink-0 transition-transform duration-200"
+                            :class="{ 'rotate-180': open }"></i>
+                    </button>
+
+                    <div x-cloak x-show="open" x-transition class="ml-4 pl-4 border-l border-slate-700 space-y-1">
+                        <a href="{{ route('super_admin.kyc_identity.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200
+            {{ request()->routeIs('super_admin.kyc_identity.*')
+                ? 'bg-amber-500/15 text-amber-400'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-id-card w-4 shrink-0"></i>
+                            <span class="sidebar-text whitespace-nowrap">Verifikasi Identitas</span>
+                        </a>
+
+                        <a href="{{ route('super_admin.kyc_bank.index') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200
+            {{ request()->routeIs('super_admin.kyc_bank.*')
+                ? 'bg-amber-500/15 text-amber-400'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-building-columns w-4 shrink-0"></i>
+                            <span class="sidebar-text whitespace-nowrap">Verifikasi Rekening</span>
+                        </a>
+                    </div>
                 </div>
 
 
@@ -262,8 +282,7 @@
                     KELOLA PAKET
                 ======================================================= --}}
 
-                <a
-                    href="{{ route('super_admin.packages.index') }}"
+                <a href="{{ route('super_admin.packages.index') }}"
                     class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('super_admin.packages.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
@@ -282,8 +301,7 @@
                     KELOLA LANGGANAN
                 ======================================================= --}}
 
-                <a
-                    href="{{ route('super_admin.subscriptions.index') }}"
+                <a href="{{ route('super_admin.subscriptions.index') }}"
                     class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('super_admin.subscriptions.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
@@ -302,8 +320,7 @@
                     KELOLA AKUN
                 ======================================================= --}}
 
-                <a
-                    href="{{ route('super_admin.accounts.index') }}"
+                <a href="{{ route('super_admin.accounts.index') }}"
                     class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('super_admin.accounts.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
@@ -322,8 +339,7 @@
                     KELOLA DISKON
                 ======================================================= --}}
 
-                <a
-                    href="{{ route('super_admin.subscription_promotions.index') }}"
+                <a href="{{ route('super_admin.subscription_promotions.index') }}"
                     class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('super_admin.subscription_promotions.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
@@ -342,8 +358,7 @@
                     LOKASI MERCHANT
                 ======================================================= --}}
 
-                <a
-                    href="{{ route('super_admin.merchant_locations.index') }}"
+                <a href="{{ route('super_admin.merchant_locations.index') }}"
                     class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('super_admin.merchant_locations.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
@@ -362,8 +377,7 @@
                     PENGATURAN WEBSITE
                 ======================================================= --}}
 
-                <a
-                    href="{{ route('super_admin.settings.index') }}"
+                <a href="{{ route('super_admin.settings.index') }}"
                     class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('super_admin.settings.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
@@ -382,8 +396,7 @@
                     AUDIT LOG
                 ======================================================= --}}
 
-                <a
-                    href="{{ route('super_admin.audit_logs.index') }}"
+                <a href="{{ route('super_admin.audit_logs.index') }}"
                     class="sidebar-menu flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200
                     {{ request()->routeIs('super_admin.audit_logs.*')
                         ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30'
@@ -442,9 +455,7 @@
 
                     @csrf
 
-                    <button
-                        type="submit"
-                        class="p-1.5 text-slate-400 hover:text-rose-400 transition"
+                    <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-400 transition"
                         title="Logout">
 
                         <i class="fa-solid fa-right-from-bracket"></i>
@@ -464,10 +475,8 @@
         WITHDRAWAL NOTIFICATION CONFIGURATION
     ================================================================ --}}
 
-    <div
-        id="withdrawalNotificationConfig"
-        data-pending-count-url="{{ route('super_admin.withdrawals.pending-count') }}"
-        class="hidden">
+    <div id="withdrawalNotificationConfig"
+        data-pending-count-url="{{ route('super_admin.withdrawals.pending-count') }}" class="hidden">
     </div>
 
 

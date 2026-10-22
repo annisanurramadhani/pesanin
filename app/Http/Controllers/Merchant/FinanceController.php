@@ -246,37 +246,32 @@ class FinanceController extends Controller
             )
             ->withQueryString();
 
+        $identityKyc = \Illuminate\Support\Facades\DB::table('merchant_kyc_submissions')
+            ->where('merchant_id', $merchantId)
+            ->first();
 
+        $identityApproved = $identityKyc
+            && $identityKyc->status === 'approved';
 
+        $bankApproved = $bankAccount !== null
+            && $bankAccount->is_locked
+            && $bankAccount->status === 'active';
 
+        $canWithdraw = $identityApproved && $bankApproved;
 
-
-
-
-        return view(
-
-            'merchant.finance.index',
-
-            compact(
-
+        return view('merchant.finance.index', compact(
                 'wallet',
-
                 'transactions',
-
                 'totalIncome',
-
                 'totalWithdraw',
-
                 'balance',
-
                 'bankAccount',
-
                 'websiteSetting',
-
-                'withdrawals'
-
+                'withdrawals',
+                'identityApproved',
+                'bankApproved',
+                'canWithdraw'
             )
-
         );
     }
 

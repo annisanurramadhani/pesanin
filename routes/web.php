@@ -7,7 +7,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seo\SitemapController;
 use App\Http\Controllers\Seo\RobotsController;
 
-
 use App\Http\Controllers\Auth\VerifyEmailController;
 
 use App\Http\Controllers\Merchant\StaffController;
@@ -40,6 +39,8 @@ use App\Http\Controllers\SuperAdmin\SubscriptionPromotionController;
 use App\Http\Controllers\SuperAdmin\WebsiteSettingController;
 use App\Http\Controllers\SuperAdmin\AccountController;
 use App\Http\Controllers\SuperAdmin\WithdrawalController;
+use App\Http\Controllers\SuperAdmin\KycIdentityController;
+use App\Http\Controllers\SuperAdmin\KycBankController;
 use App\Http\Controllers\SuperAdmin\MerchantBankAccountController as SuperAdminMerchantBankAccountController;
 use App\Http\Controllers\SuperAdmin\AuditLogController;
 
@@ -626,24 +627,6 @@ Route::middleware([
 
 
         Route::get(
-            '/merchant-bank-accounts/create',
-            [
-                SuperAdminMerchantBankAccountController::class,
-                'create'
-            ]
-        )->name('merchant_bank_accounts.create');
-
-
-        Route::post(
-            '/merchant-bank-accounts',
-            [
-                SuperAdminMerchantBankAccountController::class,
-                'store'
-            ]
-        )->name('merchant_bank_accounts.store');
-
-
-        Route::get(
             '/merchant-bank-accounts/{encryptedId}/edit',
             [
                 SuperAdminMerchantBankAccountController::class,
@@ -669,7 +652,40 @@ Route::middleware([
             ]
         )->name('merchant_bank_accounts.destroy');
 
+        Route::get(
+            '/kyc/identitas',
+            [KycIdentityController::class, 'index']
+        )->name('kyc_identity.index');
 
+        Route::post(
+            '/kyc/identitas/{id}/approve',
+            [KycIdentityController::class, 'approve']
+        )->name('kyc_identity.approve');
+
+        Route::post(
+            '/kyc/identitas/{id}/reject',
+            [KycIdentityController::class, 'reject']
+        )->name('kyc_identity.reject');
+
+        Route::get(
+            '/kyc/identitas/{id}/document/{type}',
+            [KycIdentityController::class, 'document']
+        )->name('kyc_identity.document');
+
+        Route::get(
+            '/kyc/rekening',
+            [KycBankController::class, 'index']
+        )->name('kyc_bank.index');
+
+        Route::post(
+            '/kyc/rekening/{id}/approve',
+            [KycBankController::class, 'approve']
+        )->name('kyc_bank.approve');
+
+        Route::post(
+            '/kyc/rekening/{id}/reject',
+            [KycBankController::class, 'reject']
+        )->name('kyc_bank.reject');
 
         // ==================================================================
         // Audit Log
@@ -1152,11 +1168,21 @@ Route::middleware('auth')
                 ->name(
                     'bank-account.store'
                 );
-
             Route::get(
                 '/kyc',
                 [MerchantKycController::class, 'index']
             )->name('kyc.index');
+
+            Route::post(
+                '/kyc',
+                [MerchantKycController::class, 'store']
+            )->name('kyc.store');
+
+            Route::post(
+                '/kyc/bank',
+                [MerchantKycController::class, 'storeBank']
+            )->name('kyc.bank.store');
+
             Route::get(
 
                 '/withdrawals',

@@ -12,13 +12,40 @@ use Illuminate\Support\Facades\DB;
 
 class WithdrawalController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         return redirect()->route('merchant.finance.index');
     }
 
     public function store(Request $request)
     {
+        $merchant = $request->user()->merchant;
+
+        if (! $merchant) {
+            return back()->with('error', 'Merchant tidak ditemukan.');
+        }
+
+        $identity = DB::table('merchant_kyc_submissions')
+            ->where('merchant_id', $merchant->id)
+            ->first();
+
+        if (! $identity || $identity->status !== 'approved') {
+            return redirect()
+                ->route('merchant.kyc.index')
+                ->with('error', 'Verifikasi identitas harus disetujui sebelum melakukan penarikan saldo.');
+        }
+
+        $bankAccount = MerchantBankAccount::where('merchant_id', $merchant->id)
+            ->where('status', 'active')
+            ->where('is_locked', true)
+            ->first();
+
+        if (! $bankAccount) {
+            return redirect()
+                ->route('merchant.kyc.index')
+                ->with('error', 'Verifikasi rekening bank harus disetujui sebelum melakukan penarikan saldo.');
+        }
+
         $request->validate([
             'amount' => [
                 'required',
@@ -27,32 +54,35 @@ class WithdrawalController extends Controller
             ],
         ]);
 
-        $merchant = $request->user()->merchant;
-
-        if (! $merchant) {
-            return back()->with(
-                'error',
-                'Merchant tidak ditemukan.'
-            );
-        }
-
         try {
             DB::transaction(function () use ($merchant, $request) {
-                // This row lock serializes withdrawal requests for one merchant.
-                $wallet = MerchantWallet::where('merchant_id', $merchant->id)->lockForUpdate()->firstOrFail();
-                $amount = (float) $request->amount;
+                $identity = DB::table('merchant_kyc_submissions')
+                    ->where('merchant_id', $merchant->id)
+                    ->lockForUpdate()
+                    ->first();
 
-                if ($amount > $wallet->balance) {
-                    throw new \DomainException('Saldo tidak mencukupi.');
+                if (! $identity || $identity->status !== 'approved') {
+                    throw new \DomainException('Verifikasi identitas belum disetujui.');
                 }
+
+                $wallet = MerchantWallet::where('merchant_id', $merchant->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
                 $bankAccount = MerchantBankAccount::where('merchant_id', $merchant->id)
                     ->where('status', 'active')
+                    ->where('is_locked', true)
                     ->lockForUpdate()
                     ->first();
 
                 if (! $bankAccount) {
-                    throw new \DomainException('Rekening bank aktif belum tersedia.');
+                    throw new \DomainException('Verifikasi rekening bank belum disetujui.');
+                }
+
+                $amount = (float) $request->amount;
+
+                if ($amount > $wallet->balance) {
+                    throw new \DomainException('Saldo tidak mencukupi.');
                 }
 
                 if (Withdrawal::where('merchant_id', $merchant->id)
@@ -74,9 +104,6 @@ class WithdrawalController extends Controller
             return back()->with('error', 'Wallet merchant tidak ditemukan.');
         }
 
-        return back()->with(
-            'success',
-            'Pengajuan penarikan berhasil dikirim ke admin.'
-        );
+        return back()->with('success', 'Pengajuan penarikan berhasil dikirim ke admin.');
     }
 }

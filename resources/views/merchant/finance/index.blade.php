@@ -144,27 +144,24 @@
 
 
                 <div class="flex w-full flex-col gap-3 md:ml-auto md:w-auto md:flex-row">
-
-                    @if ($bankAccount)
+                    @if ($canWithdraw)
                         <button type="button" onclick="openWithdrawModal()"
                             class="finance-btn w-full justify-center md:w-auto">
                             <i class="fa-solid fa-money-bill-transfer mr-2"></i>
                             Tarik Saldo
                         </button>
                     @else
-                        <button type="button" onclick="openBankModal()"
-                            class="finance-btn w-full justify-center md:w-auto">
-                            <i class="fa-solid fa-building-columns mr-2"></i>
-                            Tambah Rekening
-                        </button>
+                        <a href="{{ route('merchant.kyc.index') }}"
+                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3 font-bold text-slate-950 transition hover:bg-amber-400 md:w-auto">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            Selesaikan Verifikasi KYC
+                        </a>
                     @endif
-
 
                     <a href="{{ route('merchant.finance.pdf') }}" class="finance-btn-dark w-full justify-center md:w-auto">
                         <i class="fa-solid fa-file-pdf mr-2"></i>
                         Export PDF
                     </a>
-
                 </div>
 
             </form>
@@ -249,43 +246,32 @@
 
                 </div>
             @else
-                {{-- EMPTY ACCOUNT --}}
                 <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-
                     <div class="flex items-center gap-4">
-
-                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
-
-                            <i class="fa-solid fa-building-columns"></i>
-
+                        <div
+                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                            <i class="fa-solid fa-lock"></i>
                         </div>
 
-
                         <div>
-
                             <h3 class="text-base font-black text-slate-800">
-                                Rekening Penarikan Belum Tersedia
+                                Rekening Penarikan Belum Terverifikasi
                             </h3>
 
                             <p class="mt-1 text-sm text-slate-500">
-                                Tambahkan rekening untuk menerima pencairan saldo.
+                                Lengkapi verifikasi identitas dan rekening melalui halaman KYC untuk membuka penarikan
+                                saldo.
                             </p>
-
                         </div>
-
                     </div>
 
-
-                    <button type="button" onclick="openBankModal()" class="finance-btn w-full justify-center md:w-auto">
-
-                        <i class="fa-solid fa-building-columns mr-2"></i>
-
-                        Tambah Rekening
-
-                    </button>
-
+                    <a href="{{ route('merchant.kyc.index') }}" class="finance-btn w-full justify-center md:w-auto">
+                        <i class="fa-solid fa-shield-halved mr-2"></i>
+                        Buka Verifikasi KYC
+                    </a>
                 </div>
             @endif
+
 
         </div>
 
