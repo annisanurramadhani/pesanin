@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use App\Models\MerchantKycSubmission;
+use Illuminate\Support\Facades\Auth;
 
 class KycIdentityController extends Controller
 {
-    
+
     public function index(Request $request)
     {
         $baseQuery = DB::table('merchant_kyc_submissions');
@@ -51,8 +53,8 @@ class KycIdentityController extends Controller
     public function approve(int $id)
     {
         DB::transaction(function () use ($id) {
-            $submission = DB::table('merchant_kyc_submissions')
-                ->where('id', $id)
+            $submission = MerchantKycSubmission::query()
+                ->whereKey($id)
                 ->lockForUpdate()
                 ->first();
 
@@ -64,15 +66,12 @@ class KycIdentityController extends Controller
                 ]);
             }
 
-            DB::table('merchant_kyc_submissions')
-                ->where('id', $id)
-                ->update([
-                    'status' => 'approved',
-                    'rejection_note' => null,
-                    'reviewed_by' => auth()->id(),
-                    'reviewed_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            $submission->status = 'approved';
+            $submission->rejection_note = null;
+            $submission->reviewed_by = Auth::id();
+            $submission->reviewed_at = now();
+
+            $submission->save();
         });
 
         return redirect()
@@ -87,8 +86,8 @@ class KycIdentityController extends Controller
         ]);
 
         DB::transaction(function () use ($id, $validated) {
-            $submission = DB::table('merchant_kyc_submissions')
-                ->where('id', $id)
+            $submission = MerchantKycSubmission::query()
+                ->whereKey($id)
                 ->lockForUpdate()
                 ->first();
 
@@ -100,15 +99,12 @@ class KycIdentityController extends Controller
                 ]);
             }
 
-            DB::table('merchant_kyc_submissions')
-                ->where('id', $id)
-                ->update([
-                    'status' => 'rejected',
-                    'rejection_note' => $validated['rejection_note'],
-                    'reviewed_by' => auth()->id(),
-                    'reviewed_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            $submission->status = 'rejected';
+            $submission->rejection_note = $validated['rejection_note'];
+            $submission->reviewed_by = \Illuminate\Support\Facades\Auth::id();
+            $submission->reviewed_at = now();
+
+            $submission->save();
         });
 
         return redirect()

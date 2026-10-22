@@ -38,6 +38,9 @@ use App\Observers\PackageDurationObserver;
 use App\Models\SubscriptionPromotion;
 use App\Observers\SubscriptionPromotionObserver;
 use App\Models\WebsiteSetting;
+use App\Models\MerchantKycSubmission;
+use App\Observers\MerchantKycSubmissionObserver;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -99,7 +102,7 @@ class AppServiceProvider extends ServiceProvider
         SubscriptionPromotion::observe(
             SubscriptionPromotionObserver::class
         );
-        
+
         $setting = null;
 
         if (Schema::hasTable('website_settings')) {
@@ -107,5 +110,9 @@ class AppServiceProvider extends ServiceProvider
         }
 
         View::share('setting', $setting);
+
+        MerchantKycSubmission::observe(
+            MerchantKycSubmissionObserver::class
+        );
     }
 }
