@@ -13,36 +13,10 @@
                     </p>
                 </div>
             </div>
-        @endsection 
+        @endsection
 
 @section('content')
 <div class="mx-auto max-w-7xl space-y-6">
-
-
-    @if (session('success'))
-        <div class="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            <i class="fa-solid fa-circle-check mt-0.5"></i>
-            <p>{{ session('success') }}</p>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
-            <p>{{ session('error') }}</p>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            <p class="mb-2 font-semibold">Periksa kembali data berikut:</p>
-            <ul class="list-inside list-disc space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
@@ -259,7 +233,7 @@
                             <td class="px-5 py-5">
                                 @if ($submission->status === 'pending')
                                     <div class="flex min-w-[150px] flex-col items-stretch gap-2">
-                                        
+
                                         <form
                                             action="{{ route('super_admin.kyc_identity.approve', $submission->id) }}"
                                             method="POST"

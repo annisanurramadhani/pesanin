@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const sidebarMenus = document.querySelectorAll('.sidebar-menu');
 
     let collapsed =
-        localStorage.getItem('pesanin_sidebar_collapsed') === 'true';
+    localStorage.getItem('pesanin_sidebar_collapsed') === 'true';
 
     function updateSidebar() {
         if (collapsed) {
