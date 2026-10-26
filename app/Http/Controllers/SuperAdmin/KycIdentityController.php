@@ -3,29 +3,42 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Models\MerchantKycSubmission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-use App\Models\MerchantKycSubmission;
-use Illuminate\Support\Facades\Auth;
 
 class KycIdentityController extends Controller
 {
-
+    /**
+     * Menampilkan daftar pengajuan KYC identitas merchant.
+     */
     public function index(Request $request)
     {
         $baseQuery = DB::table('merchant_kyc_submissions');
 
         $stats = [
             'total' => (clone $baseQuery)->count(),
-            'pending' => (clone $baseQuery)->where('status', 'pending')->count(),
-            'approved' => (clone $baseQuery)->where('status', 'approved')->count(),
-            'rejected' => (clone $baseQuery)->where('status', 'rejected')->count(),
+            'pending' => (clone $baseQuery)
+                ->where('status', 'pending')
+                ->count(),
+            'approved' => (clone $baseQuery)
+                ->where('status', 'approved')
+                ->count(),
+            'rejected' => (clone $baseQuery)
+                ->where('status', 'rejected')
+                ->count(),
         ];
 
         $query = DB::table('merchant_kyc_submissions')
-            ->join('merchants', 'merchants.id', '=', 'merchant_kyc_submissions.merchant_id')
+            ->join(
+                'merchants',
+                'merchants.id',
+                '=',
+                'merchant_kyc_submissions.merchant_id'
+            )
             ->select(
                 'merchant_kyc_submissions.*',
                 'merchants.name as merchant_name'
@@ -38,18 +51,34 @@ class KycIdentityController extends Controller
                     ELSE 4
                 END
             ")
-            ->orderByDesc('merchant_kyc_submissions.created_at');
+            ->orderByDesc(
+                'merchant_kyc_submissions.created_at'
+            );
 
-        if (in_array($request->query('status'), ['pending', 'approved', 'rejected'], true)) {
-            $query->where('merchant_kyc_submissions.status', $request->query('status'));
+        if (in_array(
+            $request->query('status'),
+            ['pending', 'approved', 'rejected'],
+            true
+        )) {
+            $query->where(
+                'merchant_kyc_submissions.status',
+                $request->query('status')
+            );
         }
 
-        $submissions = $query->paginate(10)->withQueryString();
+        $submissions = $query
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('super_admin.kyc.identity.index', compact('submissions', 'stats'));
+        return view(
+            'super_admin.kyc.identity.index',
+            compact('submissions', 'stats')
+        );
     }
 
-
+    /**
+     * Menyetujui pengajuan identitas merchant.
+     */
     public function approve(int $id)
     {
         DB::transaction(function () use ($id) {
@@ -58,7 +87,11 @@ class KycIdentityController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            abort_if(!$submission, 404, 'Pengajuan identitas tidak ditemukan.');
+            abort_if(
+                !$submission,
+                404,
+                'Pengajuan identitas tidak ditemukan.'
+            );
 
             if ($submission->status !== 'pending') {
                 throw ValidationException::withMessages([
@@ -76,13 +109,23 @@ class KycIdentityController extends Controller
 
         return redirect()
             ->route('super_admin.kyc_identity.index')
-            ->with('success', 'Identitas merchant berhasil disetujui.');
+            ->with(
+                'success',
+                'Identitas merchant berhasil disetujui.'
+            );
     }
 
+    /**
+     * Menolak pengajuan identitas merchant.
+     */
     public function reject(Request $request, int $id)
     {
         $validated = $request->validate([
-            'rejection_note' => ['required', 'string', 'max:2000'],
+            'rejection_note' => [
+                'required',
+                'string',
+                'max:2000',
+            ],
         ]);
 
         DB::transaction(function () use ($id, $validated) {
@@ -91,7 +134,11 @@ class KycIdentityController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            abort_if(!$submission, 404, 'Pengajuan identitas tidak ditemukan.');
+            abort_if(
+                !$submission,
+                404,
+                'Pengajuan identitas tidak ditemukan.'
+            );
 
             if ($submission->status !== 'pending') {
                 throw ValidationException::withMessages([
@@ -100,8 +147,9 @@ class KycIdentityController extends Controller
             }
 
             $submission->status = 'rejected';
-            $submission->rejection_note = $validated['rejection_note'];
-            $submission->reviewed_by = \Illuminate\Support\Facades\Auth::id();
+            $submission->rejection_note =
+                $validated['rejection_note'];
+            $submission->reviewed_by = Auth::id();
             $submission->reviewed_at = now();
 
             $submission->save();
@@ -109,9 +157,15 @@ class KycIdentityController extends Controller
 
         return redirect()
             ->route('super_admin.kyc_identity.index')
-            ->with('success', 'Pengajuan identitas ditolak. Catatan penolakan telah disimpan.');
+            ->with(
+                'success',
+                'Pengajuan identitas ditolak. Catatan penolakan telah disimpan.'
+            );
     }
 
+    /**
+     * Menampilkan dokumen KYC dari S3 private.
+     */
     public function document(int $id, string $type)
     {
         $columns = [
@@ -120,33 +174,71 @@ class KycIdentityController extends Controller
             'nib' => 'nib_path',
         ];
 
-        abort_unless(array_key_exists($type, $columns), 404);
+        abort_unless(isset($columns[$type]), 404);
 
         $submission = DB::table('merchant_kyc_submissions')
             ->where('id', $id)
             ->first();
 
-        abort_if(!$submission, 404, 'Pengajuan identitas tidak ditemukan.');
+        abort_if(
+            !$submission,
+            404,
+            'Pengajuan identitas tidak ditemukan.'
+        );
 
         $path = $submission->{$columns[$type]};
 
-        abort_if(!$path || !Storage::disk('local')->exists($path), 404, 'Dokumen tidak ditemukan.');
-
-        $absolutePath = Storage::disk('local')->path($path);
-        $mimeType = mime_content_type($absolutePath) ?: 'application/octet-stream';
-
-        abort_unless(
-            in_array($mimeType, [
-                'image/jpeg',
-                'image/png',
-                'image/webp',
-                'application/pdf',
-            ], true),
-            403
+        abort_if(
+            empty($path),
+            404,
+            'Dokumen tidak ditemukan.'
         );
 
-        return response()->file($absolutePath, [
-            'Content-Type' => $mimeType,
+        // Pastikan path hanya menunjuk ke direktori KYC.
+        abort_if(
+            str_contains($path, '..') ||
+            !str_starts_with($path, 'kyc/'),
+            404,
+            'Path dokumen tidak valid.'
+        );
+
+        $extension = strtolower(
+            pathinfo($path, PATHINFO_EXTENSION)
+        );
+
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'pdf' => 'application/pdf',
+        ];
+
+        abort_unless(
+            isset($mimeTypes[$extension]),
+            403,
+            'Format dokumen tidak diizinkan.'
+        );
+
+        try {
+            $contents = Storage::disk('s3_private')->get($path);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            abort(
+                502,
+                'Dokumen gagal dibaca dari penyimpanan privat.'
+            );
+        }
+
+        abort_if(
+            $contents === '',
+            404,
+            'Dokumen kosong atau tidak ditemukan.'
+        );
+
+        return response($contents, 200, [
+            'Content-Type' => $mimeTypes[$extension],
             'X-Content-Type-Options' => 'nosniff',
             'Cache-Control' => 'private, no-store, max-age=0',
             'Content-Disposition' => 'inline',

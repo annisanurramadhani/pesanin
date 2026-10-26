@@ -46,11 +46,18 @@
                 <div class="w-10 h-10 shrink-0 flex items-center justify-center">
 
                     @if (Auth::user()->merchant && Auth::user()->merchant->logo)
-                        <img src="{{ asset('storage/' . Auth::user()->merchant->logo) }}"
-                            alt="{{ Auth::user()->merchant->name }}" class="w-10 h-10 rounded-lg object-cover">
+                        <img
+                            src="{{ \Illuminate\Support\Facades\Storage::disk('s3_public')->url(Auth::user()->merchant->logo) }}"
+                            alt="{{ Auth::user()->merchant->name }}"
+                            onerror="this.onerror=null; this.src='{{ asset('assets/images/menu-default.jpg') }}';"
+                            class="w-10 h-10 rounded-lg object-cover"
+                        >
                     @else
-                        <img src="{{ asset('assets/images/menu-default.jpg') }}" alt="PesanYuk"
-                            class="w-10 h-10 rounded-lg object-cover">
+                        <img
+                            src="{{ asset('assets/images/menu-default.jpg') }}"
+                            alt="PesanYuk"
+                            class="w-10 h-10 rounded-lg object-cover"
+                        >
                     @endif
 
                 </div>
