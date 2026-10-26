@@ -1,56 +1,20 @@
 
 @extends('layouts.admin')
 
+@section('header')
+    <div>
+        <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+            Verifikasi Rekening
+        </h1>
+
+        <p class="mt-1 text-sm text-slate-500">
+            Periksa informasi rekening merchant sebelum rekening digunakan untuk penarikan saldo.
+        </p>
+    </div>
+@endsection
+
 @section('content')
 <div class="mx-auto max-w-7xl space-y-6">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <div class="mb-2 flex items-center gap-2 text-sm text-slate-500">
-                <span>Super Admin</span>
-                <i class="fa-solid fa-chevron-right text-xs"></i>
-                <span>Verifikasi KYC</span>
-                <i class="fa-solid fa-chevron-right text-xs"></i>
-                <span class="font-semibold text-amber-600">Verifikasi Rekening</span>
-            </div>
-
-            <h1 class="text-2xl font-bold tracking-tight text-slate-800">
-                Verifikasi Rekening
-            </h1>
-
-            <p class="mt-1 text-sm text-slate-500">
-                Periksa informasi rekening merchant sebelum rekening digunakan untuk penarikan saldo.
-            </p>
-        </div>
-
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
-            <i class="fa-solid fa-building-columns text-xl"></i>
-        </div>
-    </div>
-
-    @if (session('success'))
-        <div class="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            <i class="fa-solid fa-circle-check mt-0.5"></i>
-            <p>{{ session('success') }}</p>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
-            <p>{{ session('error') }}</p>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            <p class="mb-2 font-semibold">Terjadi kesalahan:</p>
-            <ul class="list-inside list-disc space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
@@ -249,10 +213,13 @@
                             <td class="px-5 py-5">
                                 @if ($account->status === 'pending')
                                     <div class="flex min-w-[145px] flex-col items-stretch gap-2">
+                                        
                                         <form
                                             action="{{ route('super_admin.kyc_bank.approve', $account->id) }}"
                                             method="POST"
-                                            onsubmit="return confirm('Setujui rekening merchant ini? Pastikan data rekening telah diperiksa.')"
+                                            class="kyc-bank-confirm-form"
+                                            data-action="approve"
+                                            data-merchant="{{ $account->merchant_name }}"
                                         >
                                             @csrf
                                             <button
@@ -264,20 +231,25 @@
                                             </button>
                                         </form>
 
-                                        <form
-                                            action="{{ route('super_admin.kyc_bank.reject', $account->id) }}"
-                                            method="POST"
-                                            onsubmit="return confirm('Tolak pengajuan rekening ini? Merchant perlu mengajukan kembali.')"
-                                        >
-                                            @csrf
-                                            <button
-                                                type="submit"
-                                                class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2.5 text-xs font-bold text-red-600 transition hover:bg-red-50"
+
+                                        
+                                            <form
+                                                action="{{ route('super_admin.kyc_bank.reject', $account->id) }}"
+                                                method="POST"
+                                                class="kyc-bank-confirm-form"
+                                                data-action="reject"
+                                                data-merchant="{{ $account->merchant_name }}"
                                             >
-                                                <i class="fa-solid fa-xmark"></i>
-                                                Tolak
-                                            </button>
-                                        </form>
+                                                @csrf
+                                                <button
+                                                    type="submit"
+                                                    class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2.5 text-xs font-bold text-red-600 transition hover:bg-red-50"
+                                                >
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                    Tolak
+                                                </button>
+                                            </form>
+
                                     </div>
                                 @else
                                     <span class="text-xs text-slate-400">
@@ -312,4 +284,9 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+    <script src="{{ asset('js/super_admin/kyc-bank.js') }}"></script>
+@endpush
+
 @endsection

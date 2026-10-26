@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
+use App\Models\MerchantBankAccount;
+use Illuminate\Support\Facades\Auth;
 
 class KycBankController extends Controller
 {
-    
+
     public function index(Request $request)
     {
         $baseQuery = DB::table('merchant_bank_accounts');
@@ -50,8 +52,8 @@ class KycBankController extends Controller
     public function approve(int $id)
     {
         DB::transaction(function () use ($id) {
-            $account = DB::table('merchant_bank_accounts')
-                ->where('id', $id)
+            $account = MerchantBankAccount::query()
+                ->whereKey($id)
                 ->lockForUpdate()
                 ->first();
 
@@ -63,13 +65,9 @@ class KycBankController extends Controller
                 ]);
             }
 
-            DB::table('merchant_bank_accounts')
-                ->where('id', $id)
-                ->update([
-                    'status' => 'active',
-                    'is_locked' => true,
-                    'updated_at' => now(),
-                ]);
+            $account->status = 'active';
+            $account->is_locked = true;
+            $account->save();
         });
 
         return redirect()
@@ -80,8 +78,8 @@ class KycBankController extends Controller
     public function reject(int $id)
     {
         DB::transaction(function () use ($id) {
-            $account = DB::table('merchant_bank_accounts')
-                ->where('id', $id)
+            $account = MerchantBankAccount::query()
+                ->whereKey($id)
                 ->lockForUpdate()
                 ->first();
 
@@ -93,13 +91,9 @@ class KycBankController extends Controller
                 ]);
             }
 
-            DB::table('merchant_bank_accounts')
-                ->where('id', $id)
-                ->update([
-                    'status' => 'rejected',
-                    'is_locked' => false,
-                    'updated_at' => now(),
-                ]);
+            $account->status = 'rejected';
+            $account->is_locked = false;
+            $account->save();
         });
 
         return redirect()

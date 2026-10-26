@@ -1,56 +1,22 @@
 
 @extends('layouts.admin')
 
+        @section('header')
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+                        Verifikasi Identitas
+                    </h1>
+
+                    <p class="mt-1 text-sm text-slate-500">
+                        Periksa identitas merchant sebelum mengizinkan pengajuan rekening bank.
+                    </p>
+                </div>
+            </div>
+        @endsection
+
 @section('content')
 <div class="mx-auto max-w-7xl space-y-6">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <div class="mb-2 flex items-center gap-2 text-sm text-slate-500">
-                <span>Super Admin</span>
-                <i class="fa-solid fa-chevron-right text-xs"></i>
-                <span>Verifikasi KYC</span>
-                <i class="fa-solid fa-chevron-right text-xs"></i>
-                <span class="font-semibold text-amber-600">Verifikasi Identitas</span>
-            </div>
-
-            <h1 class="text-2xl font-bold tracking-tight text-slate-800">
-                Verifikasi Identitas
-            </h1>
-
-            <p class="mt-1 text-sm text-slate-500">
-                Periksa identitas merchant sebelum mengizinkan pengajuan rekening bank.
-            </p>
-        </div>
-
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
-            <i class="fa-solid fa-id-card text-xl"></i>
-        </div>
-    </div>
-
-    @if (session('success'))
-        <div class="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            <i class="fa-solid fa-circle-check mt-0.5"></i>
-            <p>{{ session('success') }}</p>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
-            <p>{{ session('error') }}</p>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            <p class="mb-2 font-semibold">Periksa kembali data berikut:</p>
-            <ul class="list-inside list-disc space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
@@ -267,12 +233,15 @@
                             <td class="px-5 py-5">
                                 @if ($submission->status === 'pending')
                                     <div class="flex min-w-[150px] flex-col items-stretch gap-2">
+
                                         <form
                                             action="{{ route('super_admin.kyc_identity.approve', $submission->id) }}"
                                             method="POST"
-                                            onsubmit="return confirm('Setujui identitas merchant ini?')"
+                                            class="approve-identity-form"
+                                            data-merchant="{{ $submission->merchant_name }}"
                                         >
                                             @csrf
+
                                             <button
                                                 type="submit"
                                                 class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-3 py-2.5 text-xs font-bold text-white transition hover:bg-green-700"
@@ -281,6 +250,7 @@
                                                 Setujui
                                             </button>
                                         </form>
+
 
                                         <button
                                             type="button"
@@ -383,4 +353,8 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+    <script src="{{ asset('js/super_admin/kyc-identity.js') }}"></script>
+@endpush
 @endsection

@@ -1,5 +1,16 @@
 @extends('layouts.merchant')
 
+@section('header')
+    <div>
+        <h1 class="text-2xl font-black text-slate-800">
+            Verifikasi Identitas (KYC)
+        </h1>
+        <p class="mt-1 text-sm text-slate-500">
+            Lengkapi identitas dan rekening bank untuk menggunakan layanan penarikan saldo.
+        </p>
+    </div>
+@endsection
+
 @section('content')
     @php
         $kycStatus = $kycStatus ?? 'not_submitted';
@@ -13,30 +24,6 @@
     @endphp
 
     <div class="max-w-7xl mx-auto">
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-slate-800">
-                Verifikasi Identitas (KYC)
-            </h1>
-            <p class="mt-2 text-sm text-slate-500">
-                Lengkapi identitas dan rekening bank untuk menggunakan layanan penarikan saldo.
-            </p>
-        </div>
-
-        @if (session('success'))
-            <div class="mb-5 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                <ul class="list-inside list-disc">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
         <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div
