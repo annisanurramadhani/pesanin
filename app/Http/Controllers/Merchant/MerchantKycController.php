@@ -88,20 +88,20 @@ class MerchantKycController extends Controller
         $nibPath = null;
 
         try {
-            $ktpPath = $request->file('ktp_file')->store(
-                "kyc/{$merchantId}/ktp",
-                'local'
+            $ktpPath = storePrivateFile(
+                $request->file('ktp_file'),
+                "kyc/{$merchantId}/ktp"
             );
 
-            $selfiePath = $request->file('selfie_file')->store(
-                "kyc/{$merchantId}/selfie",
-                'local'
+            $selfiePath = storePrivateFile(
+                $request->file('selfie_file'),
+                "kyc/{$merchantId}/selfie"
             );
 
             if ($request->hasFile('nib_file')) {
-                $nibPath = $request->file('nib_file')->store(
-                    "kyc/{$merchantId}/nib",
-                    'local'
+                $nibPath = storePrivateFile(
+                    $request->file('nib_file'),
+                    "kyc/{$merchantId}/nib"
                 );
             }
 
@@ -129,9 +129,7 @@ class MerchantKycController extends Controller
                     $submission->selfie_path,
                     $submission->nib_path,
                 ] as $oldPath) {
-                    if ($oldPath) {
-                        Storage::disk('local')->delete($oldPath);
-                    }
+                    deletePrivateFile($oldPath);
                 }
             } else {
                 $data['merchant_id'] = $merchantId;
@@ -141,9 +139,7 @@ class MerchantKycController extends Controller
             }
         } catch (\Throwable $exception) {
             foreach ([$ktpPath, $selfiePath, $nibPath] as $path) {
-                if ($path) {
-                    Storage::disk('local')->delete($path);
-                }
+                deletePrivateFile($path);
             }
 
             throw $exception;
@@ -204,7 +200,7 @@ class MerchantKycController extends Controller
                 'required',
                 Rule::in(['BCA', 'BRI', 'BNI', 'MANDIRI']),
             ],
-                        
+
             'account_number' => [
                 'required',
                 'string',

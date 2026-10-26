@@ -7,6 +7,23 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="referrer" content="strict-origin-when-cross-origin">
 
+        @php
+        $websiteSetting = \App\Models\WebsiteSetting::first();
+        $faviconPath = $websiteSetting?->favicon;
+        $faviconUrl = null;
+
+        if ($faviconPath) {
+            $faviconUrl = filter_var($faviconPath, FILTER_VALIDATE_URL)
+                ? $faviconPath
+                : \Illuminate\Support\Facades\Storage::disk('s3_public')->url($faviconPath);
+        }
+    @endphp
+
+    @if ($faviconUrl)
+        <link rel="icon" href="{{ $faviconUrl }}">
+        <link rel="shortcut icon" href="{{ $faviconUrl }}">
+    @endif
+
     @if (isset($pageSeo))
 
         <title>{{ $pageSeo['title'] }}</title>

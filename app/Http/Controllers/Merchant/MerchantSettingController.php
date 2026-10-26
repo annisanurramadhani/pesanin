@@ -44,24 +44,43 @@ class MerchantSettingController extends Controller
             ],
         ]);
 
+
             /*
             |--------------------------------------------------------------------------
-            | LOGO
+            | LOGO MERCHANT - S3 PUBLIC
             |--------------------------------------------------------------------------
             */
 
             if ($request->hasFile('logo')) {
+                $logoPath = $request->file('logo')
+                    ->store('merchants', 's3_public');
 
-                // Hapus logo lama jika ada
-                if ($merchant->logo) {
-                    Storage::disk('public')->delete($merchant->logo);
+                if (!$logoPath) {
+                    throw new \RuntimeException(
+                        'Gagal menyimpan logo merchant ke S3.'
+                    );
                 }
 
-                // Simpan logo baru
-                $logoPath = $request->file('logo')
-                    ->store('merchants', 'public');
+                // Hapus logo lama setelah logo baru berhasil disimpan.
+                $oldLogoPath = $merchant->logo;
 
                 $merchant->logo = $logoPath;
+                $merchant->save();
+
+                // Hapus file lama dari disk yang sesuai.
+                if ($oldLogoPath) {
+                    try {
+                        Storage::disk('s3_public')->delete($oldLogoPath);
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
+
+                    try {
+                        Storage::disk('public')->delete($oldLogoPath);
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
+                }
             }
 
 

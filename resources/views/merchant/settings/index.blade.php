@@ -120,9 +120,10 @@
 
                         <img
                             src="{{ $merchant->logo
-                                ? asset('storage/' . $merchant->logo)
+                                ? \Illuminate\Support\Facades\Storage::disk('s3_public')->url($merchant->logo)
                                 : asset('assets/images/menu-default.jpg') }}"
                             alt="{{ $merchant->logo ? 'Logo ' . $merchant->name : 'Logo default PesanYuk' }}"
+                            onerror="this.onerror=null; this.src='{{ asset('assets/images/menu-default.jpg') }}';"
                             class="h-16 w-16 rounded-xl border border-slate-200 bg-white object-cover"
                         >
 

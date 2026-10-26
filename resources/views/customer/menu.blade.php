@@ -253,10 +253,10 @@
                                     IMAGE
                                 =================================================== --}}
                                 <div class="relative h-48 overflow-hidden bg-slate-100 sm:h-52">
-
                                     <img
                                         src="{{ menuImage($menu->image_path ?? $menu->image) }}"
                                         alt="{{ $menu->name }}"
+                                        onerror="this.onerror=null; this.src='{{ asset('assets/images/menu-default.jpg') }}';"
                                         class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                                     >
 

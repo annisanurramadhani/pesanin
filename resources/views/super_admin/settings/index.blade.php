@@ -63,7 +63,8 @@
 
 
                                 <p class="text-xs text-slate-400">
-                                    Lengkapi identitas utama website {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
+                                    Lengkapi identitas utama website
+                                    {{ strip_tags($setting?->website_name ?? 'PesanYuk') }}.
                                 </p>
 
 
@@ -141,9 +142,12 @@
                                         class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
 
 
+
                                         <img id="logo-preview"
-                                            src="{{ $setting->logo ? asset('storage/' . $setting->logo) : '' }}"
+                                            src="{{ $setting->logo ? \Illuminate\Support\Facades\Storage::disk('s3_public')->url($setting->logo) : '' }}"
+                                            onerror="this.onerror=null; this.classList.add('hidden');"
                                             class="{{ $setting->logo ? '' : 'hidden' }} h-full w-full object-contain">
+
 
 
                                         @if (!$setting->logo)
@@ -222,9 +226,12 @@
                                         class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
 
 
+
                                         <img id="favicon-preview"
-                                            src="{{ $setting->favicon ? asset('storage/' . $setting->favicon) : '' }}"
+                                            src="{{ $setting->favicon ? \Illuminate\Support\Facades\Storage::disk('s3_public')->url($setting->favicon) : '' }}"
+                                            onerror="this.onerror=null; this.classList.add('hidden');"
                                             class="{{ $setting->favicon ? '' : 'hidden' }} h-full w-full object-contain">
+
 
 
                                         @if (!$setting->favicon)
@@ -243,14 +250,14 @@
                                     <input type="file" name="favicon" accept="image/*"
                                         onchange="previewImage(this,'favicon-preview','favicon-placeholder')"
                                         class="block w-full text-sm text-slate-500
-                                                file:mr-4 
-                                                file:rounded-xl 
-                                                file:border-0 
-                                                file:bg-amber-500 
-                                                file:px-4 
-                                                file:py-2 
-                                                file:text-sm 
-                                                file:font-bold 
+                                                file:mr-4
+                                                file:rounded-xl
+                                                file:border-0
+                                                file:bg-amber-500
+                                                file:px-4
+                                                file:py-2
+                                                file:text-sm
+                                                file:font-bold
                                                 file:text-slate-950
 
                                                 hover:file:bg-amber-400

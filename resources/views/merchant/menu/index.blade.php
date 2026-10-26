@@ -166,10 +166,9 @@
 
                             {{-- Pengelompokan Tabel Per Kategori --}}
                             @forelse($categories as $category)
-
-                            @php
-                                $groupedMenus = $menus->where('category_id', $category->id);
-                            @endphp
+                                @php
+                                    $groupedMenus = $menus->where('category_id', $category->id);
+                                @endphp
                                 <div class="border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
                                     {{-- Header Kategori --}}
                                     <div class="bg-slate-900 px-5 py-3.5 flex items-center justify-between">
@@ -196,15 +195,13 @@
                                                 $categoryId = $category->id;
                                             @endphp
 
-                                            <form 
-                                                action="{{ route('merchant.category.destroy', encryptId($categoryId)) }}"
+                                            <form action="{{ route('merchant.category.destroy', encryptId($categoryId)) }}"
                                                 method="POST">
 
                                                 @csrf
                                                 @method('DELETE')
 
-                                                <button
-                                                    type="button"
+                                                <button type="button"
                                                     onclick="confirmDeleteCategory(event, this, '{{ $category->name }}')"
                                                     class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white flex items-center justify-center transition"
                                                     title="Hapus Kategori">
@@ -237,7 +234,7 @@
                                                         {{-- Foto & Nama/Deskripsi Menu --}}
                                                         <td class="py-3.5 px-4">
                                                             <div class="flex items-center gap-3">
-                                                                <img src="{{ $menu->image ? asset('storage/' . $menu->image) : asset('assets/images/menu-default.jpg') }}"
+                                                                <img src="{{ menuImage($menu->image_path ?? $menu->image) }}"
                                                                     alt="{{ $menu->name }}"
                                                                     onerror="this.onerror=null; this.src='{{ asset('assets/images/menu-default.jpg') }}';"
                                                                     class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0 shadow-sm">
@@ -323,17 +320,15 @@
                                                         </td>
                                                     </tr>
                                                 @endforeach
-                                                @if($groupedMenus->isEmpty())
-
-                                                <tr>
-                                                    <td colspan="4" class="py-8 text-center text-slate-400">
-                                                        <i class="fa-solid fa-box-open text-xl mb-2"></i>
-                                                        <p class="text-xs font-semibold">
-                                                            Belum ada menu pada kategori ini
-                                                        </p>
-                                                    </td>
-                                                </tr>
-
+                                                @if ($groupedMenus->isEmpty())
+                                                    <tr>
+                                                        <td colspan="4" class="py-8 text-center text-slate-400">
+                                                            <i class="fa-solid fa-box-open text-xl mb-2"></i>
+                                                            <p class="text-xs font-semibold">
+                                                                Belum ada menu pada kategori ini
+                                                            </p>
+                                                        </td>
+                                                    </tr>
                                                 @endif
                                             </tbody>
                                         </table>
@@ -367,15 +362,15 @@
     {{-- Script SweetAlert2 untuk Konfirmasi Hapus & Notifikasi Sukses/Error --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @if (session('limit_reached'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const limitData = @json(session('limit_reached'));
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const limitData = @json(session('limit_reached'));
 
-            Swal.fire({
-                icon: 'warning',
-                title: limitData.title,
+                Swal.fire({
+                    icon: 'warning',
+                    title: limitData.title,
 
-                html: `
+                    html: `
                     <div class="text-sm text-slate-600 leading-6">
                         ${limitData.message}
                     </div>
@@ -386,37 +381,34 @@
                     </div>
                 `,
 
-                showCancelButton: true,
+                    showCancelButton: true,
 
-                confirmButtonText:
-                    '<i class="fa-solid fa-crown mr-1"></i> Upgrade Langganan',
+                    confirmButtonText: '<i class="fa-solid fa-crown mr-1"></i> Upgrade Langganan',
 
-                cancelButtonText: 'Nanti',
+                    cancelButtonText: 'Nanti',
 
-                reverseButtons: true,
+                    reverseButtons: true,
 
-                buttonsStyling: false,
+                    buttonsStyling: false,
 
-                customClass: {
-                    popup: 'rounded-2xl',
+                    customClass: {
+                        popup: 'rounded-2xl',
 
-                    confirmButton:
-                        'bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl px-5 py-3 font-extrabold mx-1',
+                        confirmButton: 'bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl px-5 py-3 font-extrabold mx-1',
 
-                    cancelButton:
-                        'bg-slate-700 hover:bg-slate-600 text-white rounded-xl px-5 py-3 font-extrabold mx-1'
-                }
+                        cancelButton: 'bg-slate-700 hover:bg-slate-600 text-white rounded-xl px-5 py-3 font-extrabold mx-1'
+                    }
 
-            }).then((result) => {
+                }).then((result) => {
 
-                if (result.isConfirmed) {
-                    window.location.href = '/subscription/';
-                }
+                    if (result.isConfirmed) {
+                        window.location.href = '/subscription/';
+                    }
 
+                });
             });
-        });
-    </script>
-@endif  
+        </script>
+    @endif
     @if (session('success'))
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -500,9 +492,9 @@
                     confirmButton: 'rounded-xl text-xs font-bold px-4 py-2.5',
                     cancelButton: 'rounded-xl text-xs font-bold px-4 py-2.5'
                 }
-            }).then((result)=>{
+            }).then((result) => {
 
-                if(result.isConfirmed && form){
+                if (result.isConfirmed && form) {
                     form.submit();
                 }
 
